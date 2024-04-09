@@ -1,0 +1,46 @@
+# This is Git's per-user configuration file.
+#  Please adapt and uncomment the following lines:    
+[alias]
+    br = branch
+    co = checkout
+    ci = commit
+    st = status
+    rs = reset
+    us = reset HEAD --
+[user]
+	name = chien.le
+	email = chien.le@shopee.com
+[push]
+	default = current
+[pull]
+	default = current
+	ff = only
+[log]
+    date = relative
+[format]
+    pretty = format:%C(yellow)%H %Cblue%>(12)%ad %Cgreen%<(7)%aN%Cred%d %Creset%s
+[pager]
+    branch = false
+    log = false
+[color "diff"]
+    meta = yellow bold
+    commit = green bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = "red bold 52"
+    newNormal = "green bold"
+    newHighlight = "green bold 22"
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = cyan
+[init]
+	defaultBranch = master
+; [http]
+; 	proxy = socks5h://127.0.0.1:9090
+[url "ssh://gitlab@git.garena.com:2222/"]
+	insteadOf = https://git.garena.com/
