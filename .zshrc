@@ -40,9 +40,6 @@ autoload -U promptinit
 promptinit
 prompt pure
 
-# fzf init setup
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
 setopt histignorealldups sharehistory
 
 # Use emacs keybindings even if our EDITOR is set to vi
@@ -87,3 +84,11 @@ if [ ! -d ~/.zsh/zsh-autosuggestions ]; then
 fi
 
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+if [ ! -d ~/.fzf ]; then
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+    ~/.fzf/install
+fi
+
+# fzf init setup
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
