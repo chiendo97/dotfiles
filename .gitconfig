@@ -8,8 +8,8 @@
     rs = reset
     us = reset HEAD --
 [user]
-	name = chien.le
-	email = chien.le@shopee.com
+	name = chiendo97
+	email = chiendo97@gmail.com
 [push]
 	default = current
 [pull]
@@ -42,8 +42,8 @@
 	defaultBranch = master
 ; [http]
 ; 	proxy = socks5h://127.0.0.1:9090
-[url "ssh://gitlab@git.garena.com:2222/"]
-	insteadOf = https://git.garena.com/
+; [url "ssh://gitlab@git.garena.com:2222/"]
+; 	insteadOf = https://git.garena.com/
 [filter "lfs"]
 	required = true
 	clean = git-lfs clean -- %f

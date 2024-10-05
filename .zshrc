@@ -35,6 +35,9 @@ if [[ ! -d $HOME/.zsh/pure ]]; then
 fi
 fpath+=($HOME/.zsh/pure)
 
+# for docker autocompletion
+# fpath+=($HOME/.docker/completions)
+
 # Set up the prompt
 autoload -U promptinit
 promptinit
@@ -92,3 +95,7 @@ fi
 
 # fzf init setup
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
