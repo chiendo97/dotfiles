@@ -37,16 +37,16 @@ shape = "Block"
 TERM = "xterm-256color"
 
 [font]
-size = 13
+size = 14
 
 [font.bold_italic]
-family = "Hack Nerd Font Mono"
+family = "FiraCode Nerd Font Mono"
 
 [font.italic]
-family = "Hack Nerd Font Mono"
+family = "FiraCode Nerd Font Mono"
 
 [font.normal]
-family = "Hack Nerd Font Mono"
+family = "FiraCode Nerd Font Mono"
 style = "Regular"
 
 [[keyboard.bindings]]
@@ -194,7 +194,7 @@ action = "DecreaseFontSize"
 key = "Minus"
 mods = "Command"
 
-[shell]
+[terminal.shell]
 # args = ["-l", "-c", "/opt/homebrew/bin/tmux attach || /opt/homebrew/bin/tmux new"]
 program = "/bin/zsh"
 
@@ -204,3 +204,5 @@ decorations = "buttonless"
 [window.dimensions]
 columns = 250
 lines = 70
+
+[terminal]
