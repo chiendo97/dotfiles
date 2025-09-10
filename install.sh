@@ -51,6 +51,9 @@ sync_dotfiles() {
     info "Gitdotfiles"
     cp -r "$DOTFILES/.gitconfig" ~/.gitconfig
     cp -r "$DOTFILES/.gitignore_global" ~/.gitignore_global
+
+    info "Zellij"
+    rsync -av --delete "$DOTFILES/.config/zellij/" ~/.config/zellij/
 }
 
 sync_zsh_history() {
@@ -82,6 +85,9 @@ update_dotfiles() {
     info "Gitdotfiles"
     cp ~/.gitconfig "$DOTFILES/.gitconfig"
     cp ~/.gitignore_global "$DOTFILES/.gitignore_global"
+
+    info "Zellij"
+    rsync -av --delete ~/.config/zellij/ "$DOTFILES/.config/zellij/"
 }
 
 update_zsh_history() {
