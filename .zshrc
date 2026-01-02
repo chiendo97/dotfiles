@@ -24,6 +24,19 @@ alias tidy='go mod tidy'
 # }}}
 
 # {{{ === PATH
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+# }}}
+
+# {{{ === SETTING
+# for pure zsh
+if [[ ! -d $HOME/.zsh/pure ]]; then
+  git clone https://github.com/sindresorhus/pure.git $HOME/.zsh/pure
+fi
+fpath+=($HOME/.zsh/pure)
+
+# for docker autocompletion
+# fpath+=($HOME/.docker/completions)
 
 # Set up the prompt
 autoload -U promptinit
