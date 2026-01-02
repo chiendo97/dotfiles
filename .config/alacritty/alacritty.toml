@@ -44,7 +44,6 @@ family = "Liga SFMono Nerd Font"
 style = "Regular"
 
 [terminal.shell]
-# args = ["-l", "-c", "/opt/homebrew/bin/tmux attach || /opt/homebrew/bin/tmux new"]
 program = "/bin/zsh"
 
 [window]
@@ -57,3 +56,12 @@ lines = 70
 
 [terminal]
 osc52 = "CopyPaste"
+
+[debug]
+render_timer = false
+
+# [[keyboard.bindings]]
+# key = "Apostrophe"
+# mods = "Control"
+# action = "Esc"
+# chars = "\x1b"  # or your desired escape sequence

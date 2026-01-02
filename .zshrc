@@ -1,5 +1,5 @@
 # {{{ === ALIAS
-alias l="exa"
+alias l="eza"
 alias t="tree --gitignore"
 alias c='clear'
 alias v='vim'  # quick opening files with vim
@@ -13,7 +13,7 @@ alias gd='git diff'
 alias gb='git branch'
 alias gs='git status'
 alias gl='git log'
-alias ll='exa -l'
+alias ll='eza -l'
 
 alias cpwd="\033Ptmux;\033\033]52;c;$(pwd | tr -d '\n' | base64)\a\033\\" # Copy pwd to clipboard
 
@@ -24,19 +24,6 @@ alias tidy='go mod tidy'
 # }}}
 
 # {{{ === PATH
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-# }}}
-
-# {{{ === SETTING
-# for pure zsh
-if [[ ! -d $HOME/.zsh/pure ]]; then
-  git clone https://github.com/sindresorhus/pure.git $HOME/.zsh/pure
-fi
-fpath+=($HOME/.zsh/pure)
-
-# for docker autocompletion
-# fpath+=($HOME/.docker/completions)
 
 # Set up the prompt
 autoload -U promptinit
@@ -75,22 +62,22 @@ export PATH=$GOPATH/bin:$PATH
 # }}}
 
 # {{{ === FASD INIT ===
-if ! command -v zoxide &> /dev/null; then
-    curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+if ! command -v zoxide &>/dev/null; then
+  curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 fi
 
 eval "$(zoxide init zsh)"
 # }}}
 
 if [ ! -d ~/.zsh/zsh-autosuggestions ]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
+  git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
 fi
 
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 if [ ! -d ~/.fzf ]; then
-    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-    ~/.fzf/install
+  git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+  ~/.fzf/install
 fi
 
 # fzf init setup
@@ -104,8 +91,8 @@ lazy_load_nvm() {
 }
 
 npm() {
- lazy_load_nvm
- npm $@
+  lazy_load_nvm
+  npm $@
 }
 
 node() {
