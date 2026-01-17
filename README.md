@@ -55,7 +55,14 @@ git clone https://github.com/chiendo97/dotfiles ~/Source/dotfiles
 ### 5. Apply Home Manager
 
 ```bash
+# Linux (x86_64)
 nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#cle
+
+# macOS (Apple Silicon)
+nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#cle@darwin
+
+# macOS (Intel)
+nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#cle@darwin-x86
 ```
 
 This installs all packages and configures:
@@ -132,6 +139,6 @@ The `id_ed25519_agenix` key decrypts all secrets. To set up a new machine:
 
 ## Notes
 
-- Primary platform: Linux (x86_64)
+- Platforms: Linux (x86_64), macOS (Apple Silicon & Intel)
 - Font: Nerd Font (Liga SFMono or Hack Nerd Font)
 - Theme: Gruvbox (consistent across Alacritty, Neovim, Tmux)

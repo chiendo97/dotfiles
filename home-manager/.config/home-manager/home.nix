@@ -1,8 +1,8 @@
-{ config, lib, pkgs, neovim-nightly-overlay, ... }:
+{ config, lib, pkgs, neovim-nightly-overlay, homeDirectory, ... }:
 
 {
   home.username = "cle";
-  home.homeDirectory = "/home/cle";
+  home.homeDirectory = homeDirectory;
   home.stateVersion = "25.11";
 
   # ============================================================================
@@ -121,6 +121,7 @@
 
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
 
     includes = [
       "~/.orbstack/ssh/config"
@@ -405,8 +406,8 @@
       # Early init (source nix first)
       (lib.mkBefore ''
         # Source nix
-        if [ -e /home/cle/.nix-profile/etc/profile.d/nix.sh ]; then
-          . /home/cle/.nix-profile/etc/profile.d/nix.sh
+        if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
         fi
       '')
 

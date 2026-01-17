@@ -21,8 +21,14 @@ This is a Home Manager configuration repository that manages user environment an
 
 ### Building and Applying Configuration
 ```bash
-# Build and apply the home-manager configuration
+# Linux (x86_64)
 home-manager switch --flake .#cle
+
+# macOS (Apple Silicon)
+home-manager switch --flake .#cle@darwin
+
+# macOS (Intel)
+home-manager switch --flake .#cle@darwin-x86
 
 # Build without activating (for testing)
 home-manager build --flake .#cle
@@ -30,6 +36,15 @@ home-manager build --flake .#cle
 # Check what would change
 home-manager switch --flake .#cle --dry-run
 ```
+
+### Available Configurations
+| Name | System | Home Directory |
+|------|--------|----------------|
+| `cle` | x86_64-linux | /home/cle |
+| `cle@linux` | x86_64-linux | /home/cle |
+| `cle@darwin` | aarch64-darwin | /Users/cle |
+| `cle@macos` | aarch64-darwin | /Users/cle |
+| `cle@darwin-x86` | x86_64-darwin | /Users/cle |
 
 ### Updating Dependencies
 ```bash
