@@ -72,6 +72,7 @@
   # ============================================================================
   home.packages = with pkgs; [
     age        # for agenix secrets
+    awscli2
     claude-code
     curl
     fd
