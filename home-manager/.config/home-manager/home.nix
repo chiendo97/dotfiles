@@ -21,14 +21,20 @@
   home.packages = with pkgs; [
     age        # for agenix secrets
     claude-code
+    curl
     fd
+    gnumake
+    htop
+    jq
     nodejs
     podman
     ripgrep
     rustup
     stow
     tree
+    unzip
     uv
+    wget
   ];
 
   # ============================================================================
@@ -84,6 +90,7 @@
         plugin = mkTmuxPlugin {
           pluginName = "tmux-buffer";
           version = "unstable";
+          rtpFilePath = "buffex.tmux";
           src = pkgs.fetchFromGitHub {
             owner = "chiendo97";
             repo = "tmux-buffer";
@@ -327,7 +334,10 @@
   nix.package = pkgs.nix;
   nix.settings = {
     substituters = [ "https://claude-code.cachix.org" "https://cache.nixos.org" ];
-    trusted-public-keys = [ "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk=" ];
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+    ];
   };
   nix.extraOptions = ''
     experimental-features = nix-command flakes

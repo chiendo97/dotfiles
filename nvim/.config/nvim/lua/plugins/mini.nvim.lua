@@ -3,6 +3,7 @@ return {
         "echasnovski/mini.nvim",
         dependencies = { "rafamadriz/friendly-snippets" },
         config = function()
+            require('mini.pick').setup({})
             require("mini.statusline").setup({
                 -- Content of statusline as functions which return statusline string. See
                 -- `:h statusline` and code of default contents (used instead of `nil`).

@@ -21,6 +21,7 @@ return {
     },
     {
         "carlos-algms/agentic.nvim",
+        enabled = false,
         event = "VeryLazy",
         opts = {
             -- Available by default: "claude-acp" | "gemini-acp" | "codex-acp" | "opencode-acp" | "cursor-acp"
