@@ -1,0 +1,6 @@
+{
+  "ipdb": {
+    "prefix": "ipdb",
+    "body": "from IPython import embed; embed()"
+  }
+}

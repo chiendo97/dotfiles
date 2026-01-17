@@ -1,0 +1,50 @@
+return {
+    {
+        "MeanderingProgrammer/render-markdown.nvim",
+        ft = { "markdown", "codecompanion", "AgenticChat" },
+        opts = {
+            render_modes = { "n", "no", "c", "t", "i", "ic" },
+            checkbox = {
+                enable = true,
+                position = "inline",
+            },
+            code = {
+                sign = false,
+                border = "thin",
+                position = "right",
+                width = "block",
+                above = "▁",
+                below = "▔",
+                language_left = "█",
+                language_right = "█",
+                language_border = "▁",
+                left_pad = 0,
+                right_pad = 0,
+            },
+            heading = {
+                width = "block",
+                backgrounds = {
+                    "MiniStatusLineModeNormal",
+                    "MiniStatusLineModeInsert",
+                    "MiniStatusLineModeReplace",
+                    "MiniStatusLineModeVisual",
+                    "MiniStatusLineModeCommand",
+                    "MiniStatusLineModeOther",
+                },
+                sign = false,
+                left_pad = 0,
+                right_pad = 0,
+                position = "right",
+                icons = {
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                },
+            },
+            pipe_table = { style = "normal" },
+        },
+    },
+}
