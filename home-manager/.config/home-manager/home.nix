@@ -389,6 +389,10 @@
       pp = "go tool pprof";
       vendor = "go mod vendor";
       tidy = "go mod tidy";
+
+      # History backup/restore
+      history-backup = "age -r \"$(cat ~/.ssh/id_ed25519_agenix.pub)\" -o ~/.config/home-manager/secrets/zsh_history.age ~/.zsh_history && echo 'History backed up'";
+      history-restore = "age -d -i ~/.ssh/id_ed25519_agenix ~/.config/home-manager/secrets/zsh_history.age > ~/.zsh_history && echo 'History restored'";
     };
 
     # Session variables
