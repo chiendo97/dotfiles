@@ -14,10 +14,14 @@
     claude-code = {
       url = "github:sadjow/claude-code-nix";
     };
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { nixpkgs, home-manager, neovim-nightly-overlay, claude-code, ... }:
+    { nixpkgs, home-manager, neovim-nightly-overlay, claude-code, agenix, ... }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -30,7 +34,10 @@
       homeConfigurations."cle" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         extraSpecialArgs = { inherit neovim-nightly-overlay; };
-        modules = [ ./home.nix ];
+        modules = [
+          agenix.homeManagerModules.default
+          ./home.nix
+        ];
       };
     };
 }

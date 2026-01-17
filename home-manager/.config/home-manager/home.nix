@@ -6,9 +6,20 @@
   home.stateVersion = "25.11";
 
   # ============================================================================
+  # Agenix secrets
+  # ============================================================================
+  age.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
+
+  age.secrets.api-keys = {
+    file = ./secrets/api-keys.age;
+    path = "${config.home.homeDirectory}/.secrets/api-keys";
+  };
+
+  # ============================================================================
   # Packages (no Home Manager module available)
   # ============================================================================
   home.packages = with pkgs; [
+    age        # for agenix secrets
     claude-code
     fd
     nodejs
@@ -270,8 +281,8 @@
         zle -N edit-command-line
         bindkey '^g' edit-command-line
 
-        # API Keys - set these in ~/.secrets or use agenix/sops-nix
-        # source ~/.secrets 2>/dev/null
+        # API Keys - managed by agenix
+        source ~/.secrets/api-keys 2>/dev/null
       ''
     ];
 

@@ -90,5 +90,27 @@ Most program configurations use Home Manager's declarative options. Refer to the
 ### Shell Configuration
 Zsh configuration uses `lib.mkMerge` and `lib.mkBefore` for proper initialization ordering. The nix profile is sourced early in the initialization sequence.
 
-### Secrets Management
-API keys should be stored in `~/.secrets` and sourced from there. Consider using agenix or sops-nix for production secrets management.
+### Secrets Management (agenix)
+
+Secrets are encrypted with age using your SSH key and decrypted at activation.
+
+```
+secrets/
+├── secrets.nix      # Defines which keys can decrypt which secrets
+├── api-keys.age     # Encrypted API keys
+└── api-keys.example # Template (not committed)
+```
+
+**Edit secrets:**
+```bash
+cd secrets
+age -d -i ~/.ssh/id_ed25519 api-keys.age > api-keys.txt
+# Edit api-keys.txt
+age -r "$(cat ~/.ssh/id_ed25519.pub)" -o api-keys.age api-keys.txt
+rm api-keys.txt
+```
+
+**Add new secret:**
+1. Add entry to `secrets.nix`
+2. Create encrypted file: `echo "content" | age -r "$(cat ~/.ssh/id_ed25519.pub)" -o newsecret.age`
+3. Add to `home.nix` under `age.secrets`
