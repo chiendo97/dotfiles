@@ -80,6 +80,18 @@
         plugin = sensible;
         extraConfig = "";
       }
+      {
+        plugin = mkTmuxPlugin {
+          pluginName = "tmux-buffer";
+          version = "unstable";
+          src = pkgs.fetchFromGitHub {
+            owner = "chiendo97";
+            repo = "tmux-buffer";
+            rev = "master";
+            sha256 = "sha256-fqKYEbAXdgogLhTbuPl1ogHu/2jsyg4+oT82jxuKwlY=";
+          };
+        };
+      }
     ];
 
     extraConfig = ''
