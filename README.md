@@ -1,70 +1,137 @@
-# Disclaimer
+# Dotfiles
 
-I forked to use for my own usage.
+Personal dotfiles for a complete development environment. Uses **Nix Home Manager** for declarative package management and **GNU Stow** for config symlinks.
 
-## Initial Setup and Installation
+## Structure
 
-### Backup
-
-This version doesn't have backup your original dotfiles. Please use with your own risk.
-
-### Installation
-
-If on OSX, you will need to install the XCode CLI tools before continuing. To do so, open a terminal and type
-
-```bash
-➜ xcode-select --install
+```
+dotfiles/
+├── home-manager/    # Nix flakes + Home Manager (packages, shell, SSH, secrets)
+├── nvim/            # Neovim configuration (Lua, lazy.nvim, LSP)
+├── alacritty/       # Terminal emulator (Gruvbox theme)
+├── zellij/          # Terminal multiplexer alternative
+└── Makefile         # Stow commands
 ```
 
-Then, clone the dotfiles repository to your home directory as `~/.dotfiles`. 
+## Bootstrap (New Machine)
+
+### Prerequisites
+
+- `id_ed25519_agenix` key (for decrypting secrets)
+
+### 1. Install Nix
 
 ```bash
-➜ git clone https://github.com/chiendo97/dotfiles.git ~/.dotfiles
-➜ cd ~/.dotfiles
-➜ ./install.sh
+sh <(curl -L https://nixos.org/nix/install) --daemon
+
+# Restart shell or source nix
+. ~/.nix-profile/etc/profile.d/nix.sh
 ```
 
-`install.sh` will start with helps
-
-    homebrew: install homebrew dependencies
-
-    shell: install zimfw and p10k
-
-    terminfo: support italic fonts in and out of tmux
-
-    macos: modify macos setting
-
-    sync_dotfiles: sync the current dotfiles back to this repo
-
-    all: setup all
-        setup_terminfo
-        setup_homebrew
-        setup_shell
-        setup_macos
-
-
-## Terminal Capabilities
-
-In order to properly support italic fonts in and out of tmux, a couple of terminal capabilities need to be described. Run the following from the root of the project:
+### 2. Enable Flakes
 
 ```bash
-tic -x resources/xterm-256color-italic.terminfo
-tic -x resources/tmux.terminfo
+mkdir -p ~/.config/nix
+echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 ```
 
-## ZSH Setup
+### 3. Copy Agenix Key
 
-* Install zimfw
-* Install p10k
-* And more...
+```bash
+mkdir -p ~/.ssh
+cp /path/to/id_ed25519_agenix ~/.ssh/
+cp /path/to/id_ed25519_agenix.pub ~/.ssh/
+chmod 600 ~/.ssh/id_ed25519_agenix
+chmod 644 ~/.ssh/id_ed25519_agenix.pub
+```
 
-## Neovim Setup
+### 4. Clone Dotfiles
 
-### Installation
+```bash
+# Use HTTPS (SSH keys not yet available)
+git clone https://github.com/chiendo97/dotfiles ~/Source/dotfiles
+```
 
-## Fonts
+### 5. Apply Home Manager
 
-I am currently using Hack Nerd Font
+```bash
+nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#cle
+```
 
-## Tmux Configuration
+This installs all packages and configures:
+- Shell (zsh, fzf, zoxide)
+- SSH keys (decrypted via agenix)
+- CLI tools (neovim, tmux, ripgrep, fd, etc.)
 
+### 6. Stow Config Packages
+
+```bash
+cd ~/Source/dotfiles
+make stow
+```
+
+### 7. Switch Git Remote to SSH
+
+```bash
+cd ~/Source/dotfiles
+git remote set-url origin git@github.com:chiendo97/dotfiles.git
+```
+
+## Daily Usage
+
+### Home Manager
+
+```bash
+# Apply config changes
+home-manager switch --flake ~/.config/home-manager#cle
+
+# Update all packages
+cd ~/.config/home-manager && nix flake update
+```
+
+### Stow
+
+```bash
+make stow      # Symlink all packages
+make unstow    # Remove all symlinks
+make restow    # Re-symlink all (after changes)
+make nvim      # Stow individual package
+```
+
+### Neovim
+
+```bash
+nvim -c "Lazy update"    # Update plugins
+```
+
+### Tmux
+
+- Prefix: `C-Space`
+- Reload: `prefix + r`
+- Install plugins: `prefix + I`
+
+## Secrets Management
+
+SSH keys and API tokens are encrypted with [agenix](https://github.com/ryantm/agenix) using `id_ed25519_agenix`.
+
+```bash
+# Edit a secret
+cd ~/.config/home-manager/secrets
+age -d -i ~/.ssh/id_ed25519_agenix api-keys.age > api-keys.txt
+# ... edit ...
+age -r "$(cat ~/.ssh/id_ed25519_agenix.pub)" -o api-keys.age api-keys.txt
+rm api-keys.txt
+```
+
+## Migrating Agenix Key
+
+The `id_ed25519_agenix` key decrypts all secrets. To set up a new machine:
+
+1. **Secure copy**: USB drive or password manager
+2. **Multi-key setup**: Add new machine's key to `secrets/secrets.nix` and re-encrypt
+
+## Notes
+
+- Primary platform: Linux (x86_64)
+- Font: Nerd Font (Liga SFMono or Hack Nerd Font)
+- Theme: Gruvbox (consistent across Alacritty, Neovim, Tmux)
