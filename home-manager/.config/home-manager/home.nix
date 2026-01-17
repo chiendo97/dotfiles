@@ -93,6 +93,17 @@
   ];
 
   # ============================================================================
+  # Config files
+  # ============================================================================
+  xdg.configFile."containers/registries.conf".text = ''
+    unqualified-search-registries = ["docker.io"]
+  '';
+
+  xdg.configFile."containers/policy.json".text = builtins.toJSON {
+    default = [{ type = "insecureAcceptAnything"; }];
+  };
+
+  # ============================================================================
   # Programs with Home Manager modules
   # ============================================================================
   programs.neovim = {
