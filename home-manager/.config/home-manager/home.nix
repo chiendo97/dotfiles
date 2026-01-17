@@ -75,6 +75,7 @@
     claude-code
     curl
     fd
+    gcc
     gnumake
     htop
     jq
@@ -84,6 +85,7 @@
     rustup
     stow
     tree
+    tree-sitter
     unzip
     uv
     wget
