@@ -96,7 +96,7 @@
   # ============================================================================
   programs.neovim = {
     enable = true;
-    package = neovim-nightly-overlay.packages.${pkgs.system}.default;
+    package = neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
   };
 
   programs.fzf = {
@@ -446,6 +446,15 @@
           repo = "zsh-autosuggestions";
           rev = "v0.7.1";
           sha256 = "sha256-vpTyYq9ZgfgdDsWzjxVAE7FZH4MALMNZIFyEOBLm5Qo=";
+        };
+      }
+      {
+        name = "zsh-syntax-highlighting";
+        src = pkgs.fetchFromGitHub {
+          owner = "zsh-users";
+          repo = "zsh-syntax-highlighting";
+          rev = "0.8.0";
+          sha256 = "sha256-iJdWopZwHpSyYl5/FQXEW7gl/SrKaYDEtTH9cGP7iPo=";
         };
       }
     ];
