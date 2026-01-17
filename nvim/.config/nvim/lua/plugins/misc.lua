@@ -1,5 +1,8 @@
 return {
     {
+        "jrop/tuis.nvim",
+    },
+    {
         "juniorsundar/cling.nvim",
         cmd = { "Cling" },
         config = function()

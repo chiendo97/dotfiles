@@ -1,98 +1,77 @@
 return {
     {
-        "ellisonleao/gruvbox.nvim",
+        "https://gitlab.com/motaz-shokry/gruvbox.nvim",
+        name = "gruvbox",
         priority = 1000,
         config = function()
-            local palette = require("gruvbox").palette
             require("gruvbox").setup({
-                terminal_colors = true,
-                undercurl = true,
-                underline = true,
-                bold = true,
-                italic = {
-                    strings = true,
-                    emphasis = true,
-                    comments = true,
-                    operators = false,
-                    folds = true,
+                variant = "medium",
+                dark_variant = "hard",
+                dim_inactive_windows = true,
+                extend_background_behind_borders = true,
+
+                enable = {
+                    terminal = true,
+                    legacy_highlights = true,
+                    migrations = true,
+                    devicons = true,
+                    lualine = true,
                 },
-                strikethrough = true,
-                invert_selection = false,
-                invert_signs = false,
-                invert_tabline = false,
-                invert_intend_guides = false,
-                inverse = true,
-                contrast = "hard",
-                palette_overrides = {},
-                dim_inactive = false,
-                transparent_mode = false,
-                overrides = {
-                    -- Leap
-                    LeapBackdrop = { fg = palette.dark4 },
-                    LeapLabel = { fg = palette.bright_orange, bold = true },
 
-                    -- MiniPick
-                    MiniPickMatchRanges = { fg = palette.bright_green, bold = true },
+                styles = {
+                    bold = true,
+                    italic = true,
+                    transparency = false,
+                },
 
-                    -- MiniTabline
-                    MiniTablineCurrent = { fg = palette.bright_blue, bg = palette.dark0_hard, bold = true },
-                    MiniTablineHidden = { fg = palette.gray, bg = palette.dark1 },
-                    MiniTablineModifiedCurrent = { fg = palette.dark0_hard, bg = palette.bright_blue, bold = true },
-                    MiniTablineModifiedHidden = { fg = palette.dark0_hard, bg = palette.gray },
-                    MiniTablineModifiedVisible = { fg = palette.dark0_hard, bg = palette.gray, bold = true },
-                    MiniTablineTabpagesection = { fg = palette.dark0_hard, bg = palette.bright_aqua, bold = true },
-                    MiniTablineVisible = { fg = palette.gray, bg = palette.dark1, bold = true },
+                groups = {
+                    border = "gray",
+                    link = "purple_lite",
+                    panel = "bg_second",
 
-                    -- MiniHipatterns
-                    MiniHipatternsFixme = { fg = palette.dark0, bg = palette.bright_red },
-                    MiniHipatternsFixmeBody = { fg = palette.bright_red },
-                    MiniHipatternsFixmeColon = { fg = palette.bright_red, bg = palette.bright_red, bold = true },
-                    MiniHipatternsHack = { fg = palette.dark0, bg = palette.bright_yellow },
-                    MiniHipatternsHackBody = { fg = palette.bright_yellow },
-                    MiniHipatternsHackColon = { fg = palette.bright_yellow, bg = palette.bright_yellow, bold = true },
-                    MiniHipatternsNote = { fg = palette.dark0, bg = palette.bright_blue },
-                    MiniHipatternsNoteBody = { fg = palette.bright_blue },
-                    MiniHipatternsNoteColon = { fg = palette.bright_blue, bg = palette.bright_blue, bold = true },
-                    MiniHipatternsTodo = { fg = palette.dark0, bg = palette.bright_green },
-                    MiniHipatternsTodoBody = { fg = palette.bright_green },
-                    MiniHipatternsTodoColon = { fg = palette.bright_green, bg = palette.bright_green, bold = true },
+                    error = "red_lite",
+                    hint = "aqua_lite",
+                    info = "blue_lite",
+                    ok = "green_lite",
+                    warn = "yellow_lite",
+                    note = "yellow_dark",
+                    todo = "aqua_dark",
 
-                    -- MiniStatusline
-                    MiniStatuslineDirectory = { fg = palette.dark4, bg = palette.dark1 },
-                    MiniStatuslineFilename = { fg = palette.light1, bg = palette.dark1, bold = true },
-                    MiniStatuslineFilenameModified = { fg = palette.bright_blue, bg = palette.dark1, bold = true },
-                    MiniStatuslineInactive = { fg = palette.dark4, bg = palette.dark1 },
-                    MiniStatuslineDevinfo = { fg = palette.light2, bg = palette.dark2 },
-                    MiniStatuslineFileinfo = { fg = palette.light2, bg = palette.dark2 },
+                    git_add = "green_dark",
+                    git_change = "yellow_dark",
+                    git_delete = "red_dark",
+                    git_dirty = "orange_dark",
+                    git_ignore = "gray",
+                    git_merge = "purple_dark",
+                    git_rename = "blue_dark",
+                    git_stage = "purple_dark",
+                    git_text = "yellow_lite",
+                    git_untracked = "bg2",
 
-                    -- MiniJump2d
-                    MiniJump2dDim = { fg = palette.dark4 },
-                    MiniJump2dSpot = { fg = palette.bright_orange, bg = palette.dark0_hard, bold = true },
-                    MiniJump2dSpotUnique = { fg = palette.bright_orange, bg = palette.dark0_hard, bold = true },
-                    MiniJump2dSpotAhead = { fg = palette.bright_yellow, bg = palette.dark0_hard },
+                    h1 = "red_dark",
+                    h2 = "yellow_dark",
+                    h3 = "green_dark",
+                    h4 = "aqua_dark",
+                    h5 = "blue_dark",
+                    h6 = "purple_dark",
+                },
 
-                    -- RenderMarkdown
-                    RenderMarkdownH1Bg = { bg = palette.faded_red },
-                    RenderMarkdownH2Bg = { bg = palette.faded_orange },
-                    RenderMarkdownH3Bg = { bg = palette.faded_yellow },
-                    RenderMarkdownH4Bg = { bg = palette.faded_green },
-                    RenderMarkdownH5Bg = { bg = palette.faded_blue },
-                    RenderMarkdownH6Bg = { bg = palette.faded_purple },
+                highlight_groups = {
 
-                    RenderMarkdownCodeBorder = { bg = palette.dark2 },
-                    RenderMarkdownCode = { bg = palette.dark0_soft },
-                    RenderMarkdownTableHead = { fg = palette.dark3 },
-                    RenderMarkdownTableRow = { fg = palette.dark3 },
-                    RenderMarkdownBullet = { fg = palette.bright_green },
+                    -- render-markdown
+                    RenderMarkdownBullet = { fg = "green_dark" },
+                    RenderMarkdownCode = { bg = "bg_second" },
+                    RenderMarkdownCodeBorder = { bg = "bg1" },
+                    RenderMarkdownTableHead = { fg = "purple_lite" },
+                    RenderMarkdownTableRow = { fg = "purple_lite" },
 
-                    -- TreesitterContext
-                    TreesitterContext = { bg = palette.dark0_soft },
-                    TreesitterContextLineNumber = { fg = palette.dark4, bg = palette.dark0_soft },
-                    TreesitterContextBottom = { underline = true, sp = palette.dark1 },
+                    -- Treesitter markup
+                    ["@markup.heading"] = { fg = "green_dark" },
+                    ["@markup.strong"] = { fg = "green_dark", bold = true },
+                    ["@markup.italic"] = { fg = "green_dark", italic = true },
                 },
             })
-            vim.o.background = "dark"
-            -- vim.cmd.colorscheme("gruvbox")
+            vim.cmd.colorscheme("gruvbox")
         end,
     },
 }
