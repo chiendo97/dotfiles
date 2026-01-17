@@ -55,11 +55,8 @@ git clone https://github.com/chiendo97/dotfiles ~/Source/dotfiles
 ### 5. Apply Home Manager
 
 ```bash
-# Linux (x86_64) - user: cle
-nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#cle
-
-# macOS (Apple Silicon) - user: chiendo97
-nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#chiendo97
+# Auto-detects config based on $USER (works on both Linux and macOS)
+nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager
 ```
 
 This installs all packages and configures:
@@ -86,8 +83,8 @@ git remote set-url origin git@github.com:chiendo97/dotfiles.git
 ### Home Manager
 
 ```bash
-# Apply config changes
-home-manager switch --flake ~/.config/home-manager#cle
+# Apply config changes (auto-detects by $USER)
+home-manager switch --flake ~/.config/home-manager
 
 # Update all packages
 cd ~/.config/home-manager && nix flake update

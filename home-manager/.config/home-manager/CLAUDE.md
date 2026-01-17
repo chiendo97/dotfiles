@@ -21,17 +21,18 @@ This is a Home Manager configuration repository that manages user environment an
 
 ### Building and Applying Configuration
 ```bash
-# Linux (x86_64) - user: cle
-home-manager switch --flake .#cle
+# Auto-detects config based on $USER (works on both Linux and macOS)
+home-manager switch --flake .
 
-# macOS (Apple Silicon) - user: chiendo97
-home-manager switch --flake .#chiendo97
+# Or explicitly specify:
+# home-manager switch --flake .#cle        # Linux
+# home-manager switch --flake .#chiendo97  # macOS
 
 # Build without activating (for testing)
-home-manager build --flake .#cle
+home-manager build --flake .
 
 # Check what would change
-home-manager switch --flake .#cle --dry-run
+home-manager switch --flake . --dry-run
 ```
 
 ### Available Configurations
