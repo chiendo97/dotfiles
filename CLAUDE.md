@@ -8,9 +8,14 @@ Personal dotfiles repository for a complete development environment. Manages she
 
 ## Structure
 
-Uses GNU Stow to symlink `config/.config/` into `~/.config/`.
+Uses GNU Stow with individual packages. Each package contains a `.config/` directory that gets symlinked to `~/.config/`.
 
-### Config Directory (`config/.config/`)
+```
+nvim/.config/nvim/  →  ~/.config/nvim
+alacritty/.config/alacritty/  →  ~/.config/alacritty
+```
+
+### Stow Packages
 
 | Directory | Purpose | Has CLAUDE.md |
 |-----------|---------|---------------|
@@ -31,9 +36,10 @@ Uses GNU Stow to symlink `config/.config/` into `~/.config/`.
 ## Stow Commands
 
 ```bash
-make stow      # Symlink config/.config/* to ~/.config/
-make unstow    # Remove symlinks
-make restow    # Re-symlink (after changes)
+make stow      # Symlink all packages
+make unstow    # Remove all symlinks
+make restow    # Re-symlink all (after changes)
+make nvim      # Stow individual package
 ```
 
 ## Key Integration Points
