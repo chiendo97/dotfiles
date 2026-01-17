@@ -55,14 +55,11 @@ git clone https://github.com/chiendo97/dotfiles ~/Source/dotfiles
 ### 5. Apply Home Manager
 
 ```bash
-# Linux (x86_64)
+# Linux (x86_64) - user: cle
 nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#cle
 
-# macOS (Apple Silicon)
-nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#cle@darwin
-
-# macOS (Intel)
-nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#cle@darwin-x86
+# macOS (Apple Silicon) - user: chiendo97
+nix run home-manager -- switch --flake ~/Source/dotfiles/home-manager/.config/home-manager#chiendo97
 ```
 
 This installs all packages and configures:

@@ -1,7 +1,7 @@
-{ config, lib, pkgs, neovim-nightly-overlay, homeDirectory, ... }:
+{ config, lib, pkgs, neovim-nightly-overlay, homeDirectory, username, ... }:
 
 {
-  home.username = "cle";
+  home.username = username;
   home.homeDirectory = homeDirectory;
   home.stateVersion = "25.11";
 

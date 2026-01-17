@@ -21,14 +21,11 @@ This is a Home Manager configuration repository that manages user environment an
 
 ### Building and Applying Configuration
 ```bash
-# Linux (x86_64)
+# Linux (x86_64) - user: cle
 home-manager switch --flake .#cle
 
-# macOS (Apple Silicon)
-home-manager switch --flake .#cle@darwin
-
-# macOS (Intel)
-home-manager switch --flake .#cle@darwin-x86
+# macOS (Apple Silicon) - user: chiendo97
+home-manager switch --flake .#chiendo97
 
 # Build without activating (for testing)
 home-manager build --flake .#cle
@@ -38,13 +35,13 @@ home-manager switch --flake .#cle --dry-run
 ```
 
 ### Available Configurations
-| Name | System | Home Directory |
-|------|--------|----------------|
-| `cle` | x86_64-linux | /home/cle |
-| `cle@linux` | x86_64-linux | /home/cle |
-| `cle@darwin` | aarch64-darwin | /Users/cle |
-| `cle@macos` | aarch64-darwin | /Users/cle |
-| `cle@darwin-x86` | x86_64-darwin | /Users/cle |
+| Name | System | Username | Home Directory |
+|------|--------|----------|----------------|
+| `cle` | x86_64-linux | cle | /home/cle |
+| `cle@linux` | x86_64-linux | cle | /home/cle |
+| `chiendo97` | aarch64-darwin | chiendo97 | /Users/chiendo97 |
+| `chiendo97@darwin` | aarch64-darwin | chiendo97 | /Users/chiendo97 |
+| `chiendo97@macos` | aarch64-darwin | chiendo97 | /Users/chiendo97 |
 
 ### Updating Dependencies
 ```bash
