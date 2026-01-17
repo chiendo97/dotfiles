@@ -104,13 +104,13 @@ secrets/
 **Edit secrets:**
 ```bash
 cd secrets
-age -d -i ~/.ssh/id_ed25519 api-keys.age > api-keys.txt
+age -d -i ~/.ssh/id_ed25519_agenix api-keys.age > api-keys.txt
 # Edit api-keys.txt
-age -r "$(cat ~/.ssh/id_ed25519.pub)" -o api-keys.age api-keys.txt
+age -r "$(cat ~/.ssh/id_ed25519_agenix.pub)" -o api-keys.age api-keys.txt
 rm api-keys.txt
 ```
 
 **Add new secret:**
 1. Add entry to `secrets.nix`
-2. Create encrypted file: `echo "content" | age -r "$(cat ~/.ssh/id_ed25519.pub)" -o newsecret.age`
+2. Create encrypted file: `echo "content" | age -r "$(cat ~/.ssh/id_ed25519_agenix.pub)" -o newsecret.age`
 3. Add to `home.nix` under `age.secrets`

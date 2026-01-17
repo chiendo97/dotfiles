@@ -8,11 +8,63 @@
   # ============================================================================
   # Agenix secrets
   # ============================================================================
-  age.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
+  age.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519_agenix" ];
 
   age.secrets.api-keys = {
     file = ./secrets/api-keys.age;
     path = "${config.home.homeDirectory}/.secrets/api-keys";
+  };
+
+  # SSH private keys
+  age.secrets.aws_bastion_rsa = {
+    file = ./secrets/aws_bastion_rsa.age;
+    path = "${config.home.homeDirectory}/.ssh/aws_bastion_rsa";
+    mode = "600";
+  };
+  age.secrets.cle_viettel_idc = {
+    file = ./secrets/cle_viettel_idc.age;
+    path = "${config.home.homeDirectory}/.ssh/cle_viettel_idc";
+    mode = "600";
+  };
+  age.secrets.cle_vpn = {
+    file = ./secrets/cle_vpn.age;
+    path = "${config.home.homeDirectory}/.ssh/cle_vpn";
+    mode = "600";
+  };
+  age.secrets.github_key = {
+    file = ./secrets/github_key.age;
+    path = "${config.home.homeDirectory}/.ssh/github_key";
+    mode = "600";
+  };
+  age.secrets.github_rsa = {
+    file = ./secrets/github_rsa.age;
+    path = "${config.home.homeDirectory}/.ssh/github_rsa";
+    mode = "600";
+  };
+  age.secrets.homic_olympus = {
+    file = ./secrets/homic_olympus.age;
+    path = "${config.home.homeDirectory}/.ssh/homic_olympus";
+    mode = "600";
+  };
+  age.secrets.homic_rsa = {
+    file = ./secrets/homic_rsa.age;
+    path = "${config.home.homeDirectory}/.ssh/homic_rsa";
+    mode = "600";
+  };
+  age.secrets.id_ed25519_github = {
+    file = ./secrets/id_ed25519_github.age;
+    path = "${config.home.homeDirectory}/.ssh/id_ed25519_github";
+    mode = "600";
+  };
+  age.secrets.oracle = {
+    file = ./secrets/oracle.age;
+    path = "${config.home.homeDirectory}/.ssh/oracle";
+    mode = "600";
+  };
+  age.secrets.uriel_rsa = {
+    file = ./secrets/uriel_rsa.age;
+    path = "${config.home.homeDirectory}/.ssh/uriel_rsa";
+    mode = "600";
   };
 
   # ============================================================================
@@ -65,6 +117,74 @@
 
   programs.bat = {
     enable = true;
+  };
+
+  programs.ssh = {
+    enable = true;
+
+    includes = [
+      "~/.orbstack/ssh/config"
+    ];
+
+    matchBlocks = {
+      "*" = {
+        addKeysToAgent = "yes";
+      };
+      "gitlab.com" = {
+        hostname = "gitlab.com";
+        identityFile = "~/.ssh/homic_rsa";
+        extraOptions = {
+          PreferredAuthentications = "publickey";
+        };
+      };
+
+      "github.com" = {
+        hostname = "github.com";
+        identityFile = "~/.ssh/id_ed25519_github";
+      };
+
+      "cle-home-server" = {
+        hostname = "100.118.125.39";
+        user = "cle";
+      };
+
+      "cle-viettel" = {
+        hostname = "171.244.62.91";
+        user = "root";
+        identityFile = "~/.ssh/cle_viettel_idc";
+      };
+
+      "cle-homic" = {
+        hostname = "100.83.74.104";
+        user = "root";
+      };
+
+      "homic-olympus" = {
+        hostname = "100.69.202.110";
+        user = "cle";
+        identityFile = "~/.ssh/homic_olympus";
+      };
+
+      "oracle" = {
+        hostname = "168.138.176.219";
+        user = "ubuntu";
+        identityFile = "~/.ssh/oracle";
+      };
+
+      "urieljsc" = {
+        hostname = "ssh.urieljsc.com";
+        user = "chienle";
+        identityFile = "~/.ssh/uriel_rsa";
+        identitiesOnly = true;
+      };
+
+      "aws-dev" = {
+        hostname = "10.26.136.50";
+        user = "cle";
+        identityFile = "~/.ssh/aws_bastion_rsa";
+        identitiesOnly = true;
+      };
+    };
   };
 
   programs.tmux = {

@@ -6,7 +6,15 @@ in
   # API keys
   "api-keys.age".publicKeys = [ cle ];
 
-  # SSH private keys (for other machines)
-  # "ssh-key-work.age".publicKeys = [ cle ];
-  # "ssh-key-server.age".publicKeys = [ cle ];
+  # SSH private keys
+  "aws_bastion_rsa.age".publicKeys = [ cle ];
+  "cle_viettel_idc.age".publicKeys = [ cle ];
+  "cle_vpn.age".publicKeys = [ cle ];
+  "github_key.age".publicKeys = [ cle ];
+  "github_rsa.age".publicKeys = [ cle ];
+  "homic_olympus.age".publicKeys = [ cle ];
+  "homic_rsa.age".publicKeys = [ cle ];
+  "id_ed25519_github.age".publicKeys = [ cle ];
+  "oracle.age".publicKeys = [ cle ];
+  "uriel_rsa.age".publicKeys = [ cle ];
 }
