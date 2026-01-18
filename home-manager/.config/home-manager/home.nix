@@ -80,6 +80,9 @@
     gnumake
     htop
     jq
+    k9s
+    kubectl
+    kubetail
     nodejs
     podman
     ripgrep
@@ -478,16 +481,9 @@
   };
 
   # ============================================================================
-  # Cachix Configuration for Claude Code
+  # Nix Configuration
   # ============================================================================
   nix.package = pkgs.nix;
-  nix.settings = {
-    substituters = [ "https://claude-code.cachix.org" "https://cache.nixos.org" ];
-    trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
-    ];
-  };
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
