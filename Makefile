@@ -1,4 +1,4 @@
-PACKAGES := alacritty home-manager nvim zellij
+PACKAGES := alacritty git home-manager nvim zellij
 
 .PHONY: all stow unstow restow $(PACKAGES)
 

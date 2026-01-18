@@ -75,6 +75,7 @@
     awscli2
     claude-code
     curl
+    delta
     fd
     gcc
     gnumake
