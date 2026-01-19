@@ -84,6 +84,7 @@
     k9s
     kubectl
     kubetail
+    lazygit
     nodejs
     podman
     ripgrep
@@ -92,6 +93,7 @@
     tree
     tree-sitter
     unzip
+    usql
     uv
     wget
     wireguard-tools
