@@ -70,34 +70,14 @@
   # ============================================================================
   # Packages (no Home Manager module available)
   # ============================================================================
-  home.packages = with pkgs; [
-    age        # for agenix secrets
-    awscli2
-    claude-code
-    curl
-    delta
-    fd
-    gcc
-    gnumake
-    htop
-    jq
-    k9s
-    kubectl
-    kubetail
-    lazygit
-    nodejs
-    podman
-    ripgrep
-    rustup
-    stow
-    tree
-    tree-sitter
-    unzip
-    usql
-    uv
-    wget
-    wireguard-tools
-  ];
+  home.packages =
+    (import ./packages/core.nix { inherit pkgs; }) ++
+    (import ./packages/development.nix { inherit pkgs; }) ++
+    (import ./packages/database.nix { inherit pkgs; }) ++
+    (import ./packages/containers.nix { inherit pkgs; }) ++
+    (import ./packages/cloud.nix { inherit pkgs; }) ++
+    (import ./packages/ai.nix { inherit pkgs; }) ++
+    (import ./packages/security.nix { inherit pkgs; });
 
   # ============================================================================
   # Config files
