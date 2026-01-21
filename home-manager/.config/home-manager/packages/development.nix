@@ -1,5 +1,6 @@
 { pkgs }:
 with pkgs; [
+  cht-sh
   delta
   fixjson
   gcc
