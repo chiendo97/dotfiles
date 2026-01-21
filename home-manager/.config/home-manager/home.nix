@@ -472,6 +472,34 @@
   '';
 
   # ============================================================================
+  # Launchd Agents (macOS scheduled tasks)
+  # ============================================================================
+  launchd.agents.home-manager-auto-update = {
+    enable = true;
+    config = {
+      Label = "com.home-manager.auto-update";
+      ProgramArguments = [
+        "/bin/sh"
+        "-c"
+        ''
+          export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
+          cd ~/.config/home-manager && \
+          nix flake update 2>&1 | tee /tmp/home-manager-update.log && \
+          home-manager switch --flake . 2>&1 | tee -a /tmp/home-manager-update.log
+        ''
+      ];
+      StartCalendarInterval = [
+        {
+          Hour = 9;
+          Minute = 0;
+        }
+      ];
+      StandardOutPath = "/tmp/home-manager-auto-update.out.log";
+      StandardErrorPath = "/tmp/home-manager-auto-update.err.log";
+    };
+  };
+
+  # ============================================================================
   # Session Variables (available to all programs)
   # ============================================================================
   home.sessionVariables = {
