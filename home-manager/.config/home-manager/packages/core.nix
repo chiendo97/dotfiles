@@ -2,6 +2,7 @@
 with pkgs; [
   curl
   fd
+  ffmpeg
   htop
   jq
   ripgrep
