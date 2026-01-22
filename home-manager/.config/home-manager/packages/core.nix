@@ -3,6 +3,7 @@ with pkgs; [
   curl
   fd
   ffmpeg
+  hledger
   htop
   jq
   ripgrep
