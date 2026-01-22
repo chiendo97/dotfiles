@@ -78,7 +78,7 @@ return {
                 dynamic_root = false,
                 sync_scroll = true,
                 picker = "vim.ui.select",
-                address = "127.0.0.1",
+                address = "0.0.0.0",
             })
         end,
         command = { "LivePreview" },
