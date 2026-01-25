@@ -71,13 +71,17 @@
   # Packages (no Home Manager module available)
   # ============================================================================
   home.packages =
+    # Shared packages (all platforms)
     (import ./packages/core.nix { inherit pkgs; }) ++
     (import ./packages/development.nix { inherit pkgs; }) ++
     (import ./packages/database.nix { inherit pkgs; }) ++
     (import ./packages/containers.nix { inherit pkgs; }) ++
     (import ./packages/cloud.nix { inherit pkgs; }) ++
     (import ./packages/ai.nix { inherit pkgs; }) ++
-    (import ./packages/security.nix { inherit pkgs; });
+    (import ./packages/security.nix { inherit pkgs; }) ++
+    # Platform-specific packages
+    (lib.optionals pkgs.stdenv.isLinux (import ./packages/linux.nix { inherit pkgs; })) ++
+    (lib.optionals pkgs.stdenv.isDarwin (import ./packages/darwin.nix { inherit pkgs; }));
 
   # ============================================================================
   # Config files
