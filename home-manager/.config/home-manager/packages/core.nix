@@ -1,5 +1,6 @@
 { pkgs }:
 with pkgs; [
+  btop
   curl
   fd
   ffmpeg
