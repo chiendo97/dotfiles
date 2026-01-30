@@ -221,7 +221,7 @@
             owner = "chiendo97";
             repo = "tmux-buffer";
             rev = "master";
-            sha256 = "sha256-fqKYEbAXdgogLhTbuPl1ogHu/2jsyg4+oT82jxuKwlY=";
+            sha256 = "sha256-GEyMyUd/KPYPPl01Syf9hVQerf6OMHVf5ZqKF6a73ds=";
           };
         };
       }
