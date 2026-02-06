@@ -23,7 +23,7 @@
   outputs =
     { nixpkgs, home-manager, neovim-nightly-overlay, claude-code, agenix, ... }:
     let
-      mkHomeConfiguration = { system, username }:
+      mkHomeConfiguration = { system, username, extraModules ? [] }:
         let
           pkgs = import nixpkgs {
             inherit system;
@@ -40,7 +40,7 @@
           modules = [
             agenix.homeManagerModules.default
             ./home.nix
-          ];
+          ] ++ extraModules;
         };
     in
     {
@@ -48,6 +48,11 @@
         # Linux (x86_64) - username: cle
         "cle" = mkHomeConfiguration { system = "x86_64-linux"; username = "cle"; };
         "cle@linux" = mkHomeConfiguration { system = "x86_64-linux"; username = "cle"; };
+        "genbook" = mkHomeConfiguration {
+          system = "x86_64-linux";
+          username = "cle";
+          extraModules = [ ./profiles/genbook.nix ];
+        };
 
         # macOS (Apple Silicon) - username: chiendo97
         "chiendo97" = mkHomeConfiguration { system = "aarch64-darwin"; username = "chiendo97"; };

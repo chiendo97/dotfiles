@@ -9,6 +9,9 @@ in
   # Zsh history backup (manual restore, not auto-decrypted)
   "zsh_history.age".publicKeys = [ cle ];
 
+  # Rclone config
+  "rclone.age".publicKeys = [ cle ];
+
   # SSH private keys
   "aws_bastion_rsa.age".publicKeys = [ cle ];
   "cle_viettel_idc.age".publicKeys = [ cle ];
