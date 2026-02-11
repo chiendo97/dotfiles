@@ -1,5 +1,26 @@
 return {
     {
+        "polacekpavel/prompt-yank.nvim",
+        cmd = { "PromptYank" },
+        keys = {
+            { "<leader>ys", mode = { "n", "v" }, desc = "PromptYank: file/selection" },
+            { "<leader>ym", mode = "n", desc = "PromptYank: multi-file" },
+            { "<leader>yd", mode = { "n", "v" }, desc = "PromptYank: diff" },
+            { "<leader>yb", mode = { "n", "v" }, desc = "PromptYank: blame" },
+            { "<leader>ye", mode = "v", desc = "PromptYank: diagnostics" },
+            { "<leader>yt", mode = { "n", "v" }, desc = "PromptYank: tree" },
+            { "<leader>yr", mode = { "n", "v" }, desc = "PromptYank: remote URL" },
+            { "<leader>yf", mode = "n", desc = "PromptYank: function" },
+            { "<leader>yl", mode = "v", desc = "PromptYank: selection + definitions" },
+            { "<leader>yL", mode = "v", desc = "PromptYank: selection + deep definitions" },
+            { "<leader>yR", mode = "n", desc = "PromptYank: related files" },
+        },
+        opts = {},
+        config = function(_, opts)
+            require("prompt-yank").setup(opts)
+        end,
+    },
+    {
         "jrop/tuis.nvim",
     },
     {
