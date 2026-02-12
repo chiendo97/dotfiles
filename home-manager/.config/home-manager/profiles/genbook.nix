@@ -1,11 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  age.secrets.rclone = {
-    file = ../secrets/rclone.age;
-    path = "${config.home.homeDirectory}/.config/rclone/rclone.conf";
-  };
-
   systemd.user.services.rclone-gdrive = {
     Unit = {
       Description = "Rclone mount for Google Drive";

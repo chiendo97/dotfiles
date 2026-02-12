@@ -15,6 +15,11 @@
     path = "${config.home.homeDirectory}/.secrets/api-keys";
   };
 
+  age.secrets.rclone = {
+    file = ./secrets/rclone.age;
+    path = "${config.home.homeDirectory}/.config/rclone/rclone.conf";
+  };
+
   # SSH private keys
   age.secrets.aws_bastion_rsa = {
     file = ./secrets/aws_bastion_rsa.age;
