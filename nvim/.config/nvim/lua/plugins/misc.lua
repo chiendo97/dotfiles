@@ -3,7 +3,7 @@ return {
         "polacekpavel/prompt-yank.nvim",
         cmd = { "PromptYank" },
         keys = {
-            { "<leader>ys", mode = { "n", "v" }, desc = "PromptYank: file/selection" },
+            { "<leader>yp", mode = { "n", "v" }, desc = "PromptYank: file/selection" },
             { "<leader>ym", mode = "n", desc = "PromptYank: multi-file" },
             { "<leader>yd", mode = { "n", "v" }, desc = "PromptYank: diff" },
             { "<leader>yb", mode = { "n", "v" }, desc = "PromptYank: blame" },

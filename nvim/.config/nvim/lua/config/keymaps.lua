@@ -81,13 +81,13 @@ vim.keymap.set("x", "p", '"+p', { noremap = true, desc = "Paste from last Yank" 
 vim.keymap.set("n", "yy", '"*yy', { noremap = false, desc = "Yank line to clipboard" })
 
 -- Copy current relative path
-vim.keymap.set("n", "<leader>yp", ':let @* = expand("%:~:.")<cr>', {
+vim.keymap.set("n", "<leader>yp", function()
+    vim.cmd('let @* = expand("%:~:.")')
+    vim.notify("Yanked relative path to clipboard", vim.log.levels.INFO, { title = "Path Yank" })
+end, {
     noremap = true,
     desc = "Yank relative path",
     silent = true,
-    callback = function()
-        vim.notify("Yanked relative path to clipboard", vim.log.levels.INFO, { title = "Path Yank" })
-    end,
 })
 
 -- Copy current absolute path
