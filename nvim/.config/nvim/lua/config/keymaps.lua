@@ -91,13 +91,13 @@ end, {
 })
 
 -- Copy current absolute path
-vim.keymap.set("n", "<leader>yP", ':let @* = expand("%:p")<cr>', {
+vim.keymap.set("n", "<leader>yP", function()
+    vim.cmd(':let @* = expand("%:p")')
+    vim.notify("Yanked absolute path to clipboard", vim.log.levels.INFO, { title = "Path Yank" })
+end, {
     noremap = true,
     desc = "Yank absolute path",
     silent = true,
-    callback = function()
-        vim.notify("Yanked absolute path to clipboard", vim.log.levels.INFO, { title = "Path Yank" })
-    end,
 })
 
 -- Copy last pasted
