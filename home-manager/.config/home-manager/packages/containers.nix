@@ -4,4 +4,5 @@ with pkgs; [
   kubectl
   kubetail
   podman
+  podman-compose
 ]
