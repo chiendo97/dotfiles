@@ -72,6 +72,12 @@
     mode = "600";
   };
 
+  age.secrets.wg_genbook_aws = {
+    file = ./secrets/wg_genbook_aws.age;
+    path = "${config.home.homeDirectory}/.config/wireguard/genbook-aws.conf";
+    mode = "600";
+  };
+
   # ============================================================================
   # Packages (no Home Manager module available)
   # ============================================================================
