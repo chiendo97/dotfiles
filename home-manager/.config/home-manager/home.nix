@@ -419,9 +419,11 @@
     initContent = lib.mkMerge [
       # Early init (source nix first)
       (lib.mkBefore ''
-        # Source nix-daemon (multi-user install)
+        # Source nix profile (multi-user or single-user install)
         if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
           . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+        elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
         fi
       '')
 
