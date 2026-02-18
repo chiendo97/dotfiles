@@ -106,6 +106,15 @@
   };
 
   # ============================================================================
+  # Systemd user services (Linux only)
+  # ============================================================================
+  systemd.user.sockets.podman = lib.mkIf pkgs.stdenv.isLinux {
+    Unit.Description = "Podman API Socket";
+    Socket.ListenStream = "%t/podman/podman.sock";
+    Install.WantedBy = [ "sockets.target" ];
+  };
+
+  # ============================================================================
   # Programs with Home Manager modules
   # ============================================================================
   programs.neovim = {
