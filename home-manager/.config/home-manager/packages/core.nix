@@ -6,7 +6,6 @@ with pkgs; [
   ffmpeg
   hledger
   htop
-  inetutils
   jq
   ripgrep
   stow
