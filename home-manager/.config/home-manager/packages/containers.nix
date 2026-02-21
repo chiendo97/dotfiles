@@ -5,4 +5,5 @@ with pkgs; [
   kubetail
   podman
   podman-compose
+  docker-client
 ]
