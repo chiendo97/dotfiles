@@ -441,13 +441,13 @@
         elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
           . "$HOME/.nix-profile/etc/profile.d/nix.sh"
         fi
+
+        # Emacs keybindings (must be before fzf sets up ^I binding)
+        bindkey -e
       '')
 
       # Main init content
       ''
-        # Emacs keybindings
-        bindkey -e
-
         # Edit command line with ^g
         autoload -U edit-command-line
         zle -N edit-command-line
