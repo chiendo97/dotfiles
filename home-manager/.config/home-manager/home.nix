@@ -428,6 +428,7 @@
     envExtra = ''
       export PATH="$HOME/.local/bin:$PATH"
       export PATH="$HOME/.cargo/bin:$PATH"
+      export LC_CTYPE="en_US.UTF-8"
     '';
 
     # Zsh init content using lib.mkOrder for proper ordering
