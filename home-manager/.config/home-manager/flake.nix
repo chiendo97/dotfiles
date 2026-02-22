@@ -59,5 +59,14 @@
         "chiendo97@darwin" = mkHomeConfiguration { system = "aarch64-darwin"; username = "chiendo97"; };
         "chiendo97@macos" = mkHomeConfiguration { system = "aarch64-darwin"; username = "chiendo97"; };
       };
+
+      nixosConfigurations = {
+        "nixos-cle" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./hosts/nixos-cle/configuration.nix
+          ];
+        };
+      };
     };
 }

@@ -216,6 +216,12 @@
         identityFile = "~/.ssh/aws_bastion_rsa";
         identitiesOnly = true;
       };
+
+      "nixos-cle" = {
+        hostname = "192.168.50.55";
+        user = "cle";
+        identityFile = "~/.ssh/nixos_cle";
+      };
     };
   };
 
