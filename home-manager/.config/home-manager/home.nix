@@ -10,84 +10,45 @@
   # ============================================================================
   age.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519_agenix" ];
 
-  age.secrets.api-keys = {
-    file = ./secrets/api-keys.age;
-    path = "${config.home.homeDirectory}/.secrets/api-keys";
-  };
-
-  age.secrets.rclone = {
-    file = ./secrets/rclone.age;
-    path = "${config.home.homeDirectory}/.config/rclone/rclone.conf";
-  };
-
-  # SSH private keys
-  age.secrets.aws_bastion_rsa = {
-    file = ./secrets/aws_bastion_rsa.age;
-    path = "${config.home.homeDirectory}/.ssh/aws_bastion_rsa";
-    mode = "600";
-  };
-  age.secrets.cle_viettel_idc = {
-    file = ./secrets/cle_viettel_idc.age;
-    path = "${config.home.homeDirectory}/.ssh/cle_viettel_idc";
-    mode = "600";
-  };
-  age.secrets.cle_vpn = {
-    file = ./secrets/cle_vpn.age;
-    path = "${config.home.homeDirectory}/.ssh/cle_vpn";
-    mode = "600";
-  };
-  age.secrets.github_key = {
-    file = ./secrets/github_key.age;
-    path = "${config.home.homeDirectory}/.ssh/github_key";
-    mode = "600";
-  };
-  age.secrets.github_rsa = {
-    file = ./secrets/github_rsa.age;
-    path = "${config.home.homeDirectory}/.ssh/github_rsa";
-    mode = "600";
-  };
-  age.secrets.homic_olympus = {
-    file = ./secrets/homic_olympus.age;
-    path = "${config.home.homeDirectory}/.ssh/homic_olympus";
-    mode = "600";
-  };
-  age.secrets.homic_rsa = {
-    file = ./secrets/homic_rsa.age;
-    path = "${config.home.homeDirectory}/.ssh/homic_rsa";
-    mode = "600";
-  };
-  age.secrets.id_ed25519_github = {
-    file = ./secrets/id_ed25519_github.age;
-    path = "${config.home.homeDirectory}/.ssh/id_ed25519_github";
-    mode = "600";
-  };
-  age.secrets.oracle = {
-    file = ./secrets/oracle.age;
-    path = "${config.home.homeDirectory}/.ssh/oracle";
-    mode = "600";
-  };
-  age.secrets.uriel_rsa = {
-    file = ./secrets/uriel_rsa.age;
-    path = "${config.home.homeDirectory}/.ssh/uriel_rsa";
-    mode = "600";
-  };
-  age.secrets.nixos_cle = {
-    file = ./secrets/nixos_cle.age;
-    path = "${config.home.homeDirectory}/.ssh/nixos_cle";
-    mode = "600";
-  };
-
-  age.secrets.wg_genbook_aws = {
-    file = ./secrets/wg_genbook_aws.age;
-    path = "${config.home.homeDirectory}/.config/wireguard/genbook-aws.conf";
-    mode = "600";
-  };
-
-  age.secrets.wg_urieljsc_office = {
-    file = ./secrets/wg_urieljsc_office.age;
-    path = "${config.home.homeDirectory}/.config/wireguard/urieljsc-office.conf";
-    mode = "600";
-  };
+  age.secrets = {
+    api-keys = {
+      file = ./secrets/api-keys.age;
+      path = "${config.home.homeDirectory}/.secrets/api-keys";
+    };
+    rclone = {
+      file = ./secrets/rclone.age;
+      path = "${config.home.homeDirectory}/.config/rclone/rclone.conf";
+    };
+    wg_genbook_aws = {
+      file = ./secrets/wg_genbook_aws.age;
+      path = "${config.home.homeDirectory}/.config/wireguard/genbook-aws.conf";
+      mode = "600";
+    };
+    wg_urieljsc_office = {
+      file = ./secrets/wg_urieljsc_office.age;
+      path = "${config.home.homeDirectory}/.config/wireguard/urieljsc-office.conf";
+      mode = "600";
+    };
+  } // builtins.listToAttrs (map (name: {
+    inherit name;
+    value = {
+      file = ./secrets + "/${name}.age";
+      path = "${config.home.homeDirectory}/.ssh/${name}";
+      mode = "600";
+    };
+  }) [
+    "aws_bastion_rsa"
+    "cle_viettel_idc"
+    "cle_vpn"
+    "github_key"
+    "github_rsa"
+    "homic_olympus"
+    "homic_rsa"
+    "id_ed25519_github"
+    "oracle"
+    "uriel_rsa"
+    "nixos_cle"
+  ]);
 
   # ============================================================================
   # Packages (no Home Manager module available)
@@ -128,10 +89,7 @@
   # ============================================================================
   # Programs with Home Manager modules
   # ============================================================================
-  programs.neovim = {
-    enable = true;
-    package = pkgs.neovim;
-  };
+  programs.neovim.enable = true;
 
   programs.fzf = {
     enable = true;
@@ -150,10 +108,6 @@
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
-
-    includes = [
-      "~/.orbstack/ssh/config"
-    ];
 
     matchBlocks = {
       "*" = {
@@ -352,7 +306,6 @@
 
       set-window-option -g window-status-current-format "#[bg=colour214,fg=colour237,nobold,noitalics,nounderscore]#[bg=colour214,fg=colour239] #I #[bg=colour214,fg=colour239,bold] #W#{?window_zoomed_flag,*Z,} #[bg=colour237,fg=colour214,nobold,noitalics,nounderscore]"
       set-window-option -g window-status-format "#[bg=colour239,fg=colour237,noitalics]#[bg=colour239,fg=colour223] #I #[bg=colour239,fg=colour223] #W #[bg=colour237,fg=colour239,noitalics]"
-
     '';
   };
 
@@ -385,7 +338,6 @@
     # History settings
     history = {
       size = 10000;
-      save = 10000;
       ignoreDups = true;
       share = true;
     };
@@ -465,9 +417,7 @@
   # Nix Configuration
   # ============================================================================
   nix.package = pkgs.nix;
-  nix.extraOptions = ''
-    experimental-features = nix-command flakes
-  '';
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # ============================================================================
   # Launchd Agents (macOS scheduled tasks)
@@ -503,6 +453,7 @@
   home.sessionVariables = {
     EDITOR = "nvim";
     LC_CTYPE = "en_US.UTF-8";
+  } // lib.optionalAttrs pkgs.stdenv.isLinux {
     DOCKER_HOST = "unix:///run/user/1000/podman/podman.sock";
   };
 
