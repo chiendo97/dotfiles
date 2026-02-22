@@ -78,6 +78,12 @@
     mode = "600";
   };
 
+  age.secrets.wg_urieljsc_office = {
+    file = ./secrets/wg_urieljsc_office.age;
+    path = "${config.home.homeDirectory}/.config/wireguard/urieljsc-office.conf";
+    mode = "600";
+  };
+
   # ============================================================================
   # Packages (no Home Manager module available)
   # ============================================================================

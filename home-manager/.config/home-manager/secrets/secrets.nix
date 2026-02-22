@@ -26,4 +26,5 @@ in
 
   # WireGuard config
   "wg_genbook_aws.age".publicKeys = [ cle ];
+  "wg_urieljsc_office.age".publicKeys = [ cle ];
 }
