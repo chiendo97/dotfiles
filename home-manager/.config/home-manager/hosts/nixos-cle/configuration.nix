@@ -66,5 +66,5 @@
   networking.firewall.allowedTCPPorts = [ 22 ];
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
 
-  system.stateVersion = "24.11";
+  system.stateVersion = "25.11";
 }
