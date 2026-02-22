@@ -1,4 +1,4 @@
-{ config, lib, pkgs, neovim-nightly-overlay, homeDirectory, username, ... }:
+{ config, lib, pkgs, homeDirectory, username, ... }:
 
 {
   home.username = username;
@@ -130,7 +130,7 @@
   # ============================================================================
   programs.neovim = {
     enable = true;
-    package = neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    package = pkgs.neovim;
   };
 
   programs.fzf = {
@@ -143,17 +143,9 @@
     enableZshIntegration = true;
   };
 
-  programs.go = {
-    enable = true;
-  };
-
-  programs.eza = {
-    enable = true;
-  };
-
-  programs.bat = {
-    enable = true;
-  };
+  programs.go.enable = true;
+  programs.eza.enable = true;
+  programs.bat.enable = true;
 
   programs.ssh = {
     enable = true;
@@ -246,10 +238,6 @@
       prefix-highlight
       yank
       {
-        plugin = sensible;
-        extraConfig = "";
-      }
-      {
         plugin = mkTmuxPlugin {
           pluginName = "tmux-buffer";
           version = "unstable";
@@ -268,9 +256,9 @@
       # === General ===
       set -g allow-rename off
       set -g detach-on-destroy off
+      # baseIndex only sets base-index, not pane-base-index
       set -g pane-base-index 1
-      set -ag terminal-overrides ",xterm-256color:RGB"
-      set -as terminal-features ',xterm-256color:clipboard'
+      set -as terminal-features ',xterm-256color:RGB:clipboard'
       set -g renumber-windows on
       set -g set-titles on
       set -g set-titles-string "#{session_name}"
@@ -365,7 +353,6 @@
       set-window-option -g window-status-current-format "#[bg=colour214,fg=colour237,nobold,noitalics,nounderscore]#[bg=colour214,fg=colour239] #I #[bg=colour214,fg=colour239,bold] #W#{?window_zoomed_flag,*Z,} #[bg=colour237,fg=colour214,nobold,noitalics,nounderscore]"
       set-window-option -g window-status-format "#[bg=colour239,fg=colour237,noitalics]#[bg=colour239,fg=colour223] #I #[bg=colour239,fg=colour223] #W #[bg=colour237,fg=colour239,noitalics]"
 
-      set -g @plugin 'chiendo97/tmux-buffer'
     '';
   };
 
@@ -399,7 +386,6 @@
     history = {
       size = 10000;
       save = 10000;
-      path = "${config.home.homeDirectory}/.zsh_history";
       ignoreDups = true;
       share = true;
     };
@@ -436,17 +422,9 @@
 
     # Session variables
     sessionVariables = {
-      EDITOR = "nvim";
       GO111MODULE = "auto";
       GOSUMDB = "off";
     };
-
-    # Additional paths
-    envExtra = ''
-      export PATH="$HOME/.local/bin:$PATH"
-      export PATH="$HOME/.cargo/bin:$PATH"
-      export LC_CTYPE="en_US.UTF-8"
-    '';
 
     # Zsh init content using lib.mkOrder for proper ordering
     initContent = lib.mkMerge [
@@ -477,33 +455,9 @@
 
     # Plugins
     plugins = [
-      {
-        name = "pure";
-        src = pkgs.fetchFromGitHub {
-          owner = "sindresorhus";
-          repo = "pure";
-          rev = "v1.23.0";
-          sha256 = "sha256-BmQO4xqd/3QnpLUitD2obVxL0UulpboT8jGNEh4ri8k=";
-        };
-      }
-      {
-        name = "zsh-autosuggestions";
-        src = pkgs.fetchFromGitHub {
-          owner = "zsh-users";
-          repo = "zsh-autosuggestions";
-          rev = "v0.7.1";
-          sha256 = "sha256-vpTyYq9ZgfgdDsWzjxVAE7FZH4MALMNZIFyEOBLm5Qo=";
-        };
-      }
-      {
-        name = "zsh-syntax-highlighting";
-        src = pkgs.fetchFromGitHub {
-          owner = "zsh-users";
-          repo = "zsh-syntax-highlighting";
-          rev = "0.8.0";
-          sha256 = "sha256-iJdWopZwHpSyYl5/FQXEW7gl/SrKaYDEtTH9cGP7iPo=";
-        };
-      }
+      { name = "pure"; src = pkgs.pure-prompt; }
+      { name = "zsh-autosuggestions"; src = pkgs.zsh-autosuggestions; }
+      { name = "zsh-syntax-highlighting"; src = pkgs.zsh-syntax-highlighting; }
     ];
   };
 
@@ -518,7 +472,7 @@
   # ============================================================================
   # Launchd Agents (macOS scheduled tasks)
   # ============================================================================
-  launchd.agents.home-manager-auto-update = {
+  launchd.agents.home-manager-auto-update = lib.mkIf pkgs.stdenv.isDarwin {
     enable = true;
     config = {
       Label = "com.home-manager.auto-update";
@@ -548,6 +502,7 @@
   # ============================================================================
   home.sessionVariables = {
     EDITOR = "nvim";
+    LC_CTYPE = "en_US.UTF-8";
     DOCKER_HOST = "unix:///run/user/1000/podman/podman.sock";
   };
 
