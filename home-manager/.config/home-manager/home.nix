@@ -71,6 +71,11 @@
     path = "${config.home.homeDirectory}/.ssh/uriel_rsa";
     mode = "600";
   };
+  age.secrets.nixos_cle = {
+    file = ./secrets/nixos_cle.age;
+    path = "${config.home.homeDirectory}/.ssh/nixos_cle";
+    mode = "600";
+  };
 
   age.secrets.wg_genbook_aws = {
     file = ./secrets/wg_genbook_aws.age;

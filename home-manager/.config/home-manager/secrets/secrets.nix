@@ -23,6 +23,7 @@ in
   "id_ed25519_github.age".publicKeys = [ cle ];
   "oracle.age".publicKeys = [ cle ];
   "uriel_rsa.age".publicKeys = [ cle ];
+  "nixos_cle.age".publicKeys = [ cle ];
 
   # WireGuard config
   "wg_genbook_aws.age".publicKeys = [ cle ];
