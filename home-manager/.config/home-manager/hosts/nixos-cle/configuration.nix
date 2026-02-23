@@ -100,6 +100,10 @@
     device = "media";
     fsType = "virtiofs";
   };
+  fileSystems."/home/cle/Source/immich-app" = {
+    device = "immich-app";
+    fsType = "virtiofs";
+  };
 
   # Firewall
   networking.firewall.enable = true;
