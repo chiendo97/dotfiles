@@ -61,6 +61,11 @@
   # nix-ld: dynamic linker for generic Linux binaries (uv, etc.)
   programs.nix-ld.enable = true;
 
+  # Rootless podman
+  virtualisation.podman.enable = true;
+  users.users.cle.subUidRanges = [{ startUid = 100000; count = 65536; }];
+  users.users.cle.subGidRanges = [{ startGid = 100000; count = 65536; }];
+
   # QEMU guest agent
   services.qemuGuest.enable = true;
 
