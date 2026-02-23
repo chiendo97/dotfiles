@@ -62,6 +62,7 @@
     (import ./packages/cloud.nix { inherit pkgs; }) ++
     (import ./packages/ai.nix { inherit pkgs; }) ++
     (import ./packages/security.nix { inherit pkgs; }) ++
+    [ pkgs.pure-prompt ] ++
     # Platform-specific packages
     (lib.optionals pkgs.stdenv.isLinux (import ./packages/linux.nix { inherit pkgs; })) ++
     (lib.optionals pkgs.stdenv.isDarwin (import ./packages/darwin.nix { inherit pkgs; }));
@@ -391,6 +392,11 @@
 
         # Emacs keybindings (must be before fzf sets up ^I binding)
         bindkey -e
+
+        # Pure prompt (installed via home.packages)
+        autoload -U promptinit
+        promptinit
+        prompt pure
       '')
 
       # Main init content
@@ -405,12 +411,8 @@
       ''
     ];
 
-    # Plugins
-    plugins = [
-      { name = "pure"; src = pkgs.pure-prompt; }
-      { name = "zsh-autosuggestions"; src = pkgs.zsh-autosuggestions; }
-      { name = "zsh-syntax-highlighting"; src = pkgs.zsh-syntax-highlighting; }
-    ];
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
   };
 
   # ============================================================================

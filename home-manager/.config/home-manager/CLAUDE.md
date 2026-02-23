@@ -4,141 +4,83 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is a Home Manager configuration repository that manages user environment and dotfiles using Nix flakes. The configuration is for user "cle" on a Linux system (x86_64-linux) and uses the `nixos-unstable` channel.
+Home Manager + NixOS flake configuration managing user environment and dotfiles. Supports Linux (x86_64) and macOS (aarch64-darwin) via the `nixos-unstable` channel.
+
+## Common Commands
+
+```bash
+# Apply configuration (auto-detects $USER)
+home-manager switch --flake .
+
+# Build without activating (for testing)
+home-manager build --flake .
+
+# Dry-run to preview changes
+home-manager switch --flake . --dry-run
+
+# Validate flake
+nix flake check
+
+# Update all flake inputs
+nix flake update
+
+# Rebuild NixOS system (for nixos-cle host)
+sudo nixos-rebuild switch --flake .#nixos-cle
+```
 
 ## Architecture
 
 ### Flake Structure
 
-- **flake.nix**: Defines the flake inputs (nixpkgs, home-manager, neovim-nightly-overlay) and outputs a single home configuration named "cle"
-- **home.nix**: Main configuration module containing all package installations, program configurations, and shell setup
+`flake.nix` defines a `mkHomeConfiguration` helper that builds Home Manager configs from three parameters: `system`, `username`, and optional `extraModules` for host-specific overrides. It also defines NixOS system configurations under `nixosConfigurations`.
 
-### Key Inputs
+**Flake inputs:** nixpkgs (unstable), home-manager, neovim-nightly-overlay, claude-code-nix, agenix. All inputs follow nixpkgs to avoid duplicate evaluations.
 
-- `nixpkgs`: Following nixos-unstable channel
-- `home-manager`: Home Manager framework from nix-community
-- `neovim-nightly-overlay`: Provides nightly Neovim builds
+### Directory Layout
 
-## Common Commands
-
-### Building and Applying Configuration
-
-```bash
-# Auto-detects config based on $USER (works on both Linux and macOS)
-home-manager switch --flake .
-
-# Or explicitly specify:
-# home-manager switch --flake .#cle        # Linux
-# home-manager switch --flake .#chiendo97  # macOS
-
-# Build without activating (for testing)
-home-manager build --flake .
-
-# Check what would change
-home-manager switch --flake . --dry-run
-```
+- **home.nix** — Main module: agenix secrets, program configs (tmux, zsh, ssh, neovim), systemd services, session variables
+- **packages/** — Modular package lists split by category (core, development, database, containers, cloud, ai, security, linux, darwin). Each file is a function `{ pkgs }: [ ... ]` returning a list of packages
+- **profiles/** — Host-specific modules loaded via `extraModules` (e.g., `genbook.nix` adds rclone mount services)
+- **hosts/nixos-cle/** — Full NixOS system configuration (`configuration.nix` + `hardware-configuration.nix`)
+- **secrets/** — Age-encrypted secrets; `secrets.nix` defines which public keys can decrypt each `.age` file
 
 ### Available Configurations
 
-| Name | System | Username | Home Directory |
-|------|--------|----------|----------------|
-| `cle` | x86_64-linux | cle | /home/cle |
-| `cle@linux` | x86_64-linux | cle | /home/cle |
-| `chiendo97` | aarch64-darwin | chiendo97 | /Users/chiendo97 |
-| `chiendo97@darwin` | aarch64-darwin | chiendo97 | /Users/chiendo97 |
-| `chiendo97@macos` | aarch64-darwin | chiendo97 | /Users/chiendo97 |
+| Name | System | Notes |
+|------|--------|-------|
+| `cle` / `cle@linux` | x86_64-linux | Default Linux config |
+| `genbook` | x86_64-linux | Linux + rclone mount services |
+| `chiendo97` / `chiendo97@darwin` / `chiendo97@macos` | aarch64-darwin | macOS config |
 
-### Updating Dependencies
+### Platform Handling
 
-```bash
-# Update all flake inputs
-nix flake update
+Platform-specific code uses `lib.optionals pkgs.stdenv.isLinux` / `isDarwin` guards. Linux-only: systemd services, podman socket, `DOCKER_HOST`. macOS-only: launchd agents (auto-update cron).
 
-# Update specific input
-nix flake lock --update-input nixpkgs
-nix flake lock --update-input home-manager
-```
+## Key Patterns
 
-### Testing and Validation
+### Adding Packages
 
-```bash
-# Check flake for errors
-nix flake check
+Packages without Home Manager modules go in the appropriate `packages/*.nix` file. Programs with Home Manager modules are configured in `home.nix` under `programs.<name>`.
 
-# Show flake metadata
-nix flake metadata
+### Zsh Init Ordering
 
-# Show flake outputs
-nix flake show
-```
-
-## Configuration Structure
-
-### Package Management
-
-- `home.packages`: Direct package installations without Home Manager modules (e.g., claude-code, fd, ripgrep, rustup)
-- `programs.<name>`: Programs configured through Home Manager modules with additional settings
-
-### Program Configurations
-
-**Programs with custom configuration:**
-
-- **tmux**: Extensive customization with vi keybindings, Gruvbox theme, vim-tmux navigation integration, custom key bindings
-  - Prefix: `C-Space`
-  - Plugins: cpu, prefix-highlight, yank, sensible, tmux-buffer
-- **zsh**: Complete shell configuration with history, aliases, session variables, lazy-loading nvm
-  - Plugins: pure (prompt), zsh-autosuggestions
-- **neovim**: Uses nightly build from neovim-nightly-overlay
-
-**Programs with minimal configuration:**
-
-- fzf, zoxide (both with Zsh integration)
-- go, eza, bat
-
-### Important Variables and Paths
-
-- `home.stateVersion = "25.11"`: Home Manager version lock
-- Session paths: `~/.local/bin`, `~/.cargo/bin`, `~/go/bin`
-- Editor: nvim
-- Go environment: `GO111MODULE=auto`, `GOSUMDB=off`
-
-## Development Workflow
-
-### Adding New Packages
-
-Add to `home.packages` list if no Home Manager module exists, or configure under `programs.<name>` if a module is available.
-
-### Modifying Program Configurations
-
-Most program configurations use Home Manager's declarative options. Refer to the Home Manager manual for available options: <https://nix-community.github.io/home-manager/options.xhtml>
-
-### Shell Configuration
-
-Zsh configuration uses `lib.mkMerge` and `lib.mkBefore` for proper initialization ordering. The nix profile is sourced early in the initialization sequence.
+Zsh uses `lib.mkMerge` with `lib.mkBefore` to ensure the nix profile is sourced before everything else (particularly before fzf sets up keybindings).
 
 ### Secrets Management (agenix)
 
-Secrets are encrypted with age using your SSH key and decrypted at activation.
-
-```text
-secrets/
-├── secrets.nix      # Defines which keys can decrypt which secrets
-├── api-keys.age     # Encrypted API keys
-└── api-keys.example # Template (not committed)
-```
-
-**Edit secrets:**
+Identity key: `~/.ssh/id_ed25519_agenix`. Secrets decrypt to paths defined in `age.secrets` (e.g., `~/.secrets/api-keys`, `~/.ssh/*`). SSH keys use a `builtins.listToAttrs + map` pattern for bulk declaration.
 
 ```bash
+# Edit a secret
 cd secrets
 age -d -i ~/.ssh/id_ed25519_agenix api-keys.age > api-keys.txt
-# Edit api-keys.txt
+# ... edit ...
 age -r "$(cat ~/.ssh/id_ed25519_agenix.pub)" -o api-keys.age api-keys.txt
 rm api-keys.txt
 ```
 
-**Add new secret:**
+To add a new secret: (1) add entry to `secrets/secrets.nix`, (2) encrypt with age, (3) add to `age.secrets` in `home.nix`.
 
-1. Add entry to `secrets.nix`
-2. Create encrypted file: `echo "content" | age -r "$(cat ~/.ssh/id_ed25519_agenix.pub)" -o newsecret.age`
-3. Add to `home.nix` under `age.secrets`
+### Home Manager Options Reference
+
+<https://nix-community.github.io/home-manager/options.xhtml>
