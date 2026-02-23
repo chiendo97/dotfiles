@@ -68,7 +68,12 @@ Zsh uses `lib.mkMerge` with `lib.mkBefore` to ensure the nix profile is sourced 
 
 ### Secrets Management (agenix)
 
-Identity key: `~/.ssh/id_ed25519_agenix`. Secrets decrypt to paths defined in `age.secrets` (e.g., `~/.secrets/api-keys`, `~/.ssh/*`). SSH keys use a `builtins.listToAttrs + map` pattern for bulk declaration.
+Two levels of agenix are in use:
+
+- **Home Manager level** — decrypts user secrets (API keys, SSH keys) using `~/.ssh/id_ed25519_agenix`. Configured in `home.nix` under `age.secrets`.
+- **NixOS system level** — decrypts system secrets (WireGuard configs) using the host SSH key (`/etc/ssh/ssh_host_ed25519_key`). Configured in `hosts/nixos-cle/configuration.nix`.
+
+Secrets that need system-level decryption must be encrypted with **both** the user key and the host key. See `secrets/secrets.nix` for which secrets include `nixos-cle` in their `publicKeys`.
 
 ```bash
 # Edit a secret
@@ -79,7 +84,16 @@ age -r "$(cat ~/.ssh/id_ed25519_agenix.pub)" -o api-keys.age api-keys.txt
 rm api-keys.txt
 ```
 
-To add a new secret: (1) add entry to `secrets/secrets.nix`, (2) encrypt with age, (3) add to `age.secrets` in `home.nix`.
+To add a new secret: (1) add entry to `secrets/secrets.nix`, (2) encrypt with age, (3) add to `age.secrets` in `home.nix` or `configuration.nix`. If the secret is used by a NixOS system service, include the host key in `publicKeys` and re-encrypt with both keys.
+
+### NixOS Host (nixos-cle)
+
+QEMU/KVM guest on Unraid with:
+
+- **VirtioFS mounts** — `~/Source/selfhost` and `~/Source/media` from Unraid host (configured in VM XML + `fileSystems`)
+- **WireGuard VPN** — `genbook-aws` and `urieljsc-office` tunnels, auto-start on boot via `networking.wg-quick` with agenix-decrypted configs
+- **nix-ld** — enabled for generic Linux binary compatibility (uv, etc.)
+- **Tailscale** — mesh VPN for remote access
 
 ### Home Manager Options Reference
 
