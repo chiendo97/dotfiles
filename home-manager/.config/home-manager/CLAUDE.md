@@ -92,6 +92,7 @@ QEMU/KVM guest on Unraid with:
 
 - **VirtioFS mounts** — `~/Source/selfhost` and `~/Source/media` from Unraid host (configured in VM XML + `fileSystems`)
 - **WireGuard VPN** — `genbook-aws` and `urieljsc-office` tunnels, auto-start on boot via `networking.wg-quick` with agenix-decrypted configs
+- **Rootless podman** — `virtualisation.podman.enable` + subuid/subgid ranges; socket activated via Home Manager systemd user unit. `DOCKER_HOST` points to the user podman socket so `docker compose` works transparently
 - **nix-ld** — enabled for generic Linux binary compatibility (uv, etc.)
 - **Tailscale** — mesh VPN for remote access
 
