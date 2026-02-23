@@ -61,6 +61,16 @@
   # QEMU guest agent
   services.qemuGuest.enable = true;
 
+  # VirtioFS mounts from Unraid host
+  fileSystems."/home/cle/Source/selfhost" = {
+    device = "selfhost";
+    fsType = "virtiofs";
+  };
+  fileSystems."/home/cle/Source/media" = {
+    device = "media";
+    fsType = "virtiofs";
+  };
+
   # Firewall
   networking.firewall.enable = true;
   networking.firewall.allowedTCPPorts = [ 22 ];
