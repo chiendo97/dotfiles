@@ -58,6 +58,9 @@
   # Nix settings
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # nix-ld: dynamic linker for generic Linux binaries (uv, etc.)
+  programs.nix-ld.enable = true;
+
   # QEMU guest agent
   services.qemuGuest.enable = true;
 
