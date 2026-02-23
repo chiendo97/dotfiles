@@ -103,6 +103,7 @@
         "nixos-cle" = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
+            agenix.nixosModules.default
             ./hosts/nixos-cle/configuration.nix
           ];
         };

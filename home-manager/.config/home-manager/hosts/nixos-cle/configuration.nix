@@ -61,6 +61,28 @@
   # QEMU guest agent
   services.qemuGuest.enable = true;
 
+  # Agenix secrets (system-level, uses host SSH key)
+  age.secrets.wg_genbook_aws = {
+    file = ../../secrets/wg_genbook_aws.age;
+    mode = "600";
+  };
+  age.secrets.wg_urieljsc_office = {
+    file = ../../secrets/wg_urieljsc_office.age;
+    mode = "600";
+  };
+
+  # WireGuard VPN tunnels (auto-start on boot)
+  networking.wg-quick.interfaces = {
+    genbook-aws = {
+      configFile = config.age.secrets.wg_genbook_aws.path;
+      autostart = true;
+    };
+    urieljsc-office = {
+      configFile = config.age.secrets.wg_urieljsc_office.path;
+      autostart = true;
+    };
+  };
+
   # VirtioFS mounts from Unraid host
   fileSystems."/home/cle/Source/selfhost" = {
     device = "selfhost";

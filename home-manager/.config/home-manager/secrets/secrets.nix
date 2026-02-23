@@ -1,6 +1,9 @@
 let
   # Your SSH public key - used to encrypt/decrypt secrets
   cle = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKeJL/S/PKfn776mEl9UQHr8lp8in2/npsL98YygHtXs cle@dotfiles";
+
+  # NixOS host key - needed for system-level agenix (WireGuard, etc.)
+  nixos-cle = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOSnjSJMlot12qH5y87DmAMhwwKkSiK+iyLPaNdJh+Kc root@nixos-cle";
 in
 {
   # API keys
@@ -25,7 +28,7 @@ in
   "uriel_rsa.age".publicKeys = [ cle ];
   "nixos_cle.age".publicKeys = [ cle ];
 
-  # WireGuard config
-  "wg_genbook_aws.age".publicKeys = [ cle ];
-  "wg_urieljsc_office.age".publicKeys = [ cle ];
+  # WireGuard config (also decryptable by NixOS host for system-level wg-quick)
+  "wg_genbook_aws.age".publicKeys = [ cle nixos-cle ];
+  "wg_urieljsc_office.age".publicKeys = [ cle nixos-cle ];
 }
