@@ -53,6 +53,15 @@
     htop
     curl
     wget
+
+    # Network tools
+    dnsutils # dig, nslookup, nsupdate
+    traceroute
+    mtr # combines ping + traceroute
+    tcpdump
+    whois
+    iperf3
+    nmap
   ];
 
   # Nix settings
@@ -62,7 +71,10 @@
   programs.nix-ld.enable = true;
 
   # Rootless podman
-  virtualisation.podman.enable = true;
+  virtualisation.podman = {
+    enable = true;
+    defaultNetwork.settings.dns_enabled = true; # Required for containers under podman-compose to be able to talk to each other.
+  };
   users.users.cle.subUidRanges = [{ startUid = 100000; count = 65536; }];
   users.users.cle.subGidRanges = [{ startGid = 100000; count = 65536; }];
 
