@@ -392,15 +392,15 @@
 
         # Emacs keybindings (must be before fzf sets up ^I binding)
         bindkey -e
+      '')
 
-        # Pure prompt (installed via home.packages)
+      # Main init content (runs after Home Manager sets up fpath)
+      ''
+        # Pure prompt (installed via home.packages, must be after fpath setup)
         autoload -U promptinit
         promptinit
         prompt pure
-      '')
 
-      # Main init content
-      ''
         # Edit command line with ^g
         autoload -U edit-command-line
         zle -N edit-command-line
