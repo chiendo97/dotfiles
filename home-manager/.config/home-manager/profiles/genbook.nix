@@ -8,7 +8,8 @@
     };
     Service = {
       Type = "notify";
-      ExecStartPre = "/usr/bin/env mkdir -p %h/Source/gdrive";
+      Environment = [ "PATH=/run/wrappers/bin" ];
+      ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p %h/Source/gdrive";
       ExecStart = ''
         ${pkgs.rclone}/bin/rclone mount gdrive: %h/Source/gdrive \
           --vfs-cache-mode full \
@@ -19,7 +20,7 @@
           --drive-chunk-size 64M \
           --buffer-size 128M
       '';
-      ExecStop = "/usr/bin/fusermount -u %h/Source/gdrive";
+      ExecStop = "/run/wrappers/bin/fusermount -u %h/Source/gdrive";
       Restart = "on-failure";
       RestartSec = 5;
     };
@@ -35,12 +36,13 @@
     };
     Service = {
       Type = "notify";
-      ExecStartPre = "/usr/bin/env mkdir -p %h/Source/s3-genbook";
+      Environment = [ "PATH=/run/wrappers/bin" ];
+      ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p %h/Source/s3-genbook";
       ExecStart = ''
         ${pkgs.rclone}/bin/rclone mount s3-genbook:genbook-bk01 %h/Source/s3-genbook \
           --vfs-cache-mode full
       '';
-      ExecStop = "/usr/bin/fusermount -u %h/Source/s3-genbook";
+      ExecStop = "/run/wrappers/bin/fusermount -u %h/Source/s3-genbook";
       Restart = "on-failure";
       RestartSec = 5;
     };
