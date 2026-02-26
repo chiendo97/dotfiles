@@ -97,7 +97,7 @@ return {
         config = function()
             require("livepreview.config").set({
                 port = 5500,
-                browser = "",
+browser = 'default',
                 dynamic_root = false,
                 sync_scroll = true,
                 picker = "vim.ui.select",
