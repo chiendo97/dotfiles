@@ -75,6 +75,9 @@
     enable = true;
     defaultNetwork.settings.dns_enabled = true; # Required for containers under podman-compose to be able to talk to each other.
   };
+
+  # Enable cgroup delegation for rootless containers (needed by kind/abctl for local k8s)
+  systemd.services."user@".serviceConfig.Delegate = "yes";
   users.users.cle.subUidRanges = [{ startUid = 100000; count = 65536; }];
   users.users.cle.subGidRanges = [{ startGid = 100000; count = 65536; }];
 
