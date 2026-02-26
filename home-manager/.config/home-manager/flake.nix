@@ -23,6 +23,7 @@
     # Claude Code CLI package (third-party flake)
     claude-code = {
       url = "github:sadjow/claude-code-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Age-encrypted secrets management for NixOS / Home Manager
@@ -81,8 +82,16 @@
       # Each key is a profile name used with: home-manager switch --flake .#<name>
       homeConfigurations = {
         # Linux (x86_64) - username: cle
-        "cle" = mkHomeConfiguration { system = "x86_64-linux"; username = "cle"; };
-        "cle@linux" = mkHomeConfiguration { system = "x86_64-linux"; username = "cle"; };
+        "cle" = mkHomeConfiguration {
+          system = "x86_64-linux";
+          username = "cle";
+          extraModules = [ ./profiles/genbook.nix ];
+        };
+        "cle@linux" = mkHomeConfiguration {
+          system = "x86_64-linux";
+          username = "cle";
+          extraModules = [ ./profiles/genbook.nix ];
+        };
 
         # Linux (x86_64) with extra genbook-specific modules
         "genbook" = mkHomeConfiguration {
