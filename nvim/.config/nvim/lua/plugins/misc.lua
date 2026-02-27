@@ -1,5 +1,12 @@
 return {
     {
+        "ruifm/gitlinker.nvim",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        opts = {
+            mappings = "ghl",
+        },
+    },
+    {
         "polacekpavel/prompt-yank.nvim",
         cmd = { "PromptYank" },
         keys = {
@@ -97,7 +104,7 @@ return {
         config = function()
             require("livepreview.config").set({
                 port = 5500,
-browser = 'default',
+                browser = "default",
                 dynamic_root = false,
                 sync_scroll = true,
                 picker = "vim.ui.select",
