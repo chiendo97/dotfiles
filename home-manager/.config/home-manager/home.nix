@@ -62,7 +62,16 @@
     (import ./packages/cloud.nix { inherit pkgs; }) ++
     (import ./packages/ai.nix { inherit pkgs; }) ++
     (import ./packages/security.nix { inherit pkgs; }) ++
-    [ pkgs.pure-prompt ] ++
+    # Pin to 1.26.0 — 1.27.0 has a bug where user@host renders as black
+    [ (pkgs.pure-prompt.overrideAttrs (old: rec {
+      version = "1.26.0";
+      src = pkgs.fetchFromGitHub {
+        owner = "sindresorhus";
+        repo = "pure";
+        rev = "v${version}";
+        hash = "sha256-AZSxP2g6BWoxyiSQH7yzbbbfGcwD8jgnXPPfcYwJUL0=";
+      };
+    })) ] ++
     # Platform-specific packages
     (lib.optionals pkgs.stdenv.isLinux (import ./packages/linux.nix { inherit pkgs; })) ++
     (lib.optionals pkgs.stdenv.isDarwin (import ./packages/darwin.nix { inherit pkgs; }));
@@ -400,14 +409,6 @@
         autoload -U promptinit
         promptinit
         prompt pure
-
-        # Fix Pure prompt user@host color (Pure 1.27 has a bug where
-        # $prompt_pure_colors[key] in prompt strings doesn't expand
-        # the array subscript correctly, always resolving to black).
-        # Override the username state directly after prompt init.
-        prompt_pure_colors[user]=242
-        prompt_pure_colors[host]=242
-        prompt_pure_state[username]="%F{242}%n%f%F{242}@%m%f"
 
         # Edit command line with ^g
         autoload -U edit-command-line
