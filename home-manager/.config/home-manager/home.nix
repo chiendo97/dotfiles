@@ -285,12 +285,8 @@
       set-window-option -g window-status-style bg=colour214,fg=colour237
       set-window-option -g window-status-activity-style bg=colour237,fg=colour248
       set-window-option -g window-status-current-style bg=red,fg=colour237
-      set-option -g pane-active-border-style fg=colour214
+      set-option -g pane-active-border-style fg=colour250
       set-option -g pane-border-style fg=colour237
-
-      # Dim inactive panes, keep active pane at default
-      set-option -g window-style 'fg=colour246,bg=colour233'
-      set-option -g window-active-style 'fg=colour223,bg=colour235'
       set-option -g message-style bg=colour239,fg=colour223
       set-option -g message-command-style bg=colour239,fg=colour223
       set-option -g display-panes-active-colour colour250
@@ -404,6 +400,14 @@
         autoload -U promptinit
         promptinit
         prompt pure
+
+        # Fix Pure prompt user@host color (Pure 1.27 has a bug where
+        # $prompt_pure_colors[key] in prompt strings doesn't expand
+        # the array subscript correctly, always resolving to black).
+        # Override the username state directly after prompt init.
+        prompt_pure_colors[user]=242
+        prompt_pure_colors[host]=242
+        prompt_pure_state[username]="%F{242}%n%f%F{242}@%m%f"
 
         # Edit command line with ^g
         autoload -U edit-command-line
