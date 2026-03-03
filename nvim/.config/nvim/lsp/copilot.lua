@@ -99,7 +99,6 @@ return {
     },
     filetypes = {
         "python",
-        "markdown",
         "lua",
     },
     on_attach = function(client, bufnr)
