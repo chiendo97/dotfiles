@@ -194,7 +194,7 @@
     baseIndex = 1;
     prefix = "C-Space";
     terminal = "xterm-256color";
-    historyLimit = 5000;
+    historyLimit = 50000;
     sensibleOnTop = true;
 
     plugins = with pkgs.tmuxPlugins; [
@@ -264,10 +264,10 @@
       bind - split-window -v -c '#{pane_current_path}'
 
       # Resize panes
-      bind-key -r H resize-pane -L
-      bind-key -r J resize-pane -D
-      bind-key -r K resize-pane -U
-      bind-key -r L resize-pane -R
+      bind-key -r H resize-pane -L 5
+      bind-key -r J resize-pane -D 5
+      bind-key -r K resize-pane -U 5
+      bind-key -r L resize-pane -R 5
 
       # Synchronize panes
       bind-key C-a setw synchronize-panes
@@ -284,6 +284,18 @@
       unbind -n C-s
       bind -n C-s run-shell -b "tmux list-sessions -F \"##S\" | fzf-tmux -h --layout=reverse | xargs tmux switch -t"
 
+      # Window picker with fzf
+      bind w run-shell -b "tmux list-windows -F '##I: ##W' | fzf-tmux -h --layout=reverse | cut -d: -f1 | xargs tmux select-window -t"
+
+      # New window keeps current path
+      bind c new-window -c '#{pane_current_path}'
+
+      # Quick kill pane without confirmation
+      bind X kill-pane
+
+      # Popup scratch terminal
+      bind t display-popup -E -w 80% -h 80% -d '#{pane_current_path}'
+
       # Swap windows
       bind-key -n C-S-Left swap-window -d -t -1
       bind-key -n C-S-Right swap-window -d -t +1
@@ -293,13 +305,13 @@
       set-option -g status-style bg=colour237,fg=colour223
       set-window-option -g window-status-style bg=colour214,fg=colour237
       set-window-option -g window-status-activity-style bg=colour237,fg=colour248
-      set-window-option -g window-status-current-style bg=red,fg=colour237
+      set-window-option -g window-status-current-style bg=colour142,fg=colour237
       set-option -g pane-border-lines single
       set-option -g pane-border-indicators both
-      set-option -g pane-border-status top
-      set-option -g pane-border-format " #{pane_index}: #{pane_current_command} "
+      set-option -g pane-border-status bottom
+      set-option -g pane-border-format "#[bold] #{pane_index}: #{pane_current_command} #[nobold]#{?pane_active,, │ #{pane_current_path}}"
       set-option -g pane-active-border-style fg=colour142
-      set-option -g pane-border-style fg=colour237
+      set-option -g pane-border-style fg=colour239
 
       # Dim inactive panes (Gruvbox bg0_h/bg0_s)
       set-option -g window-style 'fg=colour246,bg=colour234'
@@ -320,7 +332,7 @@
       set-window-option -g window-status-separator ""
 
       set-option -g status-left "#[bg=colour241,fg=colour248] #S #[bg=colour237,fg=colour241,nobold,noitalics,nounderscore]"
-      set-option -g status-right "#{prefix_highlight} #[bg=colour237,fg=colour239 nobold, nounderscore, noitalics]#[bg=colour239,fg=colour246] %Y-%m-%d  %H:%M #[bg=colour239,fg=colour248,nobold,noitalics,nounderscore] #{cpu_percentage} #[bg=colour248,fg=colour237] #h "
+      set-option -g status-right "#{prefix_highlight}#[bg=colour237,fg=colour239,nobold,noitalics,nounderscore]#[bg=colour239,fg=colour246] %Y-%m-%d  %H:%M #[bg=colour239,fg=colour248,nobold,noitalics,nounderscore]#[bg=colour248,fg=colour237] #{cpu_percentage}  #h "
 
       set-window-option -g window-status-current-format "#[bg=colour214,fg=colour237,nobold,noitalics,nounderscore]#[bg=colour214,fg=colour239] #I #[bg=colour214,fg=colour239,bold] #W#{?window_zoomed_flag,*Z,} #[bg=colour237,fg=colour214,nobold,noitalics,nounderscore]"
       set-window-option -g window-status-format "#[bg=colour239,fg=colour237,noitalics]#[bg=colour239,fg=colour223] #I #[bg=colour239,fg=colour223] #W #[bg=colour237,fg=colour239,noitalics]"
