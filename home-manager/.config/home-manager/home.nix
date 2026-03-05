@@ -314,11 +314,11 @@
       set-window-option -g window-status-style bg=colour214,fg=colour237
       set-window-option -g window-status-activity-style bg=colour237,fg=colour248
       set-window-option -g window-status-current-style bg=colour142,fg=colour237
-      set-option -g pane-border-lines single
+      set-option -g pane-border-lines double
       set-option -g pane-border-indicators both
       set-option -g pane-border-status bottom
       set-option -g pane-border-format "#[bold] #{pane_index}: #{pane_current_command} #[nobold]#{?pane_active,, │ #{pane_current_path}}"
-      set-option -g pane-active-border-style fg=colour142
+      set-option -g pane-active-border-style fg=colour108
       set-option -g pane-border-style fg=colour239
 
       # Dim inactive panes (Gruvbox bg0_h/bg0_s)
