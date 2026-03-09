@@ -92,8 +92,21 @@
   # ============================================================================
   systemd.user.sockets.podman = lib.mkIf pkgs.stdenv.isLinux {
     Unit.Description = "Podman API Socket";
-    Socket.ListenStream = "%t/podman/podman.sock";
+    Socket = {
+      ListenStream = "%t/podman/podman.sock";
+      SocketMode = "0660";
+      TriggerLimitIntervalSec = "60s";
+      TriggerLimitBurst = 10;
+    };
     Install.WantedBy = [ "sockets.target" ];
+  };
+
+  systemd.user.services.podman = lib.mkIf pkgs.stdenv.isLinux {
+    Unit.Description = "Podman API Service";
+    Service = {
+      Type = "exec";
+      ExecStart = "${pkgs.podman}/bin/podman system service --time=120";
+    };
   };
 
   # ============================================================================
@@ -206,7 +219,6 @@
     sensibleOnTop = true;
 
     plugins = with pkgs.tmuxPlugins; [
-      cpu
       prefix-highlight
       yank
       {
@@ -340,7 +352,7 @@
       set-window-option -g window-status-separator ""
 
       set-option -g status-left "#[bg=colour241,fg=colour248] #S #[bg=colour237,fg=colour241,nobold,noitalics,nounderscore]"
-      set-option -g status-right "#{prefix_highlight}#[bg=colour237,fg=colour239,nobold,noitalics,nounderscore]#[bg=colour239,fg=colour246] %Y-%m-%d  %H:%M #[bg=colour239,fg=colour248,nobold,noitalics,nounderscore]#[bg=colour248,fg=colour237] #{cpu_percentage}  #h "
+      set-option -g status-right "#{prefix_highlight}#[bg=colour237,fg=colour239,nobold,noitalics,nounderscore]#[bg=colour239,fg=colour246] %Y-%m-%d  %H:%M #[bg=colour239,fg=colour248,nobold,noitalics,nounderscore]#[bg=colour248,fg=colour237] #h "
 
       set-window-option -g window-status-current-format "#[bg=colour214,fg=colour237,nobold,noitalics,nounderscore]#[bg=colour214,fg=colour239] #I #[bg=colour214,fg=colour239,bold] #W#{?window_zoomed_flag,*Z,} #[bg=colour237,fg=colour214,nobold,noitalics,nounderscore]"
       set-window-option -g window-status-format "#[bg=colour239,fg=colour237,noitalics]#[bg=colour239,fg=colour223] #I #[bg=colour239,fg=colour223] #W #[bg=colour237,fg=colour239,noitalics]"
