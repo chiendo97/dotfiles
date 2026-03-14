@@ -97,8 +97,7 @@ api.nvim_create_autocmd("LspAttach", {
 })
 
 -- Global capabilities for all servers
-local is_blink, blink_cmp = pcall(require, "blink.cmp")
-local capabilities = is_blink and blink_cmp.get_lsp_capabilities() or lsp.protocol.make_client_capabilities()
+local capabilities = lsp.protocol.make_client_capabilities()
 
 -- Define configurations
 lsp.config("*", {
@@ -112,6 +111,7 @@ local lsp_servers = {
     "bashls",
     "copilot",
     "dartls",
+    "filepaths_ls",
     "gopls",
     "jsonls",
     "lua_ls",

@@ -41,12 +41,13 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     end,
 })
 
+-- Auto-update vim.pack plugins on startup
 vim.api.nvim_create_autocmd("VimEnter", {
     group = my_augroup,
     callback = function()
-        require("lazy").update({ show = false })
+        vim.pack.update(nil, { force = true })
     end,
-    desc = "Update lazy plugins silently on VimEnter",
+    desc = "Update vim.pack plugins on VimEnter",
 })
 
 -- Consolidated FileType autocmd for treesitter features
