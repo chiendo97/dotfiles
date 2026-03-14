@@ -73,6 +73,8 @@
           #   3. any extra per-host modules
           modules = [
             agenix.homeManagerModules.default
+            ./uv-tools.nix
+            ./cargo-tools.nix
             ./home.nix
           ] ++ extraModules;
         };

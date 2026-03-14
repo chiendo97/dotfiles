@@ -51,6 +51,25 @@
   ]);
 
   # ============================================================================
+  # UV tools (Python CLIs in isolated venvs, managed outside Nix)
+  # ============================================================================
+  uvTools.tools = [
+    { package = "claude-code-telegram"; }
+    { package = "codegraphcontext"; }
+    { package = "mkdocs"; }
+  ];
+
+  # ============================================================================
+  # Cargo tools (Rust CLIs, installed via cargo-binstall)
+  # ============================================================================
+  cargoTools.tools = [
+    { crate = "cargo-binstall"; }
+    { crate = "mdterm"; }
+    { crate = "meread"; }
+    { crate = "xleak"; }
+  ];
+
+  # ============================================================================
   # Packages (no Home Manager module available)
   # ============================================================================
   home.packages =
@@ -122,6 +141,30 @@
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
+  };
+
+  programs.atuin = {
+    enable = true;
+    enableZshIntegration = true;
+    flags = [ "--disable-up-arrow" ];
+    settings = {
+      # Search mode: prefix matches feel most natural
+      search_mode = "prefix";
+      # Filter out short/common commands from history
+      history_filter = [
+        "^c$"
+        "^l$"
+        "^ls"
+        "^cd"
+        "^exit"
+      ];
+      # Inline style shows results below the prompt
+      style = "compact";
+      # Store timestamps in UTC
+      dialect = "us";
+      # Don't sync to server by default
+      auto_sync = false;
+    };
   };
 
   programs.go.enable = true;
@@ -248,6 +291,7 @@
       set -g set-titles-string "#{session_name}"
       set-option -s set-clipboard on
       set -g allow-passthrough on
+      set -g display-panes-time 2000
 
       # === Key Bindings ===
       unbind Space
