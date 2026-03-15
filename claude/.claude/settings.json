@@ -1,0 +1,29 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "py-development@imagination": true,
+    "skill-creator@claude-plugins-official": true,
+    "sdlc@imagination": true,
+    "monorepo-manager@imagination": true,
+    "cc-plugin-development@imagination": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "imagination": {
+      "source": {
+        "source": "git",
+        "url": "git@github.com:intellidiotx/imagination.git"
+      }
+    },
+    "impeccable": {
+      "source": {
+        "source": "github",
+        "repo": "pbakaus/impeccable"
+      }
+    }
+  },
+  "skipDangerousModePermissionPrompt": true
+}

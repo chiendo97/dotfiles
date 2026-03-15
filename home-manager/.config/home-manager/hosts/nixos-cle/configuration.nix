@@ -45,6 +45,14 @@
 
   # Tailscale
   services.tailscale.enable = true;
+  systemd.services.tailscaled = {
+    serviceConfig = {
+      OOMScoreAdjust = -900;
+      OOMPolicy = "continue";
+      Restart = lib.mkForce "always";
+      RestartSec = 5;
+    };
+  };
 
   # System packages
   environment.systemPackages = with pkgs; [

@@ -50,4 +50,26 @@
       WantedBy = [ "default.target" ];
     };
   };
+
+  systemd.user.services.rclone-s3-dev-genbook = {
+    Unit = {
+      Description = "Rclone mount for S3 dev-genbook";
+      After = [ "network-online.target" "agenix.service" ];
+    };
+    Service = {
+      Type = "notify";
+      Environment = [ "PATH=/run/wrappers/bin" ];
+      ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p %h/Source/s3-dev-genbook";
+      ExecStart = ''
+        ${pkgs.rclone}/bin/rclone mount s3-genbook:dev-genbook-bk01 %h/Source/s3-dev-genbook \
+          --vfs-cache-mode full
+      '';
+      ExecStop = "/run/wrappers/bin/fusermount -u %h/Source/s3-dev-genbook";
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
 }

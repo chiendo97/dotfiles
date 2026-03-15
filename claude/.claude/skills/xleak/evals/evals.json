@@ -1,0 +1,23 @@
+{
+  "skill_name": "xleak",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Read the first 10 rows from ~/Source/gdrive/fact_data/lizavy/FINANCAL_EVENT/ShipmentEventList.xlsx and show me the data",
+      "expected_output": "Should use xleak to extract 10 rows of data with proper column headers, showing structured output",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "What sheets and tables are in ~/Source/gdrive/fact_data/lizavy/FINANCAL_EVENT/ShipmentEventList.xlsx?",
+      "expected_output": "Should use xleak to list sheets and named tables in the workbook",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Export the first 5 rows from ~/Source/gdrive/fact_data/lizavy/FINANCAL_EVENT/ShipmentEventList.xlsx as CSV and save to /tmp/shipment_sample.csv",
+      "expected_output": "Should use xleak --export csv piped through head to limit rows, then save to file",
+      "files": []
+    }
+  ]
+}
