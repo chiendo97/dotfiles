@@ -143,29 +143,6 @@
     enableZshIntegration = true;
   };
 
-  programs.atuin = {
-    enable = true;
-    enableZshIntegration = true;
-    flags = [ "--disable-up-arrow" ];
-    settings = {
-      # Search mode: prefix matches feel most natural
-      search_mode = "prefix";
-      # Filter out short/common commands from history
-      history_filter = [
-        "^c$"
-        "^l$"
-        "^ls"
-        "^cd"
-        "^exit"
-      ];
-      # Inline style shows results below the prompt
-      style = "compact";
-      # Store timestamps in UTC
-      dialect = "us";
-      # Don't sync to server by default
-      auto_sync = false;
-    };
-  };
 
   programs.go.enable = true;
   programs.eza.enable = true;
