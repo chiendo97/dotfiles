@@ -174,6 +174,13 @@
         user = "cle";
       };
 
+      "vng-gateway-01" = {
+        hostname = "42.1.126.5";
+        port = 234;
+        user = "cle";
+        identityFile = "~/.ssh/id_ed25519_vng_gateway_01";
+      };
+
       "cle-viettel" = {
         hostname = "171.244.62.91";
         user = "root";
@@ -495,6 +502,24 @@
   # ============================================================================
   # Launchd Agents (macOS scheduled tasks)
   # ============================================================================
+  launchd.agents.podman-machine = lib.mkIf pkgs.stdenv.isDarwin {
+    enable = true;
+    config = {
+      Label = "com.podman.machine";
+      ProgramArguments = [
+        "/bin/sh"
+        "-c"
+        ''
+          export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
+          podman machine start 2>&1 || true
+        ''
+      ];
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/podman-machine.out.log";
+      StandardErrorPath = "/tmp/podman-machine.err.log";
+    };
+  };
+
   launchd.agents.home-manager-auto-update = lib.mkIf pkgs.stdenv.isDarwin {
     enable = true;
     config = {
@@ -528,6 +553,8 @@
     LC_CTYPE = "en_US.UTF-8";
   } // lib.optionalAttrs pkgs.stdenv.isLinux {
     DOCKER_HOST = "unix:///run/user/1000/podman/podman.sock";
+  } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+    DOCKER_HOST = "unix:///var/folders/s6/svtg9t310t167pdfqqcj4gvw0000gn/T/podman/podman-machine-default-api.sock";
   };
 
   home.sessionPath = [
