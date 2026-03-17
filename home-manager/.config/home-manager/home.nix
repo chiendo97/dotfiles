@@ -54,7 +54,6 @@
   # UV tools (Python CLIs in isolated venvs, managed outside Nix)
   # ============================================================================
   uvTools.tools = [
-    { package = "claude-code-telegram"; }
     { package = "codegraphcontext"; }
     { package = "mkdocs"; }
   ];
@@ -63,9 +62,7 @@
   # Cargo tools (Rust CLIs, installed via cargo-binstall)
   # ============================================================================
   cargoTools.tools = [
-    { crate = "cargo-binstall"; }
     { crate = "mdterm"; }
-    { crate = "meread"; }
     { crate = "xleak"; }
   ];
 
