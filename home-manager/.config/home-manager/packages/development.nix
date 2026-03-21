@@ -1,5 +1,6 @@
 { pkgs }:
 with pkgs; [
+  bun
   cht-sh
   delta
   fixjson
