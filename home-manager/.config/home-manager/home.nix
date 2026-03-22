@@ -78,14 +78,14 @@
     (import ./packages/cloud.nix { inherit pkgs; }) ++
     (import ./packages/ai.nix { inherit pkgs; }) ++
     (import ./packages/security.nix { inherit pkgs; }) ++
-    # Pin to 1.26.0 — 1.27.0 has a bug where user@host renders as black
+    # Pin to 1.27.1 — 1.27.0 had a bug where user@host renders as black (#706)
     [ (pkgs.pure-prompt.overrideAttrs (old: rec {
-      version = "1.26.0";
+      version = "1.27.1";
       src = pkgs.fetchFromGitHub {
         owner = "sindresorhus";
         repo = "pure";
         rev = "v${version}";
-        hash = "sha256-AZSxP2g6BWoxyiSQH7yzbbbfGcwD8jgnXPPfcYwJUL0=";
+        hash = "sha256-Fhk4nlVPS09oh0coLsBnjrKncQGE6cUEynzDO2Skiq8=";
       };
     })) ] ++
     # Platform-specific packages
