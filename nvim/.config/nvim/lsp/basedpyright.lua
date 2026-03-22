@@ -4,9 +4,10 @@ local function get_python_path()
         return vim.fn.expand(vim.env.VIRTUAL_ENV .. "/bin/python")
     end
 
-    local venv_python = vim.fn.expand(vim.loop.cwd() .. "/.venv/bin/python")
-    if vim.loop.fs_stat(venv_python) then
-        return venv_python
+    -- Use uv to find the nearest venv.
+    local result = vim.system({ "uv", "python", "find", "--no-project" }):wait()
+    if result.code == 0 and result.stdout and result.stdout ~= "" then
+        return vim.trim(result.stdout)
     end
 
     -- Fallback to system Python.
