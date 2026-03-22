@@ -58,13 +58,9 @@ if [ -n "$TRANSCRIPT" ] && [ -f "$TRANSCRIPT" ]; then
         CMD=$(echo "$LAST_TOOL" | jq -r '.input.command // empty' | cut -c1-200)
         [ -n "$CMD" ] && DETAIL="▶ Run: <code>$(escape_html "$CMD")</code>"
         ;;
-      Edit|Write)
+      Edit|Write|Read)
         FILE=$(echo "$LAST_TOOL" | jq -r '.input.file_path // empty')
         [ -n "$FILE" ] && DETAIL="▶ ${TOOL_NAME}: <code>$(escape_html "$(basename "$FILE")")</code>"
-        ;;
-      Read)
-        FILE=$(echo "$LAST_TOOL" | jq -r '.input.file_path // empty')
-        [ -n "$FILE" ] && DETAIL="▶ Read: <code>$(escape_html "$(basename "$FILE")")</code>"
         ;;
       Agent)
         DESC=$(echo "$LAST_TOOL" | jq -r '.input.description // .input.prompt // empty' | cut -c1-200)
@@ -82,13 +78,13 @@ if [ -n "$TRANSCRIPT" ] && [ -f "$TRANSCRIPT" ]; then
 fi
 
 # Build message
-PROJECT=""
-if [ -n "$CWD" ]; then
-  PROJECT=$(basename "$CWD")
-fi
+PROJECT="${CWD:+$(basename "$CWD")}"
+
+PANE_ID="${TMUX_PANE:-}"
 
 TEXT="${EMOJI} <b>${LABEL}</b>"
 [ -n "$PROJECT" ] && TEXT="${TEXT}  ·  <code>$(escape_html "$PROJECT")</code>"
+[ -n "$PANE_ID" ] && TEXT="${TEXT}  ·  <code>$(escape_html "$PANE_ID")</code>"
 
 # Add assistant reasoning (the "why")
 if [ -n "$ASSISTANT_TEXT" ]; then
@@ -123,8 +119,8 @@ jq -n -c \
 
 curl -s --connect-timeout 5 --max-time 10 \
   -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-  -d chat_id="$CHAT_ID" \
-  -d parse_mode=HTML \
-  -d text="$TEXT" > /dev/null 2>&1
+  --data-urlencode "chat_id=$CHAT_ID" \
+  --data-urlencode "parse_mode=HTML" \
+  --data-urlencode "text=$TEXT" > /dev/null 2>&1
 
 exit 0
