@@ -14,7 +14,8 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bash ~/.claude/statusline-command.sh"
+    "command": "~/.claude/ccline/ccline",
+    "padding": 0
   },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true,
@@ -30,5 +31,8 @@
       }
     }
   },
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "env": {
+    "DISCORD_GUILD_ID": "1181560951141584926"
+  }
 }
