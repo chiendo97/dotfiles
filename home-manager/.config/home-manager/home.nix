@@ -48,6 +48,7 @@
     "oracle"
     "uriel_rsa"
     "nixos_cle"
+    "id_ed25519_vng_dev"
   ]);
 
   # ============================================================================
@@ -219,6 +220,12 @@
         hostname = "192.168.50.55";
         user = "cle";
         identityFile = "~/.ssh/nixos_cle";
+      };
+
+      "vng-dev" = {
+        hostname = "100.64.0.37";
+        user = "cle";
+        identityFile = "~/.ssh/id_ed25519_vng_dev";
       };
     };
   };
