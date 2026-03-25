@@ -224,6 +224,7 @@
 
       "vng-dev" = {
         hostname = "100.64.0.37";
+        port = 234;
         user = "cle";
         identityFile = "~/.ssh/id_ed25519_vng_dev";
       };
