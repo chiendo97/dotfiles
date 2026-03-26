@@ -1,3 +1,6 @@
+[includeIf "hasconfig:remote.*.url:git@git.urieljsc.com:*/**"]
+    path = ~/.gitconfig-urieljsc
+
 [core]
     pager = delta
 

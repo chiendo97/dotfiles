@@ -49,6 +49,7 @@
     "uriel_rsa"
     "nixos_cle"
     "id_ed25519_vng_dev"
+    "id_ed25519_urieljsc_gitlab"
   ]);
 
   # ============================================================================
@@ -206,6 +207,13 @@
         hostname = "ssh.urieljsc.com";
         user = "chienle";
         identityFile = "~/.ssh/uriel_rsa";
+        identitiesOnly = true;
+      };
+
+      "git.urieljsc.com" = {
+        hostname = "git.urieljsc.com";
+        user = "git";
+        identityFile = "~/.ssh/id_ed25519_urieljsc_gitlab";
         identitiesOnly = true;
       };
 
