@@ -50,6 +50,7 @@
     "nixos_cle"
     "id_ed25519_vng_dev"
     "id_ed25519_urieljsc_gitlab"
+    "genbook-mono-deploy"
   ]);
 
   # ============================================================================

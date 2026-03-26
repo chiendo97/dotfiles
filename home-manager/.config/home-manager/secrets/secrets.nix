@@ -29,6 +29,7 @@ in
   "nixos_cle.age".publicKeys = [ cle ];
   "id_ed25519_vng_dev.age".publicKeys = [ cle ];
   "id_ed25519_urieljsc_gitlab.age".publicKeys = [ cle ];
+  "genbook-mono-deploy.age".publicKeys = [ cle ];
 
   # WireGuard config (also decryptable by NixOS host for system-level wg-quick)
   "wg_genbook_aws.age".publicKeys = [ cle nixos-cle ];
