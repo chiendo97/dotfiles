@@ -106,6 +106,25 @@
     default = [{ type = "insecureAcceptAnything"; }];
   };
 
+  home.activation.glabConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    install -Dm600 /dev/null "${config.xdg.configHome}/glab-cli/config.yml"
+    cat > "${config.xdg.configHome}/glab-cli/config.yml" << 'GLABEOF'
+    git_protocol: ssh
+    glamour_style: dark
+    check_update: false
+    host: git.urieljsc.com
+    no_prompt: false
+    hosts:
+      git.urieljsc.com:
+        api_host: git.urieljsc.com
+        git_protocol: ssh
+        api_protocol: https
+        user: cle
+        ssh_host: git.urieljsc.com
+    GLABEOF
+    chmod 600 "${config.xdg.configHome}/glab-cli/config.yml"
+  '';
+
   # ============================================================================
   # Systemd user services (Linux only)
   # ============================================================================

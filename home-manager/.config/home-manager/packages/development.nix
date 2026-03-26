@@ -5,6 +5,7 @@ with pkgs; [
   delta
   fixjson
   gcc
+  glab
   gnumake
   lazygit
   nodejs
