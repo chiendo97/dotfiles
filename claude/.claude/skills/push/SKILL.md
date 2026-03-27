@@ -42,7 +42,7 @@ If `current_branch` is NOT `main`/`master`, skip to Step 3. The branch is ready.
 
 ### On main/master with changes — create a worktree
 
-The user is working directly on the default branch. Create a new branch in an isolated worktree at `~/Source/` so main/master stays clean and reusable for future worktrees.
+The user is working directly on the default branch. Create a new branch in an isolated worktree under `.worktrees/` in the current project root so main/master stays clean and reusable for future worktrees.
 
 1. **Ask the user** (via AskUserQuestion) for:
    - **Type**: `feat`, `fix`, `refactor`, `chore`, or `docs`
@@ -57,14 +57,15 @@ The user is working directly on the default branch. Create a new branch in an is
 4. **Create worktree with the changes**:
    ```bash
    git stash --include-untracked
-   git worktree add ~/Source/<description> -b $USER/<type>/<description>
-   cd ~/Source/<description>
+   mkdir -p .worktrees
+   git worktree add .worktrees/<description> -b $USER/<type>/<description>
+   cd .worktrees/<description>
    git stash pop
    ```
 
-5. **Switch the session** to the new worktree directory. All remaining steps run from `~/Source/<description>`.
+5. **Switch the session** to the new worktree directory. All remaining steps run from `.worktrees/<description>`.
 
-6. Tell the user: "Created worktree at `~/Source/<description>` on branch `<branch>`. After this session, start new sessions from that directory."
+6. Tell the user: "Created worktree at `.worktrees/<description>` on branch `<branch>`. After this session, start new sessions from that directory."
 
 ## Step 3: Commit
 
@@ -102,7 +103,7 @@ Find or create a Notion ticket so the PR has a `[NEXT-XXXX]` reference.
 
 ### Search first
 
-Use `mcp__claude-boy-stdio__search_tickets` to look for existing tickets in the current sprint. Filter by the likely assignee (the `$USER` name, e.g. `cle`).
+Use the `notion` skill to search for existing tickets assigned to `$USER` in the current sprint.
 
 Scan the results for a ticket whose title relates to the changes being committed. Consider:
 - Keywords from the branch name or commit message
@@ -111,20 +112,13 @@ Scan the results for a ticket whose title relates to the changes being committed
 ### Reuse or create
 
 - **If a matching ticket exists**: Confirm with the user — "Found ticket `NEXT-XXXX`: '_title_'. Use this?"
-- **If no match or user declines**: Create a new ticket:
-  ```
-  mcp__claude-boy-stdio__create_ticket
-    title: Short description matching the PR
-    description: Summary of the changes
-    priority: "Medium"
-    assignee: $USER
-  ```
+- **If no match or user declines**: Use the `notion` skill to create a new ticket with a title matching the PR, a summary description, medium priority, and assigned to `$USER`.
 
 ### Get the ticket ID
 
-The Notion tool may not return the `NEXT-XXXX` ID directly. If the ID is not visible in the tool response, ask the user: "What's the ticket ID? (e.g. NEXT-2912)"
+Extract the ticket ID and page URL from the output. If the ID is not visible, ask the user: "What's the ticket ID? (e.g. NEXT-2912)"
 
-Store the ticket ID for Step 6.
+Store the ticket ID and page ID for Step 6.
 
 ## Step 6: Push and Create PR
 
@@ -144,33 +138,34 @@ git push -u origin <branch-name>
 
 ### Create PR
 
-Use `mcp__claude-boy-stdio__create_pull_request`:
+Use `gh pr create`:
 
-- **owner** / **repo**: parsed from remote URL in Step 1
-- **head**: current branch name
-- **base**: `master` (or `main` — use whichever `default_branch` was detected)
+```bash
+gh pr create --base <default_branch> --title "[NEXT-XXXX] type: short description" --body "$(cat <<'EOF'
+## Summary
+
+**Ticket:** [NEXT-XXXX](https://www.notion.so/<page-id>)
+
+- Bullet point describing what changed and why
+
+## Test plan
+
+- [x] `make lint` passes
+- [ ] `make test` passes
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
 - **title**: `[NEXT-XXXX] type: short description` (under 70 characters total)
-- **body**:
-  ```markdown
-  ## Summary
-
-  **Ticket:** [NEXT-XXXX](https://www.notion.so/<page-id>)
-
-  - Bullet point describing what changed and why
-
-  ## Test plan
-
-  - [x] `make lint` passes
-  - [ ] `make test` passes
-
-  🤖 Generated with [Claude Code](https://claude.com/claude-code)
-  ```
+- **base**: `master` or `main` — use whichever `default_branch` was detected
 
 Return the PR URL to the user.
 
 ## Edge Cases
 
 - **No git repo**: Stop and tell the user this only works inside a git repository.
-- **Worktree path already exists**: If `~/Source/<description>` already exists, append a suffix or ask the user for a different name.
+- **Worktree path already exists**: If `.worktrees/<description>` already exists, append a suffix or ask the user for a different name.
 - **Push rejected**: If push fails (e.g. remote has newer commits), run `git pull --rebase` first, then retry the push.
 - **Multiple remotes**: Default to `origin`. If `origin` doesn't exist, list remotes and ask the user.
