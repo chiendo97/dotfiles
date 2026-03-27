@@ -6,9 +6,7 @@ let
   nixos-cle = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOSnjSJMlot12qH5y87DmAMhwwKkSiK+iyLPaNdJh+Kc root@nixos-cle";
 
   # Uriel dev machine key - for work-related secrets on aws-dev
-  # TODO: Replace with actual public key from aws-dev after running:
-  #   ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_uriel_dev
-  uriel-dev = "ssh-ed25519 PLACEHOLDER_REPLACE_WITH_ACTUAL_KEY";
+  uriel-dev = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILvvaSiAV2bFJgiEiSPZswFq/j4lDBB0WoDu7/talMJN cle@uriel-dev";
 in
 {
   # === Personal secrets (cle key only) ===
