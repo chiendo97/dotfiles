@@ -87,19 +87,38 @@
         "cle" = mkHomeConfiguration {
           system = "x86_64-linux";
           username = "cle";
-          extraModules = [ ./profiles/genbook.nix ];
+          extraModules = [
+            ./modules/personal-secrets.nix
+            ./modules/uriel-secrets.nix
+            ./profiles/genbook.nix
+          ];
         };
         "cle@linux" = mkHomeConfiguration {
           system = "x86_64-linux";
           username = "cle";
-          extraModules = [ ./profiles/genbook.nix ];
+          extraModules = [
+            ./modules/personal-secrets.nix
+            ./modules/uriel-secrets.nix
+            ./profiles/genbook.nix
+          ];
         };
 
         # Linux (x86_64) with extra genbook-specific modules
         "genbook" = mkHomeConfiguration {
           system = "x86_64-linux";
           username = "cle";
-          extraModules = [ ./profiles/genbook.nix ];
+          extraModules = [
+            ./modules/personal-secrets.nix
+            ./modules/uriel-secrets.nix
+            ./profiles/genbook.nix
+          ];
+        };
+
+        # Linux (x86_64) - uriel dev machine (work secrets only, no personal secrets)
+        "uriel-dev" = mkHomeConfiguration {
+          system = "x86_64-linux";
+          username = "cle";
+          extraModules = [ ./modules/uriel-secrets.nix ];
         };
 
         # macOS (Apple Silicon) - username: chiendo97
