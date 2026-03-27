@@ -6,54 +6,6 @@
   home.stateVersion = "25.11";
 
   # ============================================================================
-  # Agenix secrets
-  # ============================================================================
-  age.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519_agenix" ];
-
-  age.secrets = {
-    api-keys = {
-      file = ./secrets/api-keys.age;
-      path = "${config.home.homeDirectory}/.secrets/api-keys";
-    };
-    rclone = {
-      file = ./secrets/rclone.age;
-      path = "${config.home.homeDirectory}/.config/rclone/rclone.conf";
-    };
-    wg_genbook_aws = {
-      file = ./secrets/wg_genbook_aws.age;
-      path = "${config.home.homeDirectory}/.config/wireguard/genbook-aws.conf";
-      mode = "600";
-    };
-    wg_urieljsc_office = {
-      file = ./secrets/wg_urieljsc_office.age;
-      path = "${config.home.homeDirectory}/.config/wireguard/urieljsc-office.conf";
-      mode = "600";
-    };
-  } // builtins.listToAttrs (map (name: {
-    inherit name;
-    value = {
-      file = ./secrets + "/${name}.age";
-      path = "${config.home.homeDirectory}/.ssh/${name}";
-      mode = "600";
-    };
-  }) [
-    "aws_bastion_rsa"
-    "cle_viettel_idc"
-    "cle_vpn"
-    "github_key"
-    "github_rsa"
-    "homic_olympus"
-    "homic_rsa"
-    "id_ed25519_github"
-    "oracle"
-    "uriel_rsa"
-    "nixos_cle"
-    "id_ed25519_vng_dev"
-    "id_ed25519_urieljsc_gitlab"
-    "genbook-mono-deploy"
-  ]);
-
-  # ============================================================================
   # UV tools (Python CLIs in isolated venvs, managed outside Nix)
   # ============================================================================
   uvTools.tools = [
@@ -175,18 +127,6 @@
       "*" = {
         addKeysToAgent = "yes";
       };
-      "gitlab.com" = {
-        hostname = "gitlab.com";
-        identityFile = "~/.ssh/homic_rsa";
-        extraOptions = {
-          PreferredAuthentications = "publickey";
-        };
-      };
-
-      "github.com" = {
-        hostname = "github.com";
-        identityFile = "~/.ssh/id_ed25519_github";
-      };
 
       "cle-home-server" = {
         hostname = "100.118.125.39";
@@ -200,61 +140,9 @@
         identityFile = "~/.ssh/id_ed25519_vng_gateway_01";
       };
 
-      "cle-viettel" = {
-        hostname = "171.244.62.91";
-        user = "root";
-        identityFile = "~/.ssh/cle_viettel_idc";
-      };
-
       "cle-homic" = {
         hostname = "100.83.74.104";
         user = "root";
-      };
-
-      "homic-olympus" = {
-        hostname = "100.69.202.110";
-        user = "cle";
-        identityFile = "~/.ssh/homic_olympus";
-      };
-
-      "oracle" = {
-        hostname = "168.138.176.219";
-        user = "ubuntu";
-        identityFile = "~/.ssh/oracle";
-      };
-
-      "urieljsc" = {
-        hostname = "ssh.urieljsc.com";
-        user = "chienle";
-        identityFile = "~/.ssh/uriel_rsa";
-        identitiesOnly = true;
-      };
-
-      "git.urieljsc.com" = {
-        hostname = "git.urieljsc.com";
-        user = "git";
-        identityFile = "~/.ssh/id_ed25519_urieljsc_gitlab";
-        identitiesOnly = true;
-      };
-
-      "aws-dev" = {
-        hostname = "10.26.136.50";
-        user = "cle";
-        identityFile = "~/.ssh/aws_bastion_rsa";
-        identitiesOnly = true;
-      };
-
-      "nixos-cle" = {
-        hostname = "192.168.50.55";
-        user = "cle";
-        identityFile = "~/.ssh/nixos_cle";
-      };
-
-      "vng-dev" = {
-        hostname = "100.64.0.37";
-        port = 234;
-        user = "cle";
-        identityFile = "~/.ssh/id_ed25519_vng_dev";
       };
     };
   };
@@ -515,10 +403,6 @@
         autoload -U edit-command-line
         zle -N edit-command-line
         bindkey '^g' edit-command-line
-
-        # API Keys - managed by agenix
-        source ~/.secrets/api-keys 2>/dev/null
-        unset GITHUB_TOKEN
       ''
     ];
 
