@@ -21,8 +21,12 @@ Extract secrets from `home.nix` into two modules. aws-dev gets its own agenix id
 
 Agenix identity: `~/.ssh/id_ed25519_uriel_dev`
 
+**Secrets (age.secrets):**
+- `rclone`
+- `wg_genbook_aws`
+- `wg_urieljsc_office`
+
 **SSH keys (age.secrets):**
-- `aws_bastion_rsa`
 - `uriel_rsa`
 - `id_ed25519_urieljsc_gitlab`
 - `genbook-mono-deploy`
@@ -33,7 +37,6 @@ Agenix identity: `~/.ssh/id_ed25519_uriel_dev`
 - `gitlab.com` — identityFile changed from `homic_rsa` to `uriel_rsa`
 - `github.com` — identityFile `id_ed25519_github`
 - `vng-dev` — identityFile `id_ed25519_vng_dev`
-- `aws-dev` — identityFile `aws_bastion_rsa`
 - `git.urieljsc.com` — identityFile `id_ed25519_urieljsc_gitlab`
 - `urieljsc` — identityFile `uriel_rsa`
 
@@ -43,11 +46,9 @@ Agenix identity: `~/.ssh/id_ed25519_agenix`
 
 **Secrets (age.secrets):**
 - `api-keys`
-- `rclone`
-- `wg_genbook_aws`
-- `wg_urieljsc_office`
 
 **SSH keys (age.secrets):**
+- `aws_bastion_rsa`
 - `github_key`
 - `github_rsa`
 - `cle_viettel_idc`
@@ -58,6 +59,7 @@ Agenix identity: `~/.ssh/id_ed25519_agenix`
 - `nixos_cle`
 
 **SSH matchBlocks:**
+- `aws-dev` — identityFile `aws_bastion_rsa`
 - `cle-viettel`
 - `homic-olympus`
 - `oracle`
@@ -85,7 +87,9 @@ Agenix identity: `~/.ssh/id_ed25519_agenix`
 **Add:** `uriel-dev` public key variable (from `id_ed25519_uriel_dev.pub` on aws-dev).
 
 **Re-encrypt with both `cle` + `uriel-dev` keys:**
-- `aws_bastion_rsa.age`
+- `rclone.age`
+- `wg_genbook_aws.age`
+- `wg_urieljsc_office.age`
 - `uriel_rsa.age`
 - `id_ed25519_urieljsc_gitlab.age`
 - `genbook-mono-deploy.age`
@@ -138,5 +142,5 @@ No changes — still provides rclone mount services only.
 
 1. Generate `id_ed25519_uriel_dev` key on aws-dev machine: `ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_uriel_dev`
 2. Copy the public key to `secrets/secrets.nix`
-3. Re-encrypt the 6 uriel secrets with both public keys using `age`
+3. Re-encrypt the 8 uriel secrets with both public keys using `age`
 4. On nixos-cle: copy `id_ed25519_uriel_dev` public key or ensure both identity keys are present for the `cle` config to decrypt everything
