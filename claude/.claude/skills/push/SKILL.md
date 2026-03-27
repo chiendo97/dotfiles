@@ -99,11 +99,11 @@ Do not proceed to Step 5 until `make lint` passes.
 
 ## Step 5: Notion Ticket
 
-Find or create a Notion ticket so the PR has a `[NEXT-XXXX]` reference.
+Find or create a Notion ticket in the **genbook-global** project so the PR has a ticket reference.
 
 ### Search first
 
-Use the `notion` skill to search for existing tickets assigned to `$USER` in the current sprint.
+Use the `notion` skill to search for existing tickets assigned to `$USER` in the current sprint, using `--project genbook-global`.
 
 Scan the results for a ticket whose title relates to the changes being committed. Consider:
 - Keywords from the branch name or commit message
@@ -111,12 +111,12 @@ Scan the results for a ticket whose title relates to the changes being committed
 
 ### Reuse or create
 
-- **If a matching ticket exists**: Confirm with the user — "Found ticket `NEXT-XXXX`: '_title_'. Use this?"
-- **If no match or user declines**: Use the `notion` skill to create a new ticket with a title matching the PR, a summary description, medium priority, and assigned to `$USER`.
+- **If a matching ticket exists**: Confirm with the user — "Found ticket `XXXX`: '_title_'. Use this?"
+- **If no match or user declines**: Use the `notion` skill to create a new ticket with `--project genbook-global`, a title matching the PR, a summary description, medium priority, and assigned to `$USER`.
 
 ### Get the ticket ID
 
-Extract the ticket ID and page URL from the output. If the ID is not visible, ask the user: "What's the ticket ID? (e.g. NEXT-2912)"
+Extract the ticket ID (prefix + number, e.g. `GB-456`) and page URL from the output. If the ID is not visible, ask the user for it.
 
 Store the ticket ID and page ID for Step 6.
 
@@ -141,10 +141,10 @@ git push -u origin <branch-name>
 Use `gh pr create`:
 
 ```bash
-gh pr create --base <default_branch> --title "[NEXT-XXXX] type: short description" --body "$(cat <<'EOF'
+gh pr create --base <default_branch> --title "[<ticket-id>] type: short description" --body "$(cat <<'EOF'
 ## Summary
 
-**Ticket:** [NEXT-XXXX](https://www.notion.so/<page-id>)
+**Ticket:** [<ticket-id>](https://www.notion.so/<page-id>)
 
 - Bullet point describing what changed and why
 
@@ -158,7 +158,7 @@ EOF
 )"
 ```
 
-- **title**: `[NEXT-XXXX] type: short description` (under 70 characters total)
+- **title**: `[<ticket-id>] type: short description` (under 70 characters total)
 - **base**: `master` or `main` — use whichever `default_branch` was detected
 
 Return the PR URL to the user.
