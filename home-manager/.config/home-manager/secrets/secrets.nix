@@ -4,18 +4,18 @@ let
 
   # NixOS host key - needed for system-level agenix (WireGuard, etc.)
   nixos-cle = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOSnjSJMlot12qH5y87DmAMhwwKkSiK+iyLPaNdJh+Kc root@nixos-cle";
+
+  # Uriel dev machine key - for work-related secrets on aws-dev
+  # TODO: Replace with actual public key from aws-dev after running:
+  #   ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_uriel_dev
+  uriel-dev = "ssh-ed25519 PLACEHOLDER_REPLACE_WITH_ACTUAL_KEY";
 in
 {
-  # API keys
+  # === Personal secrets (cle key only) ===
   "api-keys.age".publicKeys = [ cle ];
-
-  # Zsh history backup (manual restore, not auto-decrypted)
   "zsh_history.age".publicKeys = [ cle ];
 
-  # Rclone config
-  "rclone.age".publicKeys = [ cle ];
-
-  # SSH private keys
+  # === Personal SSH keys (cle key only) ===
   "aws_bastion_rsa.age".publicKeys = [ cle ];
   "cle_viettel_idc.age".publicKeys = [ cle ];
   "cle_vpn.age".publicKeys = [ cle ];
@@ -23,15 +23,18 @@ in
   "github_rsa.age".publicKeys = [ cle ];
   "homic_olympus.age".publicKeys = [ cle ];
   "homic_rsa.age".publicKeys = [ cle ];
-  "id_ed25519_github.age".publicKeys = [ cle ];
   "oracle.age".publicKeys = [ cle ];
-  "uriel_rsa.age".publicKeys = [ cle ];
   "nixos_cle.age".publicKeys = [ cle ];
-  "id_ed25519_vng_dev.age".publicKeys = [ cle ];
-  "id_ed25519_urieljsc_gitlab.age".publicKeys = [ cle ];
-  "genbook-mono-deploy.age".publicKeys = [ cle ];
 
-  # WireGuard config (also decryptable by NixOS host for system-level wg-quick)
-  "wg_genbook_aws.age".publicKeys = [ cle nixos-cle ];
-  "wg_urieljsc_office.age".publicKeys = [ cle nixos-cle ];
+  # === Uriel/work secrets (cle + uriel-dev keys) ===
+  "rclone.age".publicKeys = [ cle uriel-dev ];
+  "uriel_rsa.age".publicKeys = [ cle uriel-dev ];
+  "id_ed25519_urieljsc_gitlab.age".publicKeys = [ cle uriel-dev ];
+  "genbook-mono-deploy.age".publicKeys = [ cle uriel-dev ];
+  "id_ed25519_github.age".publicKeys = [ cle uriel-dev ];
+  "id_ed25519_vng_dev.age".publicKeys = [ cle uriel-dev ];
+
+  # === WireGuard configs (cle + uriel-dev + nixos-cle host key) ===
+  "wg_genbook_aws.age".publicKeys = [ cle uriel-dev nixos-cle ];
+  "wg_urieljsc_office.age".publicKeys = [ cle uriel-dev nixos-cle ];
 }
