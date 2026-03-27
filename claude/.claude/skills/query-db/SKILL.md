@@ -11,11 +11,12 @@ Getting the connection wrong means querying or mutating the wrong environment, s
 
 ## Connection Strings
 
-The connection strings below are hardcoded for convenience, but the **source of truth** is in the config files:
+**Never hardcode credentials in this file.** Read them from the genbook project config files at runtime:
+
 - `configs/dev-aws.yaml` — dev environment (PostgreSQL `database_url` + `clickhouse_config`)
 - `configs/aws.yaml` — prod environment (PostgreSQL `database_url` + `clickhouse_config`)
 
-If these credentials change, read the config files to get the current values.
+Before running any query, read the appropriate config file to extract the connection string.
 
 ### PostgreSQL (App Database)
 
@@ -26,14 +27,6 @@ Two separate databases on the same RDS host. They differ by database name and us
 | **Dev** | `dev_genbook` | `dev_genbook_user` | `configs/dev-aws.yaml` |
 | **Prod** | `genbook` | `genbook_user` | `configs/aws.yaml` |
 
-```
-# Dev PostgreSQL
-postgresql://dev_genbook_user:kLUfESBLHpGBW9mGyRZecmFteggjP6yK@genbook-db01.chsacewieknx.ap-southeast-1.rds.amazonaws.com/dev_genbook
-
-# Prod PostgreSQL
-postgresql://genbook_user:kLUfESBLHpGBW9mGyRZecmFteggjP6yK@genbook-db01.chsacewieknx.ap-southeast-1.rds.amazonaws.com/genbook
-```
-
 ### ClickHouse (Analytics/OLAP)
 
 Two separate ClickHouse clusters with different ELB hostnames:
@@ -42,16 +35,6 @@ Two separate ClickHouse clusters with different ELB hostnames:
 |---|---|---|
 | **Dev** | `k8s-devgenbo-clickhou-*` | `configs/dev-aws.yaml` |
 | **Prod** | `k8s-genbook-clickhou-*` | `configs/aws.yaml` |
-
-```
-# Dev ClickHouse
-clickhouse://admin:changeme_admin_password@k8s-devgenbo-clickhou-7eb9c99774-6eef1b5a5b0c9a0f.elb.ap-southeast-1.amazonaws.com/default
-
-# Prod ClickHouse
-clickhouse://admin:changeme_admin_password@k8s-genbook-clickhou-fb96ada8c9-22315adfa474c9fe.elb.ap-southeast-1.amazonaws.com/default
-```
-
-Both use the same credentials (`admin` / `changeme_admin_password`) and database (`default`), but point to different clusters.
 
 ## Environment Rules
 
