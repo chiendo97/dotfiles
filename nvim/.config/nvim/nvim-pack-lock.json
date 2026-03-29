@@ -9,6 +9,10 @@
       "rev": "086a40dc7ed8242c03be9f47fbcee68699cc2395",
       "src": "https://github.com/stevearc/conform.nvim"
     },
+    "csvview.nvim": {
+      "rev": "7022e18a0fbae9aecf99a3ba02b2a541edc2b8a1",
+      "src": "https://github.com/hat0uma/csvview.nvim"
+    },
     "db-nbook.nvim": {
       "rev": "625ca84c13059f2040cd8a4810edd732770f1b26",
       "src": "https://github.com/chiendo97/db-nbook.nvim"
@@ -103,9 +107,17 @@
       "rev": "0c091fa73e784ae8fae1d44a3ce19d61836ccb11",
       "src": "https://github.com/chiendo97/tmux-buffer.nvim"
     },
+    "todo-comments.nvim": {
+      "rev": "31e3c38ce9b29781e4422fc0322eb0a21f4e8668",
+      "src": "https://github.com/folke/todo-comments.nvim"
+    },
     "tuis.nvim": {
       "rev": "3f3daa725cf1faffe07287cfe347e054d2f80470",
       "src": "https://github.com/jrop/tuis.nvim"
+    },
+    "vim-easy-align": {
+      "rev": "9815a55dbcd817784458df7a18acacc6f82b1241",
+      "src": "https://github.com/junegunn/vim-easy-align"
     },
     "which-key.nvim": {
       "rev": "3aab2147e74890957785941f0c1ad87d0a44c15a",

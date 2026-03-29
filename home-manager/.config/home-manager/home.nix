@@ -352,6 +352,7 @@
       n = "nvim";
       nv = "nvim";
       ll = "eza -l";
+      hssh = ''ssh -o ProxyCommand="nc -X 5 -x 127.0.0.1:1055 %h %p"'';
 
       # Git
       gi = "git";
