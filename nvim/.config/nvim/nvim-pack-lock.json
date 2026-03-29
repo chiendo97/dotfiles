@@ -5,6 +5,10 @@
       "src": "https://github.com/chiendo97/chatml.nvim",
       "version": "'cle/mcp'"
     },
+    "cling.nvim": {
+      "rev": "be704047de41d05bd312bc6f7dfbf7f8da487b6a",
+      "src": "https://github.com/juniorsundar/cling.nvim"
+    },
     "conform.nvim": {
       "rev": "086a40dc7ed8242c03be9f47fbcee68699cc2395",
       "src": "https://github.com/stevearc/conform.nvim"

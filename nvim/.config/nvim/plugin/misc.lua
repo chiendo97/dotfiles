@@ -22,14 +22,8 @@ vim.schedule(function()
     })
 end)
 
--- FileType: quickfix
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "qf",
-    once = true,
-    callback = function()
-        vim.pack.add({ "https://github.com/kevinhwang91/nvim-bqf" })
-    end,
-})
+-- quickfix: nvim-bqf
+vim.pack.add({ "https://github.com/kevinhwang91/nvim-bqf" })
 
 -- Command-triggered plugins
 vim.api.nvim_create_user_command("StartupTime", function()
@@ -64,15 +58,3 @@ vim.api.nvim_create_user_command("Calcium", function()
     vim.cmd("Calcium")
 end, { desc = "Calcium calculator" })
 
-vim.api.nvim_create_user_command("LivePreview", function()
-    vim.pack.add({ "https://github.com/brianhuster/live-preview.nvim" })
-    require("livepreview.config").set({
-        port = 5500,
-        browser = "default",
-        dynamic_root = false,
-        sync_scroll = true,
-        picker = "vim.ui.select",
-        address = "0.0.0.0",
-    })
-    vim.cmd("LivePreview")
-end, { desc = "Live Preview" })
