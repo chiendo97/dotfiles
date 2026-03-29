@@ -12,7 +12,12 @@ vim.schedule(function()
         "https://github.com/polacekpavel/prompt-yank.nvim",
     })
 
-    require("gitlinker").setup({ mappings = "ghl" })
+    require("gitlinker").setup({
+        mappings = "ghl",
+        callbacks = {
+            ["git.urieljsc.com"] = require("gitlinker.hosts").get_gitlab_type_url,
+        },
+    })
 
     require("prompt-yank").setup({
         keymaps = {
