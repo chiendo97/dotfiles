@@ -65,6 +65,10 @@
       "rev": "9990c41f10f54f29a888d13024c9f765037bde23",
       "src": "https://github.com/echasnovski/mini.nvim"
     },
+    "mkdnflow.nvim": {
+      "rev": "f20732686f70f60f18f09f4befe984ae63a99201",
+      "src": "https://github.com/jakewvincent/mkdnflow.nvim"
+    },
     "morph.nvim": {
       "rev": "868e0c62b38560f8338b891ae70b1e50bc9fa8d5",
       "src": "https://github.com/jrop/morph.nvim"
