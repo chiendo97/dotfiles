@@ -19,6 +19,7 @@
   cargoTools.tools = [
     { crate = "mdterm"; }
     { crate = "xleak"; }
+    { crate = "zsh-patina"; }
   ];
 
   # ============================================================================
@@ -403,11 +404,13 @@
         autoload -U edit-command-line
         zle -N edit-command-line
         bindkey '^g' edit-command-line
+
+        # Syntax highlighting via zsh-patina (Rust daemon, sub-ms highlighting)
+        eval "$(zsh-patina activate)"
       ''
     ];
 
     autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
   };
 
   # ============================================================================
