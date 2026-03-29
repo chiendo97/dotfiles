@@ -4,153 +4,73 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a personal Neovim configuration using Lua, structured as a modern modular setup with lazy.nvim plugin management. The configuration follows a clear separation of concerns with organized directories for different aspects of the editor setup.
+Personal Neovim configuration using Lua with vim.pack (Neovim's native package manager) for plugin management.
 
 ## Architecture
 
-### Core Structure
-- `init.lua` - Main entry point, loads all configuration modules in order
-- `lua/config/` - Core configuration modules (options, keymaps, autocmds, etc.)
-- `lua/plugins/` - Individual plugin configurations (lazy.nvim plugin specs)
-- `lsp/` - Language Server Protocol configurations for different languages
-- `after/ftplugin/` - File type specific configurations
+### Loading Order
+1. `init.lua` — Entry point: loads config modules, registers PackChanged hooks for vim.pack
+2. `lua/config/` — Core modules: options, keymaps, autocmds, statusline, tabline, LSP, diagnostics
+3. `plugin/` — Plugin loading files, sourced automatically by Neovim in alphabetical order
+   - `00-*` prefix = early load (colorscheme, snacks, mini)
+   - `zz-*` prefix = late load (LSP setup, after all plugins are available)
+4. `lsp/` — Per-language LSP server configurations
+5. `after/ftplugin/` — Filetype-specific overrides
 
-### Plugin Management
-- Uses lazy.nvim for plugin management with lazy loading
-- Each plugin has its own file in `lua/plugins/`
-- Plugin configs return lazy.nvim specs with keys, config, and dependencies
-- Development path set to `~/Source/demo` for local plugin development
+### Plugin Management: vim.pack (NOT lazy.nvim)
+Plugins are managed via `vim.pack.add()` — **not** lazy.nvim. The lock file is `nvim-pack-lock.json`. Each plugin has its own file in `plugin/`.
 
-### LSP Architecture
-- Modern LSP setup using `vim.lsp.config()` and `vim.lsp.enable()`
-- Individual server configurations in `lsp/` directory
-- Global LSP configuration in `lua/config/lsp.lua`
-- Supports multiple languages: Go, Lua, TypeScript, Python, Rust, Zig, Swift, etc.
-- Uses blink.cmp for completion capabilities when available
+Four loading patterns are used:
 
-## Key Conventions
-
-### File Organization
-- One plugin per file in `lua/plugins/`
-- LSP server configs return a table with `cmd`, `filetypes`, `root_markers`, and `settings`
-- Filetype-specific configs go in `after/ftplugin/`
+1. **Immediate**: `vim.pack.add({...})` then `require(...).setup()` — most plugins
+2. **Deferred**: Wrapped in `vim.schedule()` — gitsigns, treesitter, which-key
+3. **Filetype-triggered**: `nvim_create_autocmd("FileType", ...)` — lazydev (lua), render-markdown
+4. **Command-triggered**: `nvim_create_user_command(...)` — StartupTime, JqPlayground, rarely-used tools
 
 ### Plugin Configuration Pattern
 ```lua
-return {
-    {
-        "plugin/name",
-        event = "VeryLazy", -- or other lazy loading events
-        keys = { -- keymaps defined here
-            { "<leader>key", function() ... end, desc = "Description" },
-        },
-        config = function()
-            -- plugin setup
-        end,
-    },
-}
+-- plugin/example.lua
+vim.pack.add({ "https://github.com/author/plugin.nvim" })
+require("plugin").setup({ ... })
 ```
 
-### LSP Configuration Pattern
-```lua
-return {
-    cmd = { "language-server-command" },
-    filetypes = { "filetype1", "filetype2" },
-    root_markers = { "project-file", ".git" },
-    settings = {
-        -- server-specific settings
-    },
-}
-```
+### LSP Architecture
+- Uses native `vim.lsp.config()` / `vim.lsp.enable()` (not nvim-lspconfig)
+- Global config in `lua/config/lsp.lua`, loaded from `plugin/zz-lsp.lua`
+- Per-server configs in `lsp/` return `{ cmd, filetypes, root_markers, settings }`
+- Active servers list is in `lua/config/lsp.lua` — add/remove from the `lsp_servers` table
+- Custom user commands: `:LspStart`, `:LspStop`, `:LspRestart`, `:LspInfo`, `:LspLog`
 
-## Key Features
+### Core Plugin Infrastructure
+- **mini.nvim**: statusline, completion, snippets, file explorer (`<leader>c`), surround, AI text objects, cmdline, icons
+- **snacks.nvim**: fuzzy picker, notifications, and UI utilities
+- **conform.nvim**: formatting
+- **treesitter**: syntax highlighting and folding
 
-### Fuzzy Finding (snacks.nvim picker)
-- `<leader>g` - files
-- `<leader>r` - live grep (visual mode: grep selection)
-- `<leader>R` - grep word under cursor
-- `<leader>j` - recent files with frecency
-- `<leader>h` - help tags
-- `<leader>m` - keymaps
-- `<leader>n` - resume last search
-- `<leader>b` - snacks builtins
-- `<leader>s` - spell suggestions
-- `<leader>i` - command history
+## Key Conventions
 
-### LSP Keymaps (buffer-local)
-- `gD` - go to declaration
-- `gd` - go to definition
-- `gr` - go to references
-- `gi` - go to implementation
-- `gy` - go to type definition
-- `K` - hover info
-- `<leader>e` - rename symbol
-- `<leader>a` - code actions
-- `<leader>q` - diagnostics to quickfix
-- `<leader>Q` - toggle diagnostics
-
-### Editor Settings
-- 4-space indentation, tabs converted to spaces
-- No swap/backup files
-- Treesitter folding enabled
-- Global statusline and tabline
-- Rounded borders for floating windows
+- One plugin per file in `plugin/`
+- LSP server configs in `lsp/` return a plain table (no function wrapper)
+- Filetype configs go in `after/ftplugin/`
+- Leader key is `<space>`
+- Nested nvim instances are blocked (exits with status 2)
+- Clipboard uses `"*` register (system clipboard)
 
 ## Development Commands
 
-### Testing Configuration
 ```bash
-# Test configuration by opening a file
-nvim test.lua
-
-# Check for errors in configuration
+# Check for config errors
 nvim --headless -c "checkhealth" -c "qa"
+
+# LSP status
+:LspInfo          # alias for :checkhealth vim.lsp
+:LspLog           # open LSP log file
+:LspRestart       # restart all or specific LSP server
+:LspRestart!      # force stop then restart
 ```
-
-### Plugin Management
-```bash
-# Update plugins
-nvim -c "Lazy update"
-
-# Check plugin status
-nvim -c "Lazy"
-```
-
-### LSP Debugging
-```bash
-# Check LSP status
-nvim -c "LspInfo"
-
-# Check available language servers
-nvim -c "checkhealth lsp"
-```
-
-### Additional Keymaps
-- `<bs>` - switch to most recent file
-- `<Alt-j/k>` - move lines up/down (works in normal, insert, visual modes)
-- `H`/`L` - jump to first non-blank/end of line
-- `<C-c>` - clear search highlight and close quickfix window
-- `*` - highlight current word (visual: search selected text)
-- Tab navigation: `gt` (new), `gn`/`gp` (next/prev), `g1`-`g9` (go to tab)
-- Line movement: `j`/`k` work with wrapped lines
-- Clipboard: `y` yanks to system clipboard, `yy` yanks line
-- Path copying: `<leader>yp` (relative), `<leader>yP` (absolute)
-- Terminal: `<esc>` to exit terminal mode
-- Window resize: `=/-` (vertical), `+/_` (horizontal)
-- Lua execution: `<leader>x` (line/selection), `<leader><space>x` (source file)
-- `yc` - duplicate line and comment original
-- Search & replace: `<leader>e` - replace word under cursor
-- Sort: `<leader>s` (visual selection)
 
 ## Important Notes
 
-- Configuration disables nested nvim instances (exits with status 2)
-- Many built-in providers and plugins are disabled for performance
-- Uses ripgrep for search when available
-- Clipboard operations use system clipboard (`"*` register)
-- Leader key is space (`<space>`)
-- Uses treesitter for syntax highlighting and folding
-- Snacks.nvim provides file explorer (`<leader>c`), picker, and notification system (`<leader>t`)
-- Global debug functions: `dd()` for inspection, `bt()` for backtrace
-- LSP servers automatically disable formatting for specific servers (gopls, lua_ls, basedpyright, ruff)
-- Some servers have specific capability adjustments (basedpyright semantic tokens disabled, ruff hover disabled)
+- `<leader>e` is **search & replace** (global keymaps) but **rename symbol** (LSP buffer-local override) — the LSP keymap takes precedence when an LSP is attached
+- PackChanged hook in init.lua auto-runs `:TSUpdate` when treesitter is updated
+- `plugin/dev.lua` loads local development plugins from `~/Source/demo`
