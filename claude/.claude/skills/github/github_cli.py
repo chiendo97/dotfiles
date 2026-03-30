@@ -1,56 +1,199 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["certifi", "pyjwt[crypto]"]
+# dependencies = ["certifi", "pyjwt[crypto]", "typer", "pydantic"]
 # ///
 """GitHub PR CLI - Manage pull requests via the GitHub API."""
 
 from __future__ import annotations
 
-import argparse
 import json
 import os
 import ssl
 import sys
 import urllib.error
 import urllib.request
-from typing import Any
+from enum import Enum
+from typing import Annotated, Any, ClassVar
 
 import certifi
+import typer
+from pydantic import BaseModel, ConfigDict
 
 SSL_CTX = ssl.create_default_context(cafile=certifi.where())
-
 
 BASE_URL = "https://api.github.com"
 GRAPHQL_URL = f"{BASE_URL}/graphql"
 
+app = typer.Typer(
+    name="github_cli",
+    help="GitHub PR management CLI",
+    no_args_is_help=True,
+)
 
-def get_token() -> str:
-    """Get GitHub token — prefers GITHUB_TOKEN, falls back to GitHub App JWT auth."""
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        return token
+# ---------------------------------------------------------------------------
+# Module-level typed state (set in @app.callback)
+# ---------------------------------------------------------------------------
 
-    # Fall back to GitHub App authentication
-    app_id = os.environ.get("GITHUB_APP_ID")
-    installation_id = os.environ.get("GITHUB_APP_INSTALLATION_ID")
-    private_key = os.environ.get("GITHUB_APP_PRIVATE_KEY")
+_token: str = ""
 
-    if not (app_id and installation_id and private_key):
-        print(
-            "Error: Set GITHUB_TOKEN, or all of GITHUB_APP_ID, "
-            "GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
 
-    return _get_installation_token(app_id, installation_id, private_key)
+# ---------------------------------------------------------------------------
+# Enums (for write parameters only)
+# ---------------------------------------------------------------------------
+
+
+class PRState(str, Enum):
+    open = "open"
+    closed = "closed"
+
+
+class ReviewEvent(str, Enum):
+    APPROVE = "APPROVE"
+    REQUEST_CHANGES = "REQUEST_CHANGES"
+    COMMENT = "COMMENT"
+
+
+class DiffSide(str, Enum):
+    RIGHT = "RIGHT"
+    LEFT = "LEFT"
+
+
+# ---------------------------------------------------------------------------
+# Pydantic Models
+# ---------------------------------------------------------------------------
+
+
+class User(BaseModel):
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="ignore")
+    login: str
+
+
+class BranchRef(BaseModel):
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="ignore")
+    ref: str
+    sha: str
+
+
+class PullRequest(BaseModel):
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="ignore")
+    number: int
+    title: str
+    state: str
+    draft: bool = False
+    user: User
+    head: BranchRef
+    base: BranchRef
+    html_url: str
+    created_at: str
+    updated_at: str
+    body: str | None = None
+
+    @classmethod
+    def from_response(cls, data: dict[str, Any]) -> PullRequest:
+        return cls.model_validate(data)
+
+    def display(self) -> str:
+        lines = [
+            f"PR #{self.number}: {self.title}",
+            f"  State:   {self.state}  {'(draft)' if self.draft else ''}".rstrip(),
+            f"  Author:  {self.user.login}",
+            f"  Branch:  {self.head.ref} -> {self.base.ref}",
+            f"  URL:     {self.html_url}",
+            f"  Created: {self.created_at}",
+            f"  Updated: {self.updated_at}",
+        ]
+        if self.body:
+            body_preview = self.body[:200]
+            if len(self.body) > 200:
+                body_preview += "..."
+            lines.append(f"  Body:    {body_preview}")
+        return "\n".join(lines)
+
+
+class ChangedFile(BaseModel):
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="ignore")
+    filename: str
+    status: str
+    additions: int = 0
+    deletions: int = 0
+
+    @classmethod
+    def from_response(cls, data: dict[str, Any]) -> ChangedFile:
+        return cls.model_validate(data)
+
+    def display(self) -> str:
+        return f"  {self.status:10s} +{self.additions}/-{self.deletions}  {self.filename}"
+
+
+class Comment(BaseModel):
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="ignore")
+    id: int
+    user: User
+    created_at: str
+    body: str
+    path: str | None = None
+    line: int | None = None
+    original_line: int | None = None
+    in_reply_to_id: int | None = None
+
+    @classmethod
+    def from_response(cls, data: dict[str, Any]) -> Comment:
+        return cls.model_validate(data)
+
+    def display(self) -> str:
+        lines = [
+            f"Comment #{self.id} by {self.user.login} ({self.created_at})",
+        ]
+        if self.path:
+            line_info = f"  File: {self.path}"
+            if self.line:
+                line_info += f":{self.line}"
+            elif self.original_line:
+                line_info += f":{self.original_line}"
+            lines.append(line_info)
+        if self.in_reply_to_id:
+            lines.append(f"  In reply to: #{self.in_reply_to_id}")
+        lines.append(f"  {self.body}")
+        return "\n".join(lines)
+
+
+class Review(BaseModel):
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="ignore")
+    id: int
+    state: str
+    body: str | None = None
+
+    @classmethod
+    def from_response(cls, data: dict[str, Any]) -> Review:
+        return cls.model_validate(data)
+
+    def display(self) -> str:
+        lines = [f"Review #{self.id} submitted: {self.state}"]
+        if self.body:
+            lines.append(f"  {self.body}")
+        return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Shared option type aliases
+# ---------------------------------------------------------------------------
+
+OwnerOpt = Annotated[str, typer.Option(help="Repository owner")]
+RepoOpt = Annotated[str, typer.Option(help="Repository name")]
+NumberOpt = Annotated[int, typer.Option(help="Pull request number")]
+
+
+# ---------------------------------------------------------------------------
+# Auth
+# ---------------------------------------------------------------------------
 
 
 def _get_installation_token(app_id: str, installation_id: str, private_key: str) -> str:
     """Generate a GitHub App installation access token via JWT."""
     import time
-    import jwt
+
+    import jwt  # pyright: ignore[reportMissingImports]
 
     now = int(time.time())
     payload = {
@@ -58,7 +201,7 @@ def _get_installation_token(app_id: str, installation_id: str, private_key: str)
         "exp": now + (10 * 60),
         "iss": app_id,
     }
-    encoded_jwt = jwt.encode(payload, private_key, algorithm="RS256")
+    encoded_jwt: str = jwt.encode(payload, private_key, algorithm="RS256")  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
     url = f"{BASE_URL}/app/installations/{installation_id}/access_tokens"
     headers = {
@@ -67,8 +210,34 @@ def _get_installation_token(app_id: str, installation_id: str, private_key: str)
     }
     req = urllib.request.Request(url, data=b"", headers=headers, method="POST")
     with urllib.request.urlopen(req, context=SSL_CTX) as resp:
-        data = json.loads(resp.read())
-    return data["token"]
+        data: dict[str, Any] = json.loads(resp.read())
+    return str(data["token"])
+
+
+def _resolve_token() -> str:
+    """Get GitHub token -- prefers GITHUB_TOKEN, falls back to GitHub App JWT auth."""
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        return token
+
+    app_id = os.environ.get("GITHUB_APP_ID")
+    installation_id = os.environ.get("GITHUB_APP_INSTALLATION_ID")
+    private_key = os.environ.get("GITHUB_APP_PRIVATE_KEY")
+
+    if not (app_id and installation_id and private_key):
+        msg = (
+            "Error: Set GITHUB_TOKEN, or all of GITHUB_APP_ID, "
+            + "GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY."
+        )
+        print(msg, file=sys.stderr)
+        raise typer.Exit(code=1)
+
+    return _get_installation_token(app_id, installation_id, private_key)
+
+
+# ---------------------------------------------------------------------------
+# API helpers
+# ---------------------------------------------------------------------------
 
 
 def api_request(
@@ -77,11 +246,11 @@ def api_request(
     method: str = "GET",
     data: dict[str, Any] | None = None,
     token: str | None = None,
-) -> Any:
+) -> Any:  # noqa: ANN401
     """Make a GitHub API request."""
-    token = token or get_token()
+    tok = token or _token
     headers = {
-        "Authorization": f"Bearer {token}",
+        "Authorization": f"Bearer {tok}",
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
@@ -98,238 +267,301 @@ def api_request(
     except urllib.error.HTTPError as e:
         error_body = e.read().decode()
         try:
-            err = json.loads(error_body)
+            err: dict[str, Any] = json.loads(error_body)
             msg = err.get("message", error_body)
         except json.JSONDecodeError:
             msg = error_body
         print(f"Error {e.code}: {msg}", file=sys.stderr)
-        sys.exit(1)
+        raise typer.Exit(code=1)
 
 
-def graphql(query: str, variables: dict[str, Any] | None = None) -> Any:
+def graphql(query: str, variables: dict[str, Any] | None = None) -> Any:  # noqa: ANN401
     """Execute a GitHub GraphQL query."""
     payload: dict[str, Any] = {"query": query}
     if variables:
-        payload["variables"] = variables
+        payload["variables"] = dict(variables)
     return api_request(GRAPHQL_URL, method="POST", data=payload)
 
 
-# ---------------------------------------------------------------------------
-# Formatters
-# ---------------------------------------------------------------------------
-
-def fmt_pr(pr: dict[str, Any]) -> str:
-    lines = [
-        f"PR #{pr['number']}: {pr['title']}",
-        f"  State:   {pr['state']}  {'(draft)' if pr.get('draft') else ''}".rstrip(),
-        f"  Author:  {pr['user']['login']}",
-        f"  Branch:  {pr['head']['ref']} -> {pr['base']['ref']}",
-        f"  URL:     {pr['html_url']}",
-        f"  Created: {pr['created_at']}",
-        f"  Updated: {pr['updated_at']}",
-    ]
-    if pr.get("body"):
-        body_preview = pr["body"][:200]
-        if len(pr["body"]) > 200:
-            body_preview += "..."
-        lines.append(f"  Body:    {body_preview}")
-    return "\n".join(lines)
-
-
-def fmt_comment(c: dict[str, Any]) -> str:
-    lines = [
-        f"Comment #{c['id']} by {c['user']['login']} ({c['created_at']})",
-    ]
-    if c.get("path"):
-        line_info = f"  File: {c['path']}"
-        if c.get("line"):
-            line_info += f":{c['line']}"
-        elif c.get("original_line"):
-            line_info += f":{c['original_line']}"
-        lines.append(line_info)
-    if c.get("in_reply_to_id"):
-        lines.append(f"  In reply to: #{c['in_reply_to_id']}")
-    lines.append(f"  {c['body']}")
-    return "\n".join(lines)
+def _get_pr_head_sha(owner: str, repo: str, number: int) -> str:
+    url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/{number}"
+    pr_data: dict[str, Any] = api_request(url)
+    return str(pr_data["head"]["sha"])
 
 
 # ---------------------------------------------------------------------------
-# Subcommands
+# App callback — validate token once
 # ---------------------------------------------------------------------------
 
-def cmd_create_pr(args: argparse.Namespace) -> None:
-    url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls"
+
+@app.callback()
+def main_callback() -> None:
+    """GitHub PR management CLI."""
+    global _token  # noqa: PLW0603
+    _token = _resolve_token()
+
+
+# ---------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------
+
+
+@app.command()
+def create_pr(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    title: Annotated[str, typer.Option(help="PR title")],
+    head: Annotated[str, typer.Option(help="Source branch")],
+    base: Annotated[str, typer.Option(help="Target branch")],
+    body: Annotated[str | None, typer.Option(help="PR body")] = None,
+    draft: Annotated[bool, typer.Option(help="Create as draft")] = False,
+) -> None:
+    """Create a pull request."""
+    url = f"{BASE_URL}/repos/{owner}/{repo}/pulls"
     data: dict[str, Any] = {
-        "title": args.title,
-        "head": args.head,
-        "base": args.base,
+        "title": title,
+        "head": head,
+        "base": base,
     }
-    if args.body:
-        data["body"] = args.body
-    if args.draft:
+    if body is not None:
+        data["body"] = body
+    if draft:
         data["draft"] = True
 
-    pr = api_request(url, method="POST", data=data)
-    print(fmt_pr(pr))
+    resp = api_request(url, method="POST", data=data)
+    pr = PullRequest.from_response(resp)
+    print(pr.display())
 
 
-def cmd_update_pr(args: argparse.Namespace) -> None:
-    url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls/{args.number}"
+@app.command()
+def update_pr(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    number: NumberOpt,
+    title: Annotated[str | None, typer.Option(help="New title")] = None,
+    body: Annotated[str | None, typer.Option(help="New body")] = None,
+    state: Annotated[PRState | None, typer.Option(help="New state")] = None,
+    base: Annotated[str | None, typer.Option(help="New base branch")] = None,
+) -> None:
+    """Update an existing pull request."""
+    url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/{number}"
     data: dict[str, Any] = {}
-    if args.title:
-        data["title"] = args.title
-    if args.body:
-        data["body"] = args.body
-    if args.state:
-        data["state"] = args.state
-    if args.base:
-        data["base"] = args.base
+    if title is not None:
+        data["title"] = title
+    if body is not None:
+        data["body"] = body
+    if state is not None:
+        data["state"] = state.value
+    if base is not None:
+        data["base"] = base
 
     if not data:
         print("Error: No update fields specified.", file=sys.stderr)
-        sys.exit(1)
+        raise typer.Exit(code=1)
 
-    pr = api_request(url, method="PATCH", data=data)
-    print(fmt_pr(pr))
+    resp = api_request(url, method="PATCH", data=data)
+    pr = PullRequest.from_response(resp)
+    print(pr.display())
 
 
-def cmd_list_prs(args: argparse.Namespace) -> None:
+@app.command()
+def list_prs(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    state: Annotated[str, typer.Option(help="Filter by state (open/closed/all)")] = "open",
+    sort: Annotated[str, typer.Option(help="Sort field")] = "updated",
+    direction: Annotated[str, typer.Option(help="Sort direction (asc/desc)")] = "desc",
+    head: Annotated[str | None, typer.Option(help="Filter by head branch")] = None,
+    base: Annotated[str | None, typer.Option(help="Filter by base branch")] = None,
+    page: Annotated[int, typer.Option(help="Page number")] = 1,
+    page_size: Annotated[int, typer.Option(help="Results per page")] = 20,
+) -> None:
+    """List pull requests with filters."""
     params = [
-        f"state={args.state}",
-        f"sort={args.sort}",
-        f"direction={args.direction}",
-        f"per_page={args.page_size}",
-        f"page={args.page}",
+        f"state={state}",
+        f"sort={sort}",
+        f"direction={direction}",
+        f"per_page={page_size}",
+        f"page={page}",
     ]
-    if args.head:
-        # GitHub expects owner:branch for cross-fork, or just branch for same-repo
-        params.append(f"head={args.head}")
-    if args.base:
-        params.append(f"base={args.base}")
+    if head is not None:
+        params.append(f"head={head}")
+    if base is not None:
+        params.append(f"base={base}")
 
-    url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls?{'&'.join(params)}"
-    prs = api_request(url)
+    url = f"{BASE_URL}/repos/{owner}/{repo}/pulls?{'&'.join(params)}"
+    resp_list: list[dict[str, Any]] = api_request(url)
 
-    if not prs:
+    if not resp_list:
         print("No pull requests found.")
         return
 
-    for pr in prs:
-        print(fmt_pr(pr))
+    for item in resp_list:
+        pr = PullRequest.from_response(item)
+        print(pr.display())
         print()
 
 
-def cmd_get_pr(args: argparse.Namespace) -> None:
-    url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls/{args.number}"
-    pr = api_request(url)
-    print(fmt_pr(pr))
+@app.command()
+def get_pr(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    number: NumberOpt,
+) -> None:
+    """Get PR details including changed files."""
+    url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/{number}"
+    resp = api_request(url)
+    pr = PullRequest.from_response(resp)
+    print(pr.display())
 
-    # Fetch files
     files_url = f"{url}/files?per_page=100"
-    files = api_request(files_url)
-    if files:
+    files_resp: list[dict[str, Any]] = api_request(files_url)
+    if files_resp:
+        files = [ChangedFile.from_response(f) for f in files_resp]
         print(f"\nFiles changed ({len(files)}):")
         for f in files:
-            status = f["status"]
-            additions = f.get("additions", 0)
-            deletions = f.get("deletions", 0)
-            print(f"  {status:10s} +{additions}/-{deletions}  {f['filename']}")
+            print(f.display())
 
 
-def cmd_comments(args: argparse.Namespace) -> None:
-    # Issue comments (general PR comments)
-    issue_url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/issues/{args.number}/comments?per_page=100"
-    issue_comments = api_request(issue_url)
+@app.command()
+def comments(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    number: NumberOpt,
+) -> None:
+    """Get all comments on a PR (general and inline review comments)."""
+    issue_url = f"{BASE_URL}/repos/{owner}/{repo}/issues/{number}/comments?per_page=100"
+    issue_resp: list[dict[str, Any]] = api_request(issue_url)
 
-    # Review comments (inline code comments)
-    review_url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls/{args.number}/comments?per_page=100"
-    review_comments = api_request(review_url)
+    review_url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/{number}/comments?per_page=100"
+    review_resp: list[dict[str, Any]] = api_request(review_url)
 
-    if not issue_comments and not review_comments:
+    if not issue_resp and not review_resp:
         print("No comments found.")
         return
 
-    if issue_comments:
+    if issue_resp:
         print("=== General Comments ===\n")
-        for c in issue_comments:
-            print(fmt_comment(c))
+        for item in issue_resp:
+            c = Comment.from_response(item)
+            print(c.display())
             print()
 
-    if review_comments:
+    if review_resp:
         print("=== Review Comments ===\n")
-        for c in review_comments:
-            print(fmt_comment(c))
+        for item in review_resp:
+            c = Comment.from_response(item)
+            print(c.display())
             print()
 
 
-def cmd_comment(args: argparse.Namespace) -> None:
-    if args.path:
-        # Review comment on a specific file/line
-        url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls/{args.number}/comments"
+@app.command()
+def comment(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    number: NumberOpt,
+    text: Annotated[str, typer.Argument(help="Comment body")],
+    path: Annotated[str | None, typer.Option(help="File path for inline comment")] = None,
+    line: Annotated[int | None, typer.Option(help="Line number for inline comment")] = None,
+) -> None:
+    """Add a general or inline comment to a PR."""
+    if path is not None:
+        url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/{number}/comments"
         data: dict[str, Any] = {
-            "body": args.text,
-            "path": args.path,
-            "commit_id": _get_pr_head_sha(args.owner, args.repo, args.number),
+            "body": text,
+            "path": path,
+            "commit_id": _get_pr_head_sha(owner, repo, number),
         }
-        if args.line:
-            data["line"] = args.line
+        if line is not None:
+            data["line"] = line
             data["side"] = "RIGHT"
         else:
             data["subject_type"] = "file"
     else:
-        # General issue comment
-        url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/issues/{args.number}/comments"
-        data = {"body": args.text}
+        url = f"{BASE_URL}/repos/{owner}/{repo}/issues/{number}/comments"
+        data = {"body": text}
 
-    comment = api_request(url, method="POST", data=data)
-    print(fmt_comment(comment))
-
-
-def cmd_review(args: argparse.Namespace) -> None:
-    url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls/{args.number}/reviews"
-    data: dict[str, Any] = {"event": args.event}
-    if args.body:
-        data["body"] = args.body
-
-    review = api_request(url, method="POST", data=data)
-    print(f"Review #{review['id']} submitted: {review['state']}")
-    if review.get("body"):
-        print(f"  {review['body']}")
+    resp = api_request(url, method="POST", data=data)
+    c = Comment.from_response(resp)
+    print(c.display())
 
 
-def cmd_review_comment(args: argparse.Namespace) -> None:
-    url = f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls/{args.number}/comments"
+@app.command()
+def review(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    number: NumberOpt,
+    event: Annotated[ReviewEvent, typer.Option(help="Review event type")],
+    body: Annotated[str | None, typer.Option(help="Review body")] = None,
+) -> None:
+    """Submit a review on a PR."""
+    url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/{number}/reviews"
+    data: dict[str, Any] = {"event": event.value}
+    if body is not None:
+        data["body"] = body
+
+    resp = api_request(url, method="POST", data=data)
+    r = Review.from_response(resp)
+    print(r.display())
+
+
+@app.command()
+def review_comment(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    number: NumberOpt,
+    path: Annotated[str, typer.Option(help="File path")],
+    line: Annotated[int, typer.Option(help="Line number")],
+    text: Annotated[str, typer.Argument(help="Comment body")],
+    side: Annotated[DiffSide, typer.Option(help="Diff side")] = DiffSide.RIGHT,
+) -> None:
+    """Create an inline review comment on a file."""
+    url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/{number}/comments"
     data: dict[str, Any] = {
-        "body": args.text,
-        "path": args.path,
-        "line": args.line,
-        "side": args.side,
-        "commit_id": _get_pr_head_sha(args.owner, args.repo, args.number),
+        "body": text,
+        "path": path,
+        "line": line,
+        "side": side.value,
+        "commit_id": _get_pr_head_sha(owner, repo, number),
     }
 
-    comment = api_request(url, method="POST", data=data)
-    print(fmt_comment(comment))
+    resp = api_request(url, method="POST", data=data)
+    c = Comment.from_response(resp)
+    print(c.display())
 
 
-def cmd_reply(args: argparse.Namespace) -> None:
+@app.command()
+def reply(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    number: NumberOpt,
+    comment_id: Annotated[int, typer.Option(help="Comment ID to reply to")],
+    text: Annotated[str, typer.Argument(help="Reply body")],
+) -> None:
+    """Reply to a review comment thread."""
     url = (
-        f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls/{args.number}"
-        f"/comments/{args.comment_id}/replies"
+        f"{BASE_URL}/repos/{owner}/{repo}/pulls/{number}"
+        f"/comments/{comment_id}/replies"
     )
-    data = {"body": args.text}
-    comment = api_request(url, method="POST", data=data)
-    print(fmt_comment(comment))
+    data: dict[str, Any] = {"body": text}
+    resp = api_request(url, method="POST", data=data)
+    c = Comment.from_response(resp)
+    print(c.display())
 
 
-def cmd_resolve(args: argparse.Namespace) -> None:
-    token = get_token()
-
+@app.command()
+def resolve(
+    owner: OwnerOpt,
+    repo: RepoOpt,
+    number: NumberOpt,  # noqa: ARG001  # pyright: ignore[reportUnusedParameter]
+    comment_id: Annotated[int, typer.Option(help="Comment ID of the thread to resolve")],
+    unresolve: Annotated[bool, typer.Option(help="Unresolve instead of resolve")] = False,
+) -> None:
+    """Resolve or unresolve a review thread by comment ID."""
     # Step 1: Get the node_id of the comment
-    comment_url = (
-        f"{BASE_URL}/repos/{args.owner}/{args.repo}/pulls/comments/{args.comment_id}"
-    )
-    comment = api_request(comment_url, token=token)
-    node_id = comment["node_id"]
+    comment_url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/comments/{comment_id}"
+    comment_resp: dict[str, Any] = api_request(comment_url)
+    node_id = comment_resp["node_id"]
 
     # Step 2: Find the thread node ID via GraphQL
     query = """
@@ -355,13 +587,13 @@ def cmd_resolve(args: argparse.Namespace) -> None:
       }
     }
     """
-    result = graphql(query, {"nodeId": node_id})
+    result: dict[str, Any] = graphql(query, {"nodeId": node_id})
 
     if "errors" in result:
         print(f"GraphQL error: {result['errors']}", file=sys.stderr)
-        sys.exit(1)
+        raise typer.Exit(code=1)
 
-    threads = (
+    threads: list[dict[str, Any]] = (
         result.get("data", {})
         .get("node", {})
         .get("pullRequestReview", {})
@@ -370,19 +602,19 @@ def cmd_resolve(args: argparse.Namespace) -> None:
         .get("nodes", [])
     )
 
-    thread_id = None
+    thread_id: str | None = None
     for thread in threads:
-        comments = thread.get("comments", {}).get("nodes", [])
-        if comments and comments[0].get("databaseId") == args.comment_id:
-            thread_id = thread["id"]
+        thread_comments: list[dict[str, Any]] = thread.get("comments", {}).get("nodes", [])
+        if thread_comments and thread_comments[0].get("databaseId") == comment_id:
+            thread_id = str(thread["id"])
             break
 
     if not thread_id:
         print("Error: Could not find review thread for this comment.", file=sys.stderr)
-        sys.exit(1)
+        raise typer.Exit(code=1)
 
     # Step 3: Resolve or unresolve
-    if args.unresolve:
+    if unresolve:
         mutation = """
         mutation($threadId: ID!) {
           unresolveReviewThread(input: {threadId: $threadId}) {
@@ -401,140 +633,13 @@ def cmd_resolve(args: argparse.Namespace) -> None:
         """
         action = "Resolved"
 
-    result = graphql(mutation, {"threadId": thread_id})
-    if "errors" in result:
-        print(f"GraphQL error: {result['errors']}", file=sys.stderr)
-        sys.exit(1)
+    mutation_result: dict[str, Any] = graphql(mutation, {"threadId": thread_id})
+    if "errors" in mutation_result:
+        print(f"GraphQL error: {mutation_result['errors']}", file=sys.stderr)
+        raise typer.Exit(code=1)
 
-    print(f"{action} thread for comment #{args.comment_id}")
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _get_pr_head_sha(owner: str, repo: str, number: int) -> str:
-    url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/{number}"
-    pr = api_request(url)
-    return pr["head"]["sha"]
-
-
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
-
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="github_cli",
-        description="GitHub PR management CLI",
-    )
-    sub = parser.add_subparsers(dest="command", required=True)
-
-    # -- create-pr --
-    p = sub.add_parser("create-pr", help="Create a pull request")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--title", required=True)
-    p.add_argument("--head", required=True, help="Source branch")
-    p.add_argument("--base", required=True, help="Target branch")
-    p.add_argument("--body", default=None)
-    p.add_argument("--draft", action="store_true")
-    p.set_defaults(func=cmd_create_pr)
-
-    # -- update-pr --
-    p = sub.add_parser("update-pr", help="Update a pull request")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--number", required=True, type=int)
-    p.add_argument("--title", default=None)
-    p.add_argument("--body", default=None)
-    p.add_argument("--state", choices=["open", "closed"], default=None)
-    p.add_argument("--base", default=None)
-    p.set_defaults(func=cmd_update_pr)
-
-    # -- list-prs --
-    p = sub.add_parser("list-prs", help="List pull requests")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--state", default="open", choices=["open", "closed", "all"])
-    p.add_argument("--sort", default="updated", choices=["created", "updated", "popularity", "long-running"])
-    p.add_argument("--direction", default="desc", choices=["asc", "desc"])
-    p.add_argument("--head", default=None)
-    p.add_argument("--base", default=None)
-    p.add_argument("--page", default=1, type=int)
-    p.add_argument("--page-size", default=20, type=int)
-    p.set_defaults(func=cmd_list_prs)
-
-    # -- get-pr --
-    p = sub.add_parser("get-pr", help="Get PR details")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--number", required=True, type=int)
-    p.set_defaults(func=cmd_get_pr)
-
-    # -- comments --
-    p = sub.add_parser("comments", help="Get PR comments")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--number", required=True, type=int)
-    p.set_defaults(func=cmd_comments)
-
-    # -- comment --
-    p = sub.add_parser("comment", help="Add a PR comment")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--number", required=True, type=int)
-    p.add_argument("text", help="Comment body")
-    p.add_argument("--path", default=None, help="File path for inline comment")
-    p.add_argument("--line", default=None, type=int, help="Line number for inline comment")
-    p.set_defaults(func=cmd_comment)
-
-    # -- review --
-    p = sub.add_parser("review", help="Create a PR review")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--number", required=True, type=int)
-    p.add_argument("--event", required=True, choices=["APPROVE", "REQUEST_CHANGES", "COMMENT"])
-    p.add_argument("--body", default=None)
-    p.set_defaults(func=cmd_review)
-
-    # -- review-comment --
-    p = sub.add_parser("review-comment", help="Create inline review comment")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--number", required=True, type=int)
-    p.add_argument("--path", required=True, help="File path")
-    p.add_argument("--line", required=True, type=int, help="Line number")
-    p.add_argument("text", help="Comment body")
-    p.add_argument("--side", default="RIGHT", choices=["RIGHT", "LEFT"])
-    p.set_defaults(func=cmd_review_comment)
-
-    # -- reply --
-    p = sub.add_parser("reply", help="Reply to a review comment")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--number", required=True, type=int)
-    p.add_argument("--comment-id", required=True, type=int)
-    p.add_argument("text", help="Reply body")
-    p.set_defaults(func=cmd_reply)
-
-    # -- resolve --
-    p = sub.add_parser("resolve", help="Resolve/unresolve a review thread")
-    p.add_argument("--owner", required=True)
-    p.add_argument("--repo", required=True)
-    p.add_argument("--number", required=True, type=int)
-    p.add_argument("--comment-id", required=True, type=int)
-    p.add_argument("--unresolve", action="store_true")
-    p.set_defaults(func=cmd_resolve)
-
-    return parser
-
-
-def main() -> None:
-    parser = build_parser()
-    args = parser.parse_args()
-    args.func(args)
+    print(f"{action} thread for comment #{comment_id}")
 
 
 if __name__ == "__main__":
-    main()
+    app()

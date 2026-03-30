@@ -1,0 +1,5 @@
+{
+  "include": ["github_cli.py"],
+  "reportExplicitAny": false,
+  "reportAny": false
+}

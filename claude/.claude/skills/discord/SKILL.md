@@ -9,22 +9,28 @@ description: >
 
 # discord — Discord Bot CLI
 
-A standalone Python CLI that talks to the Discord REST API using only stdlib (`urllib`).
-Run it with `uv` — no dependencies to install.
+A standalone Python CLI that talks to the Discord REST API using typer and pydantic.
+Run it with `uv` — no virtualenv needed.
 
 **Requires environment variables:**
 - `DISCORD_TOKEN` — your bot token
-- `DISCORD_GUILD_ID` — default guild (server) ID
+- `DISCORD_GUILD_ID` — default guild (server) ID (can also be passed via `--guild-id`)
+
+## Global Options
+
+| Option | Description |
+|--------|-------------|
+| `--guild-id` | Default guild ID (overrides `DISCORD_GUILD_ID` env var) |
 
 ## Quick Reference
 
-| Subcommand | Description |
-|------------|-------------|
+| Command | Description |
+|---------|-------------|
 | `send` | Send a message to a channel, thread, or DM |
 | `edit` | Edit an existing message |
 | `get` | Get recent messages from a channel |
 | `channels` | List all channels in a guild |
-| `thread` | Create a new thread |
+| `thread` | Create a new thread (public, private, or announcement) |
 | `react` | React to a message with an emoji |
 | `send-file` | Upload a file to a channel, thread, or DM |
 
@@ -33,7 +39,7 @@ Run it with `uv` — no dependencies to install.
 All commands are run via:
 
 ```bash
-uv run /home/cle/.claude/skills/discord/discord_cli.py <subcommand> [options]
+uv run /home/cle/.claude/skills/discord/discord_cli.py <command> [options]
 ```
 
 ---
@@ -58,11 +64,11 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py send --channel-id 123456 
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
+| `message` | Yes | The message text (positional arg) |
 | `--channel-id` | One of three | Target channel ID |
 | `--thread-id` | One of three | Target thread ID |
 | `--user-id` | One of three | Target user ID (creates DM) |
 | `--reply-to` | No | Message ID to reply to |
-| `message` | Yes | The message text (positional arg) |
 
 ---
 
@@ -74,9 +80,9 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py edit --channel-id 123456 
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
+| `content` | Yes | New message content (positional arg) |
 | `--channel-id` | Yes | Channel containing the message |
 | `--message-id` | Yes | ID of the message to edit |
-| `content` | Yes | New message content (positional arg) |
 
 ---
 
@@ -113,17 +119,21 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py channels --guild-id 11122
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `--guild-id` | No | Guild ID (defaults to `DISCORD_GUILD_ID` env var) |
+| `--guild-id` | No | Guild ID (overrides default from env or global option) |
 
 ---
 
 ### thread — Create a thread
 
-Create a standalone thread or a thread from an existing message.
+Create a standalone thread or a thread from an existing message. Thread type can be
+`PUBLIC` (default), `PRIVATE`, or `ANNOUNCEMENT`.
 
 ```bash
-# Standalone thread in a channel
+# Standalone public thread in a channel
 uv run /home/cle/.claude/skills/discord/discord_cli.py thread --channel-id 123456 --name "Discussion Topic"
+
+# Private thread
+uv run /home/cle/.claude/skills/discord/discord_cli.py thread --channel-id 123456 --name "Private Talk" --type PRIVATE
 
 # Thread from a message
 uv run /home/cle/.claude/skills/discord/discord_cli.py thread --channel-id 123456 --name "Follow-up" --message-id 999888
@@ -134,6 +144,7 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py thread --channel-id 12345
 | `--channel-id` | Yes | Parent channel ID |
 | `--name` | Yes | Thread name |
 | `--message-id` | No | Message to create thread from |
+| `--type` | No | Thread type: `PUBLIC`, `PRIVATE`, or `ANNOUNCEMENT` (default: `PUBLIC`) |
 
 ---
 
@@ -171,10 +182,10 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py send-file --thread-id 345
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
+| `--file` | Yes | Path to file to upload |
 | `--channel-id` | One of three | Target channel ID |
 | `--thread-id` | One of three | Target thread ID |
 | `--user-id` | One of three | Target user ID (creates DM) |
-| `--file` | Yes | Path to file to upload |
 | `--message` | No | Optional text message with the file |
 
 ---

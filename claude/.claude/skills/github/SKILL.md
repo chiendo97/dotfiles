@@ -15,6 +15,7 @@ Manage GitHub pull requests using `github_cli.py` via `uv run`.
 
 - `GITHUB_TOKEN` environment variable set (personal access token or installation token)
 - Token needs `repo` scope for private repos, `public_repo` for public repos
+- Uses `uv run` with inline script dependencies (typer, pydantic, certifi, pyjwt)
 
 ## Quick Reference
 
@@ -38,6 +39,8 @@ All commands follow this pattern:
 ```bash
 uv run /home/cle/.claude/skills/github/github_cli.py <command> [options]
 ```
+
+Use `--help` on any command to see full option details and enum choices.
 
 ### Create a Pull Request
 
