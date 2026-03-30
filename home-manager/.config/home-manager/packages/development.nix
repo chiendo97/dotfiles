@@ -11,4 +11,5 @@ with pkgs; [
   nodejs
   rustup
   tree-sitter
+  zk
 ]

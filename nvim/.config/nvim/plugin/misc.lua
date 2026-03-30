@@ -30,6 +30,23 @@ end)
 -- quickfix: nvim-bqf
 vim.pack.add({ "https://github.com/kevinhwang91/nvim-bqf" })
 
+-- Filetype-triggered plugins
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "markdown" },
+    once = true,
+    callback = function()
+        vim.pack.add({ "https://github.com/zk-org/zk-nvim" })
+        require("zk").setup({
+            picker = "snacks_picker",
+            lsp = {
+                -- zk LSP is already managed via lsp/zk.lua + vim.lsp.enable
+                config = { cmd = { "zk", "lsp" } },
+                auto_attach = { enabled = false },
+            },
+        })
+    end,
+})
+
 -- Command-triggered plugins
 vim.api.nvim_create_user_command("StartupTime", function()
     vim.pack.add({ "https://github.com/tweekmonster/startuptime.vim" })

@@ -122,6 +122,7 @@ local lsp_servers = {
     "tinymist",
     -- "ts_ls",
     "tsgo",
+    "zk",
     "zls",
     -- "pyrefly",
     -- "ty",
