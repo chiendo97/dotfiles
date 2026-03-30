@@ -1,0 +1,58 @@
+default_project: genbooks
+projects:
+  genbooks:
+    project_id: 271d67a3-7e1d-8081-b144-ce1b112c7bb0
+    database_id: 2251326d09cf461b9655ce2c652e1ccb
+    tickets_data_source_id: 2b167656-1e8a-4348-8b9b-0d4f4e515976
+    sprints_data_source_id: 51b222ca-f5ad-49e5-b88f-f7e6286d17b1
+    epics_data_source_id: 242e6b4e-4218-441c-b278-7ccc700bad7e
+    epics_database_id: d6c00c58-cea6-40a2-a347-1d0193c928f2
+    prop_epic: Related Genbook | Epics
+    prop_sprint: Sprint
+    prop_sprint_date: Start Date
+    prop_project: ''
+    epic_status_type: select
+  genbook-global:
+    project_id: 2fbd67a3-7e1d-8005-b379-c2eff00a6119
+    database_id: 05a49604-c400-4a64-9e5f-ca282dd3e539
+    date_property_type: created_time
+    tickets_data_source_id: 10b97c57-9336-4c96-bffe-de6bf6392318
+    sprints_data_source_id: a0557733-3eae-43a2-aae4-4bb0b351a73d
+    epics_data_source_id: 9f5800b6-a4db-4fe9-85ed-ed521d11ff16
+    epics_database_id: 619c4eb7-dd42-4c8c-a071-617c229f3ca2
+    prop_epic: Epic
+    prop_sprint: Sprint
+    prop_sprint_date: Start Date
+    prop_project: ''
+    epic_status_type: status
+users:
+  nguyễn đức huy: 17e2e325-d86d-4578-ab3e-86a31726af15
+  huy: 17e2e325-d86d-4578-ab3e-86a31726af15
+  thùy linh: 19b27d98-43c6-4004-b77a-d94b9d55537c
+  linh: 19b27d98-43c6-4004-b77a-d94b9d55537c
+  hieu ha: 222d872b-594c-81a3-bcbf-0002aa6ab068
+  hieu: 222d872b-594c-81a3-bcbf-0002aa6ab068
+  thành đạt: 251d872b-594c-81db-a90a-00021649de5e
+  dat: 251d872b-594c-81db-a90a-00021649de5e
+  cle: 293d872b-594c-818b-b7c8-00022a9e2b96
+  dungpb: 29dd872b-594c-81b5-b807-00024ed0268e
+  hoangi19: 2bbd872b-594c-819d-8d18-0002b886f7f0
+  hoang: 2bbd872b-594c-819d-8d18-0002b886f7f0
+  dung nguyễn: 2dad872b-594c-81ad-b2c9-0002c29f7335
+  dung: 2dad872b-594c-81ad-b2c9-0002c29f7335
+  quang võ: 5bb8176b-d092-42b8-9cb5-15bb1164ebd5
+  quang: 5bb8176b-d092-42b8-9cb5-15bb1164ebd5
+  ngan vu: 737a16e9-101b-4484-b1a5-35a36cc04dff
+  ngan: 737a16e9-101b-4484-b1a5-35a36cc04dff
+  diệu linh nguyễn: 3a5b1918-583f-4943-ac91-80b59b7121bf
+  diệu linh: 3a5b1918-583f-4943-ac91-80b59b7121bf
+  long lê: 61fef284-8f35-42ac-8952-2c941e36e907
+  long: 61fef284-8f35-42ac-8952-2c941e36e907
+  nguyễn minh hải: 150d872b-594c-81b8-9d3e-00029c02ebac
+  yen nguyen: 2fcd872b-594c-8183-bb85-00023bcf55a4
+  linh dao: 31ed872b-594c-8169-a208-0002aaa7a019
+  lương văn tú: 6ffa0267-8c40-40a9-97e8-4dbc26f53241
+  minh hiếu đặng xuân: 8cc4eff9-212d-40a2-9ca9-3f3491c06a20
+  duy bui: e3130ec4-cb70-4017-9a97-6021abca0fe1
+  phan phuc: d418fd1e-cbc1-4c5a-9396-67d77d82d83b
+discord_users: {}

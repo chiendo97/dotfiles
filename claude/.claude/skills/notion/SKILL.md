@@ -9,7 +9,7 @@ description: >
 
 # Notion CLI
 
-Standalone Python CLI for Notion ticket/epic operations. Runs via `uv` with no project dependencies.
+Standalone Python CLI for Notion ticket/epic operations. Runs via `uv` with inline script dependencies (typer, pydantic, pyyaml, certifi).
 
 ## Environment
 
@@ -83,7 +83,8 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py update \
   --page-id "abc123-def456" \
   --status "In progress" \
   --priority High \
-  --assignee huy
+  --assignee huy \
+  --project genbooks
 ```
 
 **Options:**
@@ -94,6 +95,7 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py update \
 - `--ah`: Actual working hours (number)
 - `--assignee`: New assignee name
 - `--description`: New description (replaces existing page content)
+- `--project`: Project key from config
 
 ### Search tickets
 
@@ -137,11 +139,15 @@ Accepts either a human-readable ticket ID (e.g. `GB-319`) or a Notion page ID. S
 ```bash
 uv run /home/cle/.claude/skills/notion/notion_cli.py stale \
   --assignee cle \
+  --since 2026-03-01 \
+  --limit 20 \
   --project genbooks
 ```
 
 **Options:**
 - `--assignee`: Filter by assignee name
+- `--since`: Filter by Sort Date >= YYYY-MM-DD
+- `--limit`: Max results to display (default: 50, 0 for all)
 - `--project`: Project key
 
 **Output:** Lists tickets that have empty status or no AH logged, with a reason tag (e.g. `[no status, no AH]`).
@@ -152,12 +158,14 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py stale \
 uv run /home/cle/.claude/skills/notion/notion_cli.py report \
   --period weekly \
   --assignee cle \
+  --since 2026-03-01 \
   --project genbooks
 ```
 
 **Options:**
 - `--period`: `weekly` (default) or `monthly`
 - `--assignee`: Filter by assignee name
+- `--since`: Filter by Sort Date >= YYYY-MM-DD
 - `--project`: Project key
 
 **Output:** Table showing ticket count, total AH, and average AH per period, sorted newest first, with a summary line.
