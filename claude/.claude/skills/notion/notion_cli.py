@@ -260,13 +260,16 @@ def _read_ticket(page: dict) -> dict:
     }
 
 
-def _build_ticket_query(config: dict, args: argparse.Namespace) -> tuple[str, dict]:
-    """Build a ticket query with optional assignee filter and Sort Date ordering.
+def _build_filter_body(config: dict, args: argparse.Namespace, proj: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Build filter and sort body for ticket queries.
 
-    Returns (database_id, query_body).
+    Uses project-level ``date_property`` (default: ``Sort Date``) for
+    ``--since`` filtering and sort ordering.  The property type defaults to
+    ``formula`` but can be overridden per project via ``date_property_type``
+    (e.g. ``created_time``).
     """
-    proj = get_project_config(config, args.project)
-    database_id = proj["database_id"]
+    date_prop = (proj or {}).get("date_property", "Sort Date")
+    date_type = (proj or {}).get("date_property_type", "formula")
 
     filters: list[dict[str, Any]] = []
     if getattr(args, "assignee", None):
@@ -281,18 +284,59 @@ def _build_ticket_query(config: dict, args: argparse.Namespace) -> tuple[str, di
     if getattr(args, "query", None):
         filters.append({"property": "Name", "title": {"contains": args.query}})
     if getattr(args, "since", None):
-        filters.append({"property": "Sort Date", "formula": {"date": {"on_or_after": args.since}}})
+        if date_type == "formula":
+            filters.append({"property": date_prop, "formula": {"date": {"on_or_after": args.since}}})
+        elif date_type == "created_time":
+            filters.append({"timestamp": "created_time", "created_time": {"on_or_after": args.since}})
+        elif date_type == "last_edited_time":
+            filters.append({"timestamp": "last_edited_time", "last_edited_time": {"on_or_after": args.since}})
+        else:
+            filters.append({"property": date_prop, "date": {"on_or_after": args.since}})
 
-    body: dict[str, Any] = {
-        "page_size": 100,
-        "sorts": [{"property": "Sort Date", "direction": "descending"}],
-    }
+    body: dict[str, Any] = {"page_size": 100}
+    if date_type in ("created_time", "last_edited_time"):
+        body["sorts"] = [{"timestamp": date_type, "direction": "descending"}]
+    else:
+        body["sorts"] = [{"property": date_prop, "direction": "descending"}]
+
     if len(filters) == 1:
         body["filter"] = filters[0]
     elif len(filters) > 1:
         body["filter"] = {"and": filters}
 
+    return body
+
+
+def _build_ticket_query(config: dict, args: argparse.Namespace) -> tuple[str, dict]:
+    """Build a ticket query for a single project.
+
+    Returns (database_id, query_body).
+    """
+    proj = get_project_config(config, args.project)
+    database_id = proj["database_id"]
+    body = _build_filter_body(config, args, proj)
     return database_id, body
+
+
+def _build_ticket_queries(config: dict, args: argparse.Namespace) -> list[tuple[str, str, dict]]:
+    """Build ticket queries across projects.
+
+    When --project is specified, queries that project only.
+    When omitted, queries ALL configured projects.
+
+    Returns list of (project_name, database_id, query_body).
+    """
+    projects = config.get("projects", {})
+    if args.project:
+        proj = get_project_config(config, args.project)
+        body = _build_filter_body(config, args, proj)
+        return [(args.project, proj["database_id"], body)]
+
+    result = []
+    for name, proj in projects.items():
+        body = _build_filter_body(config, args, proj)
+        result.append((name, proj["database_id"], body))
+    return result
 
 
 def _markdown_to_blocks(text: str) -> list[dict[str, Any]]:
@@ -558,16 +602,19 @@ def cmd_update(args: argparse.Namespace) -> None:
 def cmd_search(args: argparse.Namespace) -> None:
     """Search tickets."""
     config = load_config(args.config)
-    database_id, body = _build_ticket_query(config, args)
-    results = _query_database(database_id, body)
+    queries = _build_ticket_queries(config, args)
 
-    if not results:
+    all_results: list[dict] = []
+    for _name, database_id, body in queries:
+        all_results.extend(_query_database(database_id, body))
+
+    if not all_results:
         print("No tickets found.")
         return
 
-    total = len(results)
+    total = len(all_results)
     limit = args.limit
-    display = results if limit == 0 else results[:limit]
+    display = all_results if limit == 0 else all_results[:limit]
     truncated = limit > 0 and total > limit
 
     print(f"Found {total} ticket(s):\n")
@@ -590,8 +637,11 @@ def cmd_search(args: argparse.Namespace) -> None:
 def cmd_stale(args: argparse.Namespace) -> None:
     """List stale tickets (no status or no AH)."""
     config = load_config(args.config)
-    database_id, body = _build_ticket_query(config, args)
-    results = _query_database(database_id, body)
+    queries = _build_ticket_queries(config, args)
+
+    results: list[dict] = []
+    for _name, database_id, body in queries:
+        results.extend(_query_database(database_id, body))
 
     stale: list[tuple[dict, str]] = []
     for page in results:
@@ -624,27 +674,35 @@ def cmd_stale(args: argparse.Namespace) -> None:
 def cmd_epics(args: argparse.Namespace) -> None:
     """List epics."""
     config = load_config(args.config)
-    proj = get_project_config(config, args.project)
-    epics_db = proj.get("epics_database_id", "")
-    if not epics_db:
-        print("Error: no epics_database_id configured for this project", file=sys.stderr)
-        sys.exit(1)
+    projects = config.get("projects", {})
 
-    status_type = proj.get("epic_status_type", "select")
+    if args.project:
+        proj_items = [(args.project, get_project_config(config, args.project))]
+    else:
+        proj_items = list(projects.items())
 
-    body: dict[str, Any] = {"page_size": 100}
-    if args.status:
-        body["filter"] = {
-            "property": "Status",
-            status_type: {"equals": args.status},
-        }
+    all_results: list[dict] = []
+    for name, proj in proj_items:
+        epics_db = proj.get("epics_database_id", "")
+        if not epics_db:
+            continue
 
-    results = _query_database(epics_db, body)
+        status_type = proj.get("epic_status_type", "select")
 
-    if not results:
+        body: dict[str, Any] = {"page_size": 100}
+        if args.status:
+            body["filter"] = {
+                "property": "Status",
+                status_type: {"equals": args.status},
+            }
+
+        all_results.extend(_query_database(epics_db, body))
+
+    if not all_results:
         print("No epics found.")
         return
 
+    results = all_results
     print(f"Found {len(results)} epic(s):\n")
     for page in results:
         props = page.get("properties", {})
@@ -675,11 +733,15 @@ def _resolve_ticket_date(t: dict) -> str:
 def cmd_report(args: argparse.Namespace) -> None:
     """AH report grouped by week or month."""
     config = load_config(args.config)
-    database_id, body = _build_ticket_query(config, args)
-    results = _query_database(database_id, body)
+    queries = _build_ticket_queries(config, args)
 
-    proj = get_project_config(config, args.project)
-    proj_name = args.project or config.get("default_project", "")
+    results: list[dict] = []
+    proj_names: list[str] = []
+    for name, database_id, body in queries:
+        results.extend(_query_database(database_id, body))
+        proj_names.append(name)
+
+    proj_name = ", ".join(proj_names)
 
     period = getattr(args, "period", "weekly")
     buckets: dict[str, list[float]] = {}
@@ -730,8 +792,7 @@ def cmd_report(args: argparse.Namespace) -> None:
 def cmd_get_ticket(args: argparse.Namespace) -> None:
     """Get full detail for a single ticket by ID or page-id."""
     config = load_config(args.config)
-    proj = get_project_config(config, args.project)
-    database_id = proj["database_id"]
+    projects = config.get("projects", {})
 
     ticket_arg = args.ticket
     match = re.match(r'^([A-Za-z]+)-(\d+)$', ticket_arg)
@@ -745,11 +806,25 @@ def cmd_get_ticket(args: argparse.Namespace) -> None:
                 "unique_id": {"equals": number},
             },
         }
-        results = _query_database(database_id, body)
-        if not results:
+
+        # Determine which projects to search
+        if args.project:
+            search_projects = [get_project_config(config, args.project)]
+        else:
+            search_projects = list(projects.values())
+
+        page = None
+        for proj in search_projects:
+            results = _query_database(proj["database_id"], body)
+            if results:
+                # Verify prefix matches the ticket ID
+                found_ticket = _read_ticket(results[0])
+                if found_ticket["ticket_id"] and found_ticket["ticket_id"].upper() == ticket_arg.upper():
+                    page = results[0]
+                    break
+        if not page:
             print(f"No ticket found matching '{ticket_arg}'.", file=sys.stderr)
             sys.exit(1)
-        page = results[0]
     else:
         # Treat as page-id
         page = _get(f"/pages/{ticket_arg}")
