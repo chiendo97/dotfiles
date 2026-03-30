@@ -473,6 +473,7 @@
   home.sessionVariables = {
     EDITOR = "nvim";
     LC_CTYPE = "en_US.UTF-8";
+    ZK_NOTEBOOK_DIR = "${config.home.homeDirectory}/Source/selfhost/zk";
   } // lib.optionalAttrs pkgs.stdenv.isLinux {
     DOCKER_HOST = "unix:///run/user/1000/podman/podman.sock";
   } // lib.optionalAttrs pkgs.stdenv.isDarwin {
