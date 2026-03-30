@@ -54,12 +54,27 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py create \
 
 **Options:**
 - `--title` (required): Ticket title
-- `--description`: Ticket description (stored in Description property)
+- `--description`: Ticket description (added as page content)
 - `--priority`: Low | Medium | High | Critical (default: Medium)
 - `--status`: Not started | In progress | Done | Backlog
 - `--assignee`: User name from config
 - `--epic`: Epic name (searches epics database to link)
 - `--project`: Project key from config
+
+**Description convention:** When creating tickets, format the `--description` with this structure:
+
+```
+## Context
+Why this ticket exists — the problem, trigger, or motivation.
+
+## What
+What needs to be done — specific changes, scope.
+
+## Acceptance Criteria
+- [ ] Concrete conditions that define "done"
+```
+
+Omit sections that don't apply (e.g., a simple bug fix might skip Acceptance Criteria).
 
 ### Update a ticket
 
@@ -76,8 +91,9 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py update \
 - `--title`: New title
 - `--status`: Not started | In progress | Done | Backlog
 - `--priority`: Low | Medium | High | Critical
+- `--ah`: Actual working hours (number)
 - `--assignee`: New assignee name
-- `--description`: New description (updates Description property)
+- `--description`: New description (replaces existing page content)
 
 ### Search tickets
 
@@ -85,15 +101,36 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py update \
 uv run /home/cle/.claude/skills/notion/notion_cli.py search \
   --assignee cle \
   --status "In progress" \
+  --query "auth" \
+  --since 2026-03-01 \
+  --limit 20 \
   --project genbooks
 ```
 
 **Options:**
 - `--assignee`: Filter by assignee name
 - `--status`: Filter by status
+- `--query`: Search by title (case-insensitive substring)
+- `--since`: Filter by Sort Date >= YYYY-MM-DD
+- `--limit`: Max results to display (default: 50, 0 for all)
 - `--project`: Project key
 
-**Output:** Lists tickets sorted by Sort Date (newest first) with ID, name, status, priority, assignee, AH, dates (Sort/Created/Updated with relative times), and URL.
+All filters combine with AND logic.
+
+**Output:** Lists tickets sorted by Sort Date (newest first) with ID, name, status, priority, assignee, AH, MR (if present), dates (Sort/Created/Updated with relative times), and URL.
+
+### Get ticket details
+
+```bash
+uv run /home/cle/.claude/skills/notion/notion_cli.py get-ticket GB-319
+uv run /home/cle/.claude/skills/notion/notion_cli.py get-ticket 3db52639-55bd-4228-90f7-298586ddaa98
+```
+
+Accepts either a human-readable ticket ID (e.g. `GB-319`) or a Notion page ID. Shows full ticket detail including the complete description.
+
+**Options:**
+- `ticket` (required, positional): Ticket ID or page ID
+- `--project`: Project key
 
 ### List stale tickets
 

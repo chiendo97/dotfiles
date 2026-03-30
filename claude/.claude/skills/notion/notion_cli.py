@@ -19,6 +19,7 @@ Config:
 import argparse
 import json
 import os
+import re
 import ssl
 import sys
 import urllib.error
@@ -144,12 +145,6 @@ def _read_status(props: dict) -> str:
     return val.get("name", "") if val else ""
 
 
-def _read_rich_text(props: dict, key: str) -> str:
-    """Extract plain text from a rich_text property."""
-    texts = props.get(key, {}).get("rich_text", [])
-    return "".join(t.get("plain_text", "") for t in texts)
-
-
 def _read_select(props: dict, key: str) -> str:
     sel = props.get(key, {}).get("select", {})
     return sel.get("name", "") if sel else ""
@@ -170,6 +165,10 @@ def _read_unique_id(props: dict) -> str:
             if prefix and number is not None:
                 return f"{prefix}-{number}"
     return ""
+
+
+def _read_url(props: dict, key: str) -> str:
+    return props.get(key, {}).get("url", "") or ""
 
 
 def _read_number(props: dict, key: str) -> float | int | None:
@@ -255,7 +254,7 @@ def _read_ticket(page: dict) -> dict:
         "sort_date": _read_formula_date(props, "Sort Date"),
         "created": _read_timestamp(props, "Created time"),
         "edited": _read_timestamp(props, "Last edited time"),
-        "description": _read_rich_text(props, "Description"),
+        "gitlab_mr": _read_url(props, "Gitlab MR"),
         "url": page.get("url", ""),
         "page_id": page.get("id", ""),
     }
@@ -279,6 +278,10 @@ def _build_ticket_query(config: dict, args: argparse.Namespace) -> tuple[str, di
         filters.append({"property": "Assignee", "people": {"contains": user_id}})
     if getattr(args, "status", None):
         filters.append({"property": "Status", "status": {"equals": args.status}})
+    if getattr(args, "query", None):
+        filters.append({"property": "Name", "title": {"contains": args.query}})
+    if getattr(args, "since", None):
+        filters.append({"property": "Sort Date", "formula": {"date": {"on_or_after": args.since}}})
 
     body: dict[str, Any] = {
         "page_size": 100,
@@ -291,6 +294,129 @@ def _build_ticket_query(config: dict, args: argparse.Namespace) -> tuple[str, di
 
     return database_id, body
 
+
+def _markdown_to_blocks(text: str) -> list[dict[str, Any]]:
+    """Convert markdown text to Notion blocks.
+
+    Supports headings (h1-h3), to-do items, bulleted lists, and paragraphs.
+    Consecutive plain-text lines are joined into a single paragraph block.
+    """
+    if not text:
+        return []
+
+    def _rich_text(content: str) -> list[dict[str, Any]]:
+        return [{"type": "text", "text": {"content": content}}]
+
+    blocks: list[dict[str, Any]] = []
+    paragraph_lines: list[str] = []
+
+    def _flush_paragraph() -> None:
+        if paragraph_lines:
+            blocks.append({
+                "object": "block",
+                "type": "paragraph",
+                "paragraph": {"rich_text": _rich_text("\n".join(paragraph_lines))},
+            })
+            paragraph_lines.clear()
+
+    for line in text.split("\n"):
+        stripped = line.strip()
+        if not stripped:
+            _flush_paragraph()
+            continue
+
+        # Headings
+        heading_match = re.match(r'^(#{1,3})\s+(.*)', stripped)
+        if heading_match:
+            _flush_paragraph()
+            level = len(heading_match.group(1))
+            heading_type = f"heading_{level}"
+            blocks.append({
+                "object": "block",
+                "type": heading_type,
+                heading_type: {"rich_text": _rich_text(heading_match.group(2).strip())},
+            })
+            continue
+
+        # To-do items (checked)
+        todo_checked = re.match(r'^- \[x\]\s+(.*)', stripped, re.IGNORECASE)
+        if todo_checked:
+            _flush_paragraph()
+            blocks.append({
+                "object": "block",
+                "type": "to_do",
+                "to_do": {"rich_text": _rich_text(todo_checked.group(1).strip()), "checked": True},
+            })
+            continue
+
+        # To-do items (unchecked)
+        todo_unchecked = re.match(r'^- \[ \]\s+(.*)', stripped)
+        if todo_unchecked:
+            _flush_paragraph()
+            blocks.append({
+                "object": "block",
+                "type": "to_do",
+                "to_do": {"rich_text": _rich_text(todo_unchecked.group(1).strip()), "checked": False},
+            })
+            continue
+
+        # Bulleted list items
+        bullet_match = re.match(r'^- (.*)', stripped)
+        if bullet_match:
+            _flush_paragraph()
+            blocks.append({
+                "object": "block",
+                "type": "bulleted_list_item",
+                "bulleted_list_item": {"rich_text": _rich_text(bullet_match.group(1).strip())},
+            })
+            continue
+
+        # Plain text — accumulate for paragraph grouping
+        paragraph_lines.append(stripped)
+
+    _flush_paragraph()
+    return blocks
+
+
+def _read_page_content(page_id: str) -> str:
+    """Read all text content from a page's children blocks."""
+    parts: list[str] = []
+    url = f"/blocks/{page_id}/children"
+    while True:
+        resp = _get(url)
+        for block in resp.get("results", []):
+            btype = block.get("type", "")
+            texts = block.get(btype, {}).get("rich_text", [])
+            text = "".join(t.get("plain_text", "") for t in texts)
+            if text:
+                parts.append(text)
+        if not resp.get("has_more"):
+            break
+        url = f"/blocks/{page_id}/children?start_cursor={resp['next_cursor']}"
+    return "\n\n".join(parts)
+
+
+def _replace_page_blocks(page_id: str, new_blocks: list[dict[str, Any]]) -> None:
+    """Replace all blocks in a page."""
+    # Collect all block IDs first to avoid cursor invalidation during deletion
+    block_ids: list[str] = []
+    url = f"/blocks/{page_id}/children"
+    while True:
+        existing = _get(url)
+        for block in existing.get("results", []):
+            block_ids.append(block["id"])
+        if not existing.get("has_more"):
+            break
+        url = f"/blocks/{page_id}/children?start_cursor={existing['next_cursor']}"
+
+    for bid in block_ids:
+        _request("DELETE", f"/blocks/{bid}")
+
+    # Append new blocks in batches of 100
+    if new_blocks:
+        for i in range(0, len(new_blocks), 100):
+            batch = new_blocks[i:i + 100]
+            _patch(f"/blocks/{page_id}/children", {"children": batch})
 
 
 # =============================================================================
@@ -355,15 +481,14 @@ def cmd_create(args: argparse.Namespace) -> None:
             else:
                 print(f"Warning: epic '{args.epic}' not found, skipping epic link", file=sys.stderr)
 
-    if args.description:
-        properties["Description"] = {
-            "rich_text": [{"type": "text", "text": {"content": args.description}}]
-        }
+    children = _markdown_to_blocks(args.description) if args.description else []
 
     payload: dict[str, Any] = {
         "parent": {"database_id": database_id},
         "properties": properties,
     }
+    if children:
+        payload["children"] = children
 
     page = _post("/pages", payload)
 
@@ -412,16 +537,17 @@ def cmd_update(args: argparse.Namespace) -> None:
             sys.exit(1)
         properties["Assignee"] = {"people": [{"id": user_id}]}
 
-    if args.description:
-        properties["Description"] = {
-            "rich_text": [{"type": "text", "text": {"content": args.description}}]
-        }
-
-    if not properties:
+    if not properties and not args.description:
         print("Error: nothing to update. Provide at least one field.", file=sys.stderr)
         sys.exit(1)
 
-    page = _patch(f"/pages/{args.page_id}", {"properties": properties})
+    if properties:
+        page = _patch(f"/pages/{args.page_id}", {"properties": properties})
+    else:
+        page = _get(f"/pages/{args.page_id}")
+
+    if args.description:
+        _replace_page_blocks(args.page_id, _markdown_to_blocks(args.description))
 
     url = page.get("url", "")
     print(f"Updated: {args.page_id}")
@@ -439,16 +565,26 @@ def cmd_search(args: argparse.Namespace) -> None:
         print("No tickets found.")
         return
 
-    print(f"Found {len(results)} ticket(s):\n")
-    for page in results:
+    total = len(results)
+    limit = args.limit
+    display = results if limit == 0 else results[:limit]
+    truncated = limit > 0 and total > limit
+
+    print(f"Found {total} ticket(s):\n")
+    for page in display:
         t = _read_ticket(page)
         ah_str = str(t["ah"]) if t["ah"] is not None else "-"
         label = f"[{t['ticket_id']}]" if t["ticket_id"] else f"[{t['page_id'][:8]}]"
         print(f"  {label} {t['name']}")
         print(f"    Status: {t['status']} | Priority: {t['priority']} | Assignee: {t['assignee']} | AH: {ah_str}")
         print(f"    Sort: {_format_date(t['sort_date'])} | Created: {_format_dt(t['created'])} ({_format_relative(t['created'])}) | Updated: {_format_dt(t['edited'])} ({_format_relative(t['edited'])})")
+        if t["gitlab_mr"]:
+            print(f"    MR: {t['gitlab_mr']}")
         print(f"    URL: {t['url']}")
         print()
+
+    if truncated:
+        print(f"Showing {limit} of {total} ticket(s). Use --limit to see more.")
 
 
 def cmd_stale(args: argparse.Namespace) -> None:
@@ -479,6 +615,8 @@ def cmd_stale(args: argparse.Namespace) -> None:
         print(f"  {label} {t['name']}  [{reason}]")
         print(f"    Status: {t['status']} | Priority: {t['priority']} | Assignee: {t['assignee']} | AH: {ah_str}")
         print(f"    Sort: {_format_date(t['sort_date'])} | Created: {_format_dt(t['created'])} ({_format_relative(t['created'])}) | Updated: {_format_dt(t['edited'])} ({_format_relative(t['edited'])})")
+        if t["gitlab_mr"]:
+            print(f"    MR: {t['gitlab_mr']}")
         print(f"    URL: {t['url']}")
         print()
 
@@ -589,6 +727,56 @@ def cmd_report(args: argparse.Namespace) -> None:
     print(f"\nSummary: {total_tickets} tickets, {total_ah:.0f} AH total, {overall_avg:.1f} avg")
 
 
+def cmd_get_ticket(args: argparse.Namespace) -> None:
+    """Get full detail for a single ticket by ID or page-id."""
+    config = load_config(args.config)
+    proj = get_project_config(config, args.project)
+    database_id = proj["database_id"]
+
+    ticket_arg = args.ticket
+    match = re.match(r'^([A-Za-z]+)-(\d+)$', ticket_arg)
+
+    if match:
+        # Human-readable ticket ID like GB-319
+        number = int(match.group(2))
+        body = {
+            "filter": {
+                "property": "ID",
+                "unique_id": {"equals": number},
+            },
+        }
+        results = _query_database(database_id, body)
+        if not results:
+            print(f"No ticket found matching '{ticket_arg}'.", file=sys.stderr)
+            sys.exit(1)
+        page = results[0]
+    else:
+        # Treat as page-id
+        page = _get(f"/pages/{ticket_arg}")
+
+    t = _read_ticket(page)
+
+    ticket_label = t["ticket_id"] or t["page_id"][:8]
+    type_str = _read_select(page.get("properties", {}), "Type")
+    type_part = f" [{type_str}]" if type_str else ""
+    ah_str = str(t["ah"]) if t["ah"] is not None else "-"
+
+    print(f"[{ticket_label}]{type_part} {t['name']}")
+    print(f"  Status: {t['status']} | Priority: {t['priority']} | Assignee: {t['assignee']} | AH: {ah_str}")
+    print(f"  Sort: {_format_date(t['sort_date'])} | Created: {_format_dt(t['created'])} ({_format_relative(t['created'])}) | Updated: {_format_dt(t['edited'])} ({_format_relative(t['edited'])})")
+    if t["gitlab_mr"]:
+        print(f"  MR: {t['gitlab_mr']}")
+    print(f"  URL: {t['url']}")
+
+    # Read page content (children blocks) as description
+    content = _read_page_content(t["page_id"])
+    if content.strip():
+        print()
+        print("  Description:")
+        for line in content.splitlines():
+            print(f"    {line}")
+
+
 def cmd_users(args: argparse.Namespace) -> None:
     """Discover workspace users."""
     config = load_config(args.config)
@@ -688,6 +876,9 @@ def main() -> None:
     p_search = subparsers.add_parser("search", help="Search tickets")
     p_search.add_argument("--assignee", help="Filter by assignee name")
     p_search.add_argument("--status", help="Filter by status")
+    p_search.add_argument("--query", help="Search by title (case-insensitive substring)")
+    p_search.add_argument("--since", help="Filter by Sort Date >= YYYY-MM-DD")
+    p_search.add_argument("--limit", type=int, default=50, help="Max results to display (default: 50, 0 for all)")
     p_search.add_argument("--project", help="Project key")
 
     # --- stale ---
@@ -711,6 +902,11 @@ def main() -> None:
     p_report.add_argument("--assignee", help="Filter by assignee name")
     p_report.add_argument("--project", help="Project key")
 
+    # --- get-ticket ---
+    p_get_ticket = subparsers.add_parser("get-ticket", help="Get full detail for a single ticket")
+    p_get_ticket.add_argument("ticket", help="Ticket ID (e.g. GB-319) or Notion page-id")
+    p_get_ticket.add_argument("--project", help="Project key")
+
     # --- users ---
     subparsers.add_parser("users", help="Discover workspace users")
 
@@ -723,6 +919,7 @@ def main() -> None:
         "stale": cmd_stale,
         "epics": cmd_epics,
         "report": cmd_report,
+        "get-ticket": cmd_get_ticket,
         "users": cmd_users,
     }
     commands[args.command](args)
