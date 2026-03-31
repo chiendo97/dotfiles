@@ -62,6 +62,8 @@
     curl
     wget
 
+    glances # system monitoring (also runs as web service)
+
     # Network tools
     dnsutils # dig, nslookup, nsupdate
     traceroute
@@ -77,6 +79,13 @@
 
   # nix-ld: dynamic linker for generic Linux binaries (uv, etc.)
   programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    fuse  # libfuse2 — needed by fusepy (ctypes.util.find_library("fuse"))
+    fuse3
+  ];
+
+  # Expose nix-ld libraries to LD_LIBRARY_PATH so ctypes.util.find_library works
+  environment.sessionVariables.LD_LIBRARY_PATH = [ "/run/current-system/sw/share/nix-ld/lib" ];
 
   # Rootless podman
   virtualisation.podman = {
@@ -88,6 +97,19 @@
   systemd.services."user@".serviceConfig.Delegate = "yes";
   users.users.cle.subUidRanges = [{ startUid = 100000; count = 65536; }];
   users.users.cle.subGidRanges = [{ startGid = 100000; count = 65536; }];
+
+  # Glances system monitor (web UI on port 61208)
+  # Accessible via localhost and Tailscale (trustedInterfaces)
+  systemd.services.glances = {
+    description = "Glances system monitor (web mode)";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.glances}/bin/glances -w -B 0.0.0.0";
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
+  };
 
   # QEMU guest agent
   services.qemuGuest.enable = true;
