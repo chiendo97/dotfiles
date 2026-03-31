@@ -1,7 +1,8 @@
 vim.api.nvim_create_autocmd("FileType", {
-    pattern = "csv",
+    pattern = { "csv", "tsv" },
     once = true,
     callback = function()
+        vim.notify("Loading csvview.nvim...")
         vim.pack.add({ "https://github.com/hat0uma/csvview.nvim" })
         require("csvview").setup({
             view = { display_mode = "border" },
