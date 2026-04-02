@@ -7,6 +7,7 @@ with pkgs; [
   hledger
   htop
   jq
+  yq-go
   ripgrep
   stow
   tree
