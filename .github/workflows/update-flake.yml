@@ -12,6 +12,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          determinate: false
 
       - uses: DeterminateSystems/magic-nix-cache-action@main
 
