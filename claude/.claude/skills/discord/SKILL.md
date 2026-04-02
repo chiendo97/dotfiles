@@ -28,8 +28,9 @@ Run it with `uv` — no virtualenv needed.
 |---------|-------------|
 | `send` | Send a message to a channel, thread, or DM |
 | `edit` | Edit an existing message |
-| `get` | Get recent messages from a channel |
+| `get` | Get recent messages from a channel or thread |
 | `channels` | List all channels in a guild |
+| `threads` | List active threads in a guild (optionally filtered by channel) |
 | `thread` | Create a new thread (public, private, or announcement) |
 | `react` | React to a message with an emoji |
 | `send-file` | Upload a file to a channel, thread, or DM |
@@ -88,7 +89,8 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py edit --channel-id 123456 
 
 ### get — Get recent messages
 
-Retrieves messages in chronological order (oldest first).
+Retrieves messages in chronological order (oldest first). Works with both channels and threads
+(threads are channels in Discord's API — use the thread ID as `--channel-id`).
 
 ```bash
 # Get last 20 messages (default)
@@ -96,11 +98,14 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py get --channel-id 123456
 
 # Get last 50 messages
 uv run /home/cle/.claude/skills/discord/discord_cli.py get --channel-id 123456 --limit 50
+
+# Get messages from a thread (use thread ID as channel-id)
+uv run /home/cle/.claude/skills/discord/discord_cli.py get --channel-id 1488803431698272387 --limit 20
 ```
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `--channel-id` | Yes | Channel to read from |
+| `--channel-id` | Yes | Channel or thread ID to read from |
 | `--limit` | No | Number of messages to fetch (default: 20, max: 100) |
 
 ---
@@ -120,6 +125,40 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py channels --guild-id 11122
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `--guild-id` | No | Guild ID (overrides default from env or global option) |
+
+---
+
+### threads — List active threads
+
+Lists all active (non-archived) threads in the guild, grouped by parent channel.
+Use `--channel-id` to filter threads under a specific channel. Thread IDs from this
+output can be passed to `get --channel-id` to read thread messages.
+
+```bash
+# List all active threads in the guild
+uv run /home/cle/.claude/skills/discord/discord_cli.py threads
+
+# List threads under a specific channel
+uv run /home/cle/.claude/skills/discord/discord_cli.py threads --channel-id 1417919945538273372
+```
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `--channel-id` | No | Filter threads by parent channel ID |
+| `--guild-id` | No | Guild ID (overrides default from env or global option) |
+
+**Output format:**
+```
+[#genbooks]
+  💬 Mr 327  (id:1488803431698272387)
+     msgs:3 | members:2 | created:2026-04-01 07:34:43
+
+--- 1 active thread(s) ---
+```
+
+**Workflow — reading thread messages:**
+1. Run `threads` to discover active threads and their IDs
+2. Run `get --channel-id <thread-id>` to read messages from a specific thread
 
 ---
 

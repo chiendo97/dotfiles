@@ -1,4 +1,7 @@
 {
+  "env": {
+    "DISCORD_GUILD_ID": "1181560951141584926"
+  },
   "hooks": {
     "Notification": [
       {
@@ -21,7 +24,8 @@
     "skill-creator@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "impeccable@impeccable": true,
-    "code-simplifier@claude-plugins-official": true
+    "code-simplifier@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "impeccable": {
@@ -31,8 +35,5 @@
       }
     }
   },
-  "skipDangerousModePermissionPrompt": true,
-  "env": {
-    "DISCORD_GUILD_ID": "1181560951141584926"
-  }
+  "skipDangerousModePermissionPrompt": true
 }

@@ -130,6 +130,15 @@ class Channel(BaseModel):
         return f"  #{self.name}  (id:{self.id}, type:{self.type_name})"
 
 
+class ThreadMetadata(BaseModel):
+    """Discord thread metadata."""
+
+    model_config = ConfigDict(extra="ignore")  # pyright: ignore[reportUnannotatedClassAttribute]
+
+    archived: bool = False
+    create_timestamp: str | None = None
+
+
 class Thread(BaseModel):
     """A created Discord thread."""
 
@@ -144,6 +153,33 @@ class Thread(BaseModel):
 
     def display(self) -> str:
         return f"Created thread: {self.name} (id:{self.id})"
+
+
+class ActiveThread(BaseModel):
+    """An active Discord thread with metadata."""
+
+    model_config = ConfigDict(extra="ignore")  # pyright: ignore[reportUnannotatedClassAttribute]
+
+    id: str
+    name: str = "?"
+    parent_id: str | None = None
+    message_count: int = 0
+    member_count: int = 0
+    thread_metadata: ThreadMetadata = ThreadMetadata()
+
+    @classmethod
+    def from_response(cls, data: dict[str, Any]) -> ActiveThread:
+        return cls.model_validate(data)
+
+    def display(self, parent_name: str | None = None) -> str:
+        created = ""
+        if self.thread_metadata.create_timestamp:
+            created = self.thread_metadata.create_timestamp[:19].replace("T", " ")
+        parent_info = f" in #{parent_name}" if parent_name else ""
+        return (
+            f"  💬 {self.name}  (id:{self.id}){parent_info}\n"
+            f"     msgs:{self.message_count} | members:{self.member_count} | created:{created}"
+        )
 
 
 class SentMessage(BaseModel):
@@ -418,6 +454,59 @@ def channels(
         print(f"--- {len(parsed)} channel(s) ---")
     else:
         print("No channels found.")
+
+
+@app.command()
+def threads(
+    channel_id: Annotated[str | None, typer.Option("--channel-id", help="Filter by parent channel ID")] = None,
+    guild_id: Annotated[str | None, typer.Option("--guild-id", help="Guild ID (overrides default)")] = None,
+) -> None:
+    """List active threads in the guild."""
+    effective_guild_id = guild_id or _guild_id
+    if not effective_guild_id:
+        print("Error: DISCORD_GUILD_ID environment variable is not set and --guild-id not provided.", file=sys.stderr)
+        raise typer.Exit(code=1)
+
+    result = api_request("GET", f"/guilds/{effective_guild_id}/threads/active")
+    if not result or not isinstance(result, dict):
+        print("No active threads found.")
+        return
+
+    raw_threads: list[dict[str, Any]] = result.get("threads", [])
+    parsed = [ActiveThread.from_response(t) for t in raw_threads]
+
+    if channel_id:
+        parsed = [t for t in parsed if t.parent_id == channel_id]
+
+    if not parsed:
+        print("No active threads found.")
+        return
+
+    # Resolve parent channel names for display
+    parent_ids = {t.parent_id for t in parsed if t.parent_id}
+    parent_names: dict[str, str] = {}
+    if parent_ids:
+        guild_channels = api_request("GET", f"/guilds/{effective_guild_id}/channels")
+        if guild_channels and isinstance(guild_channels, list):
+            for ch in guild_channels:
+                ch_id = ch.get("id", "")
+                if ch_id in parent_ids:
+                    parent_names[ch_id] = ch.get("name", ch_id)
+
+    # Group by parent channel
+    groups: dict[str | None, list[ActiveThread]] = {}
+    for t in parsed:
+        groups.setdefault(t.parent_id, []).append(t)
+
+    for parent_id, group_threads in sorted(groups.items(), key=lambda x: parent_names.get(x[0] or "", "")):
+        header = f"#{parent_names.get(parent_id or '', parent_id or 'unknown')}"
+        print(f"[{header}]")
+        for t in sorted(group_threads, key=lambda x: x.thread_metadata.create_timestamp or "", reverse=True):
+            parent_name = parent_names.get(t.parent_id or "") if not channel_id else None
+            print(t.display(parent_name))
+        print()
+
+    print(f"--- {len(parsed)} active thread(s) ---")
 
 
 @app.command()
