@@ -91,6 +91,7 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py edit --channel-id 123456 
 
 Retrieves messages in chronological order (oldest first). Works with both channels and threads
 (threads are channels in Discord's API — use the thread ID as `--channel-id`).
+Displays text content, embeds (title, description, fields), and attachments.
 
 ```bash
 # Get last 20 messages (default)

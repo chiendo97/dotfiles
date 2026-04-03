@@ -82,6 +82,44 @@ class Author(BaseModel):
     username: str = "unknown"
 
 
+class EmbedField(BaseModel):
+    """A field within a Discord embed."""
+
+    model_config = ConfigDict(extra="ignore")  # pyright: ignore[reportUnannotatedClassAttribute]
+
+    name: str = ""
+    value: str = ""
+    inline: bool = False
+
+
+class Embed(BaseModel):
+    """A Discord message embed."""
+
+    model_config = ConfigDict(extra="ignore")  # pyright: ignore[reportUnannotatedClassAttribute]
+
+    title: str = ""
+    description: str = ""
+    url: str = ""
+    color: int | None = None
+    fields: list[EmbedField] = []
+
+    def display(self) -> str:
+        lines: list[str] = []
+        if self.title:
+            header = f"  [embed] {self.title}"
+            if self.url:
+                header += f" — {self.url}"
+            lines.append(header)
+        elif self.url:
+            lines.append(f"  [embed] {self.url}")
+        if self.description:
+            for desc_line in self.description.split("\n"):
+                lines.append(f"    {desc_line}")
+        for field in self.fields:
+            lines.append(f"    {field.name}: {field.value}")
+        return "\n".join(lines)
+
+
 class Message(BaseModel):
     """A Discord message."""
 
@@ -92,6 +130,7 @@ class Message(BaseModel):
     timestamp: str = ""
     author: Author = Author()
     attachments: list[Attachment] = []
+    embeds: list[Embed] = []
 
     @classmethod
     def from_response(cls, data: dict[str, Any]) -> Message:
@@ -102,6 +141,8 @@ class Message(BaseModel):
         lines = [f"[{ts}] {self.author.username} (msg:{self.id})"]
         if self.content:
             lines.append(f"  {self.content}")
+        for embed in self.embeds:
+            lines.append(embed.display())
         for att in self.attachments:
             lines.append(att.display())
         return "\n".join(lines)
