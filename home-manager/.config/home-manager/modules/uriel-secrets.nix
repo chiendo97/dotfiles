@@ -7,6 +7,7 @@
     uriel-api-keys = {
       file = ../secrets/uriel-api-keys.age;
       path = "${config.home.homeDirectory}/.secrets/uriel-api-keys";
+      mode = "600";
     };
     rclone = {
       file = ../secrets/rclone.age;
@@ -76,5 +77,7 @@
   programs.zsh.initContent = ''
     # Uriel API Keys - managed by agenix
     source ~/.secrets/uriel-api-keys 2>/dev/null
+    unset GITHUB_TOKEN
+    unset ANTHROPIC_API_KEY
   '';
 }

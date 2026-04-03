@@ -64,5 +64,6 @@
     # API Keys - managed by agenix
     source ~/.secrets/api-keys 2>/dev/null
     unset GITHUB_TOKEN
+    unset ANTHROPIC_API_KEY
   '';
 }
