@@ -4,6 +4,10 @@
   age.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519_uriel_dev" ];
 
   age.secrets = {
+    uriel-api-keys = {
+      file = ../secrets/uriel-api-keys.age;
+      path = "${config.home.homeDirectory}/.secrets/uriel-api-keys";
+    };
     rclone = {
       file = ../secrets/rclone.age;
       path = "${config.home.homeDirectory}/.config/rclone/rclone.conf";
@@ -68,4 +72,9 @@
       identitiesOnly = true;
     };
   };
+
+  programs.zsh.initContent = ''
+    # Uriel API Keys - managed by agenix
+    source ~/.secrets/uriel-api-keys 2>/dev/null
+  '';
 }

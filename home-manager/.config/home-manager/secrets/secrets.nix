@@ -24,6 +24,9 @@ in
   "oracle.age".publicKeys = [ cle ];
   "nixos_cle.age".publicKeys = [ cle ];
 
+  # === Uriel/work API keys (cle + uriel-dev keys) ===
+  "uriel-api-keys.age".publicKeys = [ cle uriel-dev ];
+
   # === Uriel/work secrets (cle + uriel-dev keys) ===
   "rclone.age".publicKeys = [ cle uriel-dev ];
   "uriel_rsa.age".publicKeys = [ cle uriel-dev ];
