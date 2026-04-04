@@ -5,6 +5,11 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.pack.add({ "https://github.com/MeanderingProgrammer/render-markdown.nvim" })
         require("render-markdown").setup({
             render_modes = { "n", "no", "c", "t", "i", "ic" },
+            bullet = {
+                ordered_icons = function(ctx)
+                    return ("%d."):format(ctx.index)
+                end,
+            },
             checkbox = {
                 enable = true,
                 position = "inline",

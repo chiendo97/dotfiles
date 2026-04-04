@@ -1,0 +1,7 @@
+# rumdl configuration file
+
+[global]
+disable = ["MD013", "MD025"]
+
+[MD007]
+indent = 4

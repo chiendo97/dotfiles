@@ -22,7 +22,7 @@ require("conform").setup({
     formatters = {
         rumdl = {
             command = "rumdl",
-            args = { "fmt", "-", "-s", "-d", "MD025" },
+            args = { "fmt", "-", "-s", "--config", vim.fn.stdpath("config") .. "/.rumdl.toml" },
             stdin = true,
         },
         shfmt = {
