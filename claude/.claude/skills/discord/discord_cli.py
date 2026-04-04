@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["certifi", "typer", "pydantic"]
+# dependencies = ["certifi", "typer", "pydantic", "rich"]
 # ///
 """Discord CLI — interact with Discord channels, threads, and DMs via REST API."""
 
@@ -21,6 +21,11 @@ from typing import Annotated, Any
 import certifi
 import typer
 from pydantic import BaseModel, ConfigDict
+from rich.console import Console, RenderableType
+from rich.panel import Panel
+from rich.rule import Rule
+from rich.table import Table
+from rich.text import Text
 
 SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
@@ -40,6 +45,10 @@ CHANNEL_TYPES: dict[int, str] = {
     15: "forum",
     16: "media",
 }
+
+THREAD_TYPES: set[int] = {10, 11, 12}
+
+console = Console()
 
 
 # ---------------------------------------------------------------------------
@@ -69,8 +78,13 @@ class Attachment(BaseModel):
     filename: str = "?"
     url: str = ""
 
-    def display(self) -> str:
-        return f"  [file: {self.filename} — {self.url}]"
+    def display(self) -> Text:
+        text = Text()
+        text.append("  📎 ", style="dim")
+        text.append(self.filename, style="green bold")
+        if self.url:
+            text.append(f" — {self.url}", style="dim")
+        return text
 
 
 class Author(BaseModel):
@@ -103,21 +117,22 @@ class Embed(BaseModel):
     color: int | None = None
     fields: list[EmbedField] = []
 
-    def display(self) -> str:
-        lines: list[str] = []
+    def display(self) -> Text:
+        text = Text()
         if self.title:
-            header = f"  [embed] {self.title}"
+            text.append("  [embed] ", style="dim")
+            text.append(self.title, style="yellow italic")
             if self.url:
-                header += f" — {self.url}"
-            lines.append(header)
+                text.append(f" — {self.url}", style="dim")
         elif self.url:
-            lines.append(f"  [embed] {self.url}")
+            text.append(f"  [embed] {self.url}", style="dim yellow")
         if self.description:
             for desc_line in self.description.split("\n"):
-                lines.append(f"    {desc_line}")
+                text.append(f"\n    {desc_line}")
         for field in self.fields:
-            lines.append(f"    {field.name}: {field.value}")
-        return "\n".join(lines)
+            text.append(f"\n    {field.name}: ", style="bold")
+            text.append(field.value)
+        return text
 
 
 class Message(BaseModel):
@@ -136,16 +151,33 @@ class Message(BaseModel):
     def from_response(cls, data: dict[str, Any]) -> Message:
         return cls.model_validate(data)
 
-    def display(self) -> str:
+    def display(self) -> Panel:
         ts = self.timestamp[:19].replace("T", " ")
-        lines = [f"[{ts}] {self.author.username} (msg:{self.id})"]
+        body = Text()
         if self.content:
-            lines.append(f"  {self.content}")
+            body.append(self.content)
         for embed in self.embeds:
-            lines.append(embed.display())
+            if body.plain:
+                body.append("\n")
+            body.append_text(embed.display())
         for att in self.attachments:
-            lines.append(att.display())
-        return "\n".join(lines)
+            if body.plain:
+                body.append("\n")
+            body.append_text(att.display())
+
+        title = Text()
+        title.append(self.author.username, style="bold cyan")
+        title.append(f"  {ts}", style="dim cyan")
+
+        return Panel(
+            body,
+            title=title,
+            title_align="left",
+            subtitle=Text(f"msg:{self.id}", style="dim"),
+            subtitle_align="right",
+            expand=True,
+            padding=(0, 1),
+        )
 
 
 class Channel(BaseModel):
@@ -167,8 +199,11 @@ class Channel(BaseModel):
     def type_name(self) -> str:
         return CHANNEL_TYPES.get(self.type, "unknown")
 
-    def display(self) -> str:
-        return f"  #{self.name}  (id:{self.id}, type:{self.type_name})"
+    def display(self) -> Text:
+        text = Text()
+        text.append(f"#{self.name}", style="bold blue")
+        text.append(f"  (id:{self.id}, type:{self.type_name})", style="dim")
+        return text
 
 
 class ThreadMetadata(BaseModel):
@@ -192,8 +227,12 @@ class Thread(BaseModel):
     def from_response(cls, data: dict[str, Any]) -> Thread:
         return cls.model_validate(data)
 
-    def display(self) -> str:
-        return f"Created thread: {self.name} (id:{self.id})"
+    def display(self) -> Text:
+        text = Text()
+        text.append("Created thread: ", style="bold green")
+        text.append(self.name, style="bold magenta")
+        text.append(f" (id:{self.id})", style="dim")
+        return text
 
 
 class ActiveThread(BaseModel):
@@ -212,15 +251,24 @@ class ActiveThread(BaseModel):
     def from_response(cls, data: dict[str, Any]) -> ActiveThread:
         return cls.model_validate(data)
 
-    def display(self, parent_name: str | None = None) -> str:
+    def display(self, parent_name: str | None = None) -> Text:
         created = ""
         if self.thread_metadata.create_timestamp:
             created = self.thread_metadata.create_timestamp[:19].replace("T", " ")
-        parent_info = f" in #{parent_name}" if parent_name else ""
-        return (
-            f"  💬 {self.name}  (id:{self.id}){parent_info}\n"
-            f"     msgs:{self.message_count} | members:{self.member_count} | created:{created}"
-        )
+        text = Text()
+        text.append("💬 ", style="bold")
+        text.append(self.name, style="bold magenta")
+        text.append(f"  (id:{self.id})", style="dim")
+        if parent_name:
+            text.append(f" in ", style="dim")
+            text.append(f"#{parent_name}", style="dim blue")
+        text.append("\n   msgs:", style="dim")
+        text.append(str(self.message_count), style="cyan")
+        text.append(" | members:", style="dim")
+        text.append(str(self.member_count), style="cyan")
+        if created:
+            text.append(f" | created:{created}", style="dim")
+        return text
 
 
 class SentMessage(BaseModel):
@@ -236,24 +284,36 @@ class SentMessage(BaseModel):
     def from_response(cls, data: dict[str, Any]) -> SentMessage:
         return cls.model_validate(data)
 
-    def display_sent(self, target: str) -> str:
-        lines = [f"Sent (msg:{self.id}) to channel:{target}"]
+    def display_sent(self, target: str) -> Text:
+        text = Text()
+        text.append("Sent ", style="bold green")
+        text.append(f"(msg:{self.id})", style="dim")
+        text.append(" to channel:", style="dim")
+        text.append(target, style="blue")
         if self.content:
-            lines.append(f"  {self.content}")
-        return "\n".join(lines)
+            text.append(f"\n  {self.content}", style="dim")
+        return text
 
-    def display_edited(self, channel_id: str) -> str:
-        lines = [f"Edited (msg:{self.id}) in channel:{channel_id}"]
+    def display_edited(self, channel_id: str) -> Text:
+        text = Text()
+        text.append("Edited ", style="bold yellow")
+        text.append(f"(msg:{self.id})", style="dim")
+        text.append(" in channel:", style="dim")
+        text.append(channel_id, style="blue")
         if self.content:
-            lines.append(f"  {self.content}")
-        return "\n".join(lines)
+            text.append(f"\n  {self.content}", style="dim")
+        return text
 
-    def display_file_sent(self, target: str) -> str:
+    def display_file_sent(self, target: str) -> Text:
         att_info = f", {len(self.attachments)} attachment(s)" if self.attachments else ""
-        lines = [f"Sent file (msg:{self.id}) to channel:{target}{att_info}"]
+        text = Text()
+        text.append("Sent file ", style="bold green")
+        text.append(f"(msg:{self.id})", style="dim")
+        text.append(" to channel:", style="dim")
+        text.append(f"{target}{att_info}", style="blue")
         if self.content:
-            lines.append(f"  {self.content}")
-        return "\n".join(lines)
+            text.append(f"\n  {self.content}", style="dim")
+        return text
 
 
 # ---------------------------------------------------------------------------
@@ -382,6 +442,110 @@ def build_multipart(fields: dict[str, str], file_path: str, file_field: str = "f
     return body, ct
 
 
+def _summary(text: str) -> RenderableType:
+    """Render a dim summary/footer line."""
+    return Text(text, style="dim")
+
+
+def _require_guild_id(guild_id: str | None = None) -> str:
+    """Return effective guild ID or exit."""
+    effective = guild_id or _guild_id
+    if not effective:
+        print("Error: DISCORD_GUILD_ID environment variable is not set and --guild-id not provided.", file=sys.stderr)
+        raise typer.Exit(code=1)
+    return effective
+
+
+def _try_fetch_message(channel_id: str, message_id: str) -> dict[str, Any] | None:
+    """Try to fetch a single message. Returns None instead of exiting on 404/403."""
+    url = f"{BASE_URL}/channels/{channel_id}/messages/{message_id}"
+    headers = {
+        "Authorization": f"Bot {_token}",
+        "User-Agent": "DiscordCLI/1.0",
+    }
+    req = urllib.request.Request(url, headers=headers, method="GET")
+    try:
+        with urllib.request.urlopen(req, context=SSL_CTX) as resp:
+            body = resp.read()
+            if body:
+                result: dict[str, Any] = json.loads(body)
+                return result
+    except urllib.error.HTTPError:
+        pass
+    except urllib.error.URLError:
+        pass
+    return None
+
+
+def resolve_message(
+    message_id: str,
+    channel_id: str | None = None,
+    guild_id: str | None = None,
+) -> tuple[dict[str, Any], str]:
+    """Resolve a message by ID, optionally searching across the guild.
+
+    Returns (message_json, channel_id).
+    """
+    # Strategy 1: direct fetch if channel_id is known
+    if channel_id:
+        result = api_request("GET", f"/channels/{channel_id}/messages/{message_id}")
+        if result and isinstance(result, dict):
+            return result, channel_id
+        print(f"Error: message {message_id} not found in channel {channel_id}.", file=sys.stderr)
+        raise typer.Exit(code=1)
+
+    effective_guild = _require_guild_id(guild_id)
+
+    # Strategy 2: guild search API
+    params = urllib.parse.urlencode({"min_id": str(int(message_id) - 1), "max_id": str(int(message_id) + 1)})
+    try:
+        search_result = api_request("GET", f"/guilds/{effective_guild}/messages/search?{params}")
+        if search_result and isinstance(search_result, dict):
+            for group in search_result.get("messages", []):
+                for msg in group:
+                    if isinstance(msg, dict) and msg.get("id") == message_id:
+                        return msg, str(msg["channel_id"])
+    except SystemExit:
+        pass  # search may fail due to permissions, fall through
+
+    # Strategy 3: brute-force — try all channels and active threads
+    console.print(Text("Message not found via search, scanning channels...", style="dim yellow"))
+
+    candidate_ids: list[str] = []
+
+    # Gather active thread IDs
+    try:
+        threads_resp = api_request("GET", f"/guilds/{effective_guild}/threads/active")
+        if threads_resp and isinstance(threads_resp, dict):
+            for t in threads_resp.get("threads", []):
+                if isinstance(t, dict) and "id" in t:
+                    candidate_ids.append(str(t["id"]))
+    except SystemExit:
+        pass
+
+    # Gather channel IDs
+    try:
+        channels_resp = api_request("GET", f"/guilds/{effective_guild}/channels")
+        if channels_resp and isinstance(channels_resp, list):
+            for ch in channels_resp:
+                if isinstance(ch, dict) and "id" in ch:
+                    candidate_ids.append(str(ch["id"]))
+    except SystemExit:
+        pass
+
+    total = len(candidate_ids)
+    for i, cid in enumerate(candidate_ids, 1):
+        if i % 20 == 0:
+            console.print(Text(f"  Checked {i}/{total} channels...", style="dim"))
+        msg_data = _try_fetch_message(cid, message_id)
+        if msg_data is not None:
+            console.print(Text(f"  Found in channel {cid}", style="dim green"))
+            return msg_data, cid
+
+    print(f"Error: message {message_id} not found in any accessible channel.", file=sys.stderr)
+    raise typer.Exit(code=1)
+
+
 # ---------------------------------------------------------------------------
 # Shared option aliases
 # ---------------------------------------------------------------------------
@@ -414,7 +578,7 @@ def send(
     result = api_request("POST", f"/channels/{target}/messages", body=body)
     if result and isinstance(result, dict):
         msg = SentMessage.from_response(result)
-        print(msg.display_sent(target))
+        console.print(msg.display_sent(target))
 
 
 @app.command()
@@ -431,7 +595,27 @@ def edit(
     )
     if result and isinstance(result, dict):
         msg = SentMessage.from_response(result)
-        print(msg.display_edited(channel_id))
+        console.print(msg.display_edited(channel_id))
+
+
+def _fetch_thread_starter(channel_id: str) -> Message | None:
+    """If channel_id is a thread, fetch the starter message from the parent channel."""
+    ch_info = api_request("GET", f"/channels/{channel_id}")
+    if not ch_info or not isinstance(ch_info, dict):
+        return None
+    ch_type = ch_info.get("type", 0)
+    if ch_type not in THREAD_TYPES:
+        return None
+    parent_id = ch_info.get("parent_id")
+    if not parent_id:
+        return None
+    try:
+        starter = api_request("GET", f"/channels/{parent_id}/messages/{channel_id}")
+        if starter and isinstance(starter, dict):
+            return Message.from_response(starter)
+    except SystemExit:
+        pass
+    return None
 
 
 @app.command()
@@ -440,16 +624,35 @@ def get(
     limit: Annotated[int, typer.Option("--limit", help="Number of messages (default: 20, max: 100)")] = 20,
 ) -> None:
     """Get recent messages from a channel."""
+    starter = _fetch_thread_starter(channel_id)
+    if starter:
+        console.print(Rule("thread starter", style="cyan"))
+        console.print(starter.display())
+
     params = urllib.parse.urlencode({"limit": limit})
     result = api_request("GET", f"/channels/{channel_id}/messages?{params}")
     if result and isinstance(result, list):
+        if starter:
+            console.print(Rule("thread replies", style="cyan"))
         messages = [Message.from_response(m) for m in reversed(result)]
         for msg in messages:
-            print(msg.display())
-            print()
-        print(f"--- {len(messages)} message(s) ---")
+            console.print(msg.display())
+        total = len(messages) + (1 if starter else 0)
+        console.print(_summary(f"--- {total} message(s) ---"))
     else:
-        print("No messages found.")
+        console.print("No messages found.")
+
+
+@app.command("get-message")
+def get_message(
+    message_id: Annotated[str, typer.Option("--message-id", help="Message ID to fetch")],
+    channel_id: Annotated[str | None, typer.Option("--channel-id", help="Channel ID (optional — auto-resolves if omitted)")] = None,
+) -> None:
+    """Fetch and display a single message by ID."""
+    msg_data, resolved_cid = resolve_message(message_id, channel_id=channel_id)
+    msg = Message.from_response(msg_data)
+    console.print(msg.display())
+    console.print(_summary(f"channel:{resolved_cid}"))
 
 
 @app.command()
@@ -479,22 +682,28 @@ def channels(
 
         for parent_id in [None, *sorted(cat_names.keys(), key=lambda k: cat_names.get(k, ""))]:
             if parent_id is None:
-                header = "[No Category]"
+                header = "No Category"
             else:
-                header = f"[{cat_names.get(parent_id, parent_id)}]"
+                header = cat_names.get(parent_id, parent_id)
 
             group = categories.get(parent_id, [])
             if not group:
                 continue
 
-            print(header)
-            for ch in sorted(group, key=lambda c: c.position):
-                print(ch.display())
-            print()
+            table = Table(title=header, title_style="bold yellow", expand=True, show_header=True, show_lines=False)
+            table.add_column("Name", style="bold blue")
+            table.add_column("ID", style="dim")
+            table.add_column("Type", style="cyan")
 
-        print(f"--- {len(parsed)} channel(s) ---")
+            for ch in sorted(group, key=lambda c: c.position):
+                table.add_row(f"#{ch.name}", ch.id, ch.type_name)
+
+            console.print(table)
+            console.print()
+
+        console.print(_summary(f"--- {len(parsed)} channel(s) ---"))
     else:
-        print("No channels found.")
+        console.print("No channels found.")
 
 
 @app.command()
@@ -510,7 +719,7 @@ def threads(
 
     result = api_request("GET", f"/guilds/{effective_guild_id}/threads/active")
     if not result or not isinstance(result, dict):
-        print("No active threads found.")
+        console.print("No active threads found.")
         return
 
     raw_threads: list[dict[str, Any]] = result.get("threads", [])
@@ -520,7 +729,7 @@ def threads(
         parsed = [t for t in parsed if t.parent_id == channel_id]
 
     if not parsed:
-        print("No active threads found.")
+        console.print("No active threads found.")
         return
 
     # Resolve parent channel names for display
@@ -541,13 +750,29 @@ def threads(
 
     for parent_id, group_threads in sorted(groups.items(), key=lambda x: parent_names.get(x[0] or "", "")):
         header = f"#{parent_names.get(parent_id or '', parent_id or 'unknown')}"
-        print(f"[{header}]")
-        for t in sorted(group_threads, key=lambda x: x.thread_metadata.create_timestamp or "", reverse=True):
-            parent_name = parent_names.get(t.parent_id or "") if not channel_id else None
-            print(t.display(parent_name))
-        print()
 
-    print(f"--- {len(parsed)} active thread(s) ---")
+        table = Table(title=header, title_style="bold yellow", expand=True, show_header=True, show_lines=False)
+        table.add_column("Name", style="bold magenta")
+        table.add_column("ID", style="dim")
+        table.add_column("Messages", justify="right", style="cyan")
+        table.add_column("Members", justify="right", style="cyan")
+        table.add_column("Created", style="dim")
+
+        for t in sorted(group_threads, key=lambda x: x.thread_metadata.create_timestamp or "", reverse=True):
+            created = ""
+            if t.thread_metadata.create_timestamp:
+                created = t.thread_metadata.create_timestamp[:19].replace("T", " ")
+            name = f"💬 {t.name}"
+            if not channel_id:
+                parent_name = parent_names.get(t.parent_id or "")
+                if parent_name:
+                    name += f" (in #{parent_name})"
+            table.add_row(name, t.id, str(t.message_count), str(t.member_count), created)
+
+        console.print(table)
+        console.print()
+
+    console.print(_summary(f"--- {len(parsed)} active thread(s) ---"))
 
 
 @app.command()
@@ -572,7 +797,23 @@ def thread(
         )
     if result and isinstance(result, dict):
         t = Thread.from_response(result)
-        print(t.display())
+        console.print(t.display())
+
+
+@app.command()
+def rename(
+    thread_id: Annotated[str, typer.Option("--thread-id", help="Thread ID to rename")],
+    name: Annotated[str, typer.Option("--name", help="New thread name")],
+) -> None:
+    """Rename a thread."""
+    result = api_request("PATCH", f"/channels/{thread_id}", body={"name": name})
+    if result and isinstance(result, dict):
+        t = Thread.from_response(result)
+        text = Text()
+        text.append("Renamed thread to: ", style="bold yellow")
+        text.append(t.name, style="bold magenta")
+        text.append(f" (id:{t.id})", style="dim")
+        console.print(text)
 
 
 @app.command()
@@ -587,7 +828,11 @@ def react(
         "PUT",
         f"/channels/{channel_id}/messages/{message_id}/reactions/{encoded_emoji}/@me",
     )
-    print(f"Reacted with :{emoji}: on msg:{message_id}")
+    text = Text()
+    text.append("Reacted with ", style="bold green")
+    text.append(f":{emoji}:", style="bold yellow")
+    text.append(f" on msg:{message_id}", style="dim")
+    console.print(text)
 
 
 @app.command("send-file")
@@ -620,7 +865,61 @@ def send_file(
     )
     if result and isinstance(result, dict):
         msg = SentMessage.from_response(result)
-        print(msg.display_file_sent(target))
+        console.print(msg.display_file_sent(target))
+
+
+@app.command()
+def download(
+    message_id: Annotated[str, typer.Option("--message-id", help="Message ID containing attachments")],
+    channel_id: Annotated[str | None, typer.Option("--channel-id", help="Channel ID (optional — auto-resolves if omitted)")] = None,
+    output: Annotated[str | None, typer.Option("--output", help="Output path (default: current dir with original filename)")] = None,
+    index: Annotated[int, typer.Option("--index", help="Attachment index to download (default: 0 = first, -1 = all)")] = -1,
+) -> None:
+    """Download attachments from a message."""
+    msg_data, resolved_cid = resolve_message(message_id, channel_id=channel_id)
+    msg = Message.from_response(msg_data)
+
+    if not msg.attachments:
+        console.print(Text("No attachments found on this message.", style="yellow"))
+        raise typer.Exit(code=1)
+
+    if index >= 0:
+        if index >= len(msg.attachments):
+            print(f"Error: attachment index {index} out of range (message has {len(msg.attachments)}).", file=sys.stderr)
+            raise typer.Exit(code=1)
+        targets = [msg.attachments[index]]
+    else:
+        targets = list(msg.attachments)
+
+    for att in targets:
+        if not att.url:
+            console.print(Text(f"  Skipping {att.filename} — no URL", style="dim yellow"))
+            continue
+
+        if output and len(targets) == 1:
+            dest = Path(output)
+        else:
+            dest = Path(output or ".") / att.filename
+            if output and Path(output).is_dir():
+                dest = Path(output) / att.filename
+
+        req = urllib.request.Request(att.url, method="GET", headers={"User-Agent": "DiscordCLI/1.0"})
+        try:
+            with urllib.request.urlopen(req, context=SSL_CTX) as resp:
+                data = resp.read()
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(data)
+                text = Text()
+                text.append("  ✓ ", style="bold green")
+                text.append(att.filename, style="bold green")
+                text.append(f" → {dest} ({len(data):,} bytes)", style="dim")
+                console.print(text)
+        except urllib.error.HTTPError as e:
+            print(f"Error downloading {att.filename}: HTTP {e.code}", file=sys.stderr)
+        except urllib.error.URLError as e:
+            print(f"Error downloading {att.filename}: {e.reason}", file=sys.stderr)
+
+    console.print(_summary(f"channel:{resolved_cid} | msg:{message_id}"))
 
 
 if __name__ == "__main__":

@@ -2,9 +2,9 @@
 name: discord
 description: >
   Interact with Discord channels, threads, and DMs via CLI. Use this skill whenever you need to
-  send messages, read messages, send files, manage threads, list channels, or react to messages
-  in Discord. Even if the user doesn't mention "discord" by name — if they want to communicate
-  via chat, notify someone, or check messages, use this skill.
+  send messages, read messages, send files, download attachments, manage threads, list channels,
+  or react to messages in Discord. Even if the user doesn't mention "discord" by name — if they
+  want to communicate via chat, notify someone, check messages, or download files, use this skill.
 ---
 
 # discord — Discord Bot CLI
@@ -32,7 +32,10 @@ Run it with `uv` — no virtualenv needed.
 | `channels` | List all channels in a guild |
 | `threads` | List active threads in a guild (optionally filtered by channel) |
 | `thread` | Create a new thread (public, private, or announcement) |
+| `rename` | Rename a thread |
 | `react` | React to a message with an emoji |
+| `get-message` | Fetch and display a single message by ID (auto-resolves channel) |
+| `download` | Download attachments from a message |
 | `send-file` | Upload a file to a channel, thread, or DM |
 
 ## Usage
@@ -111,6 +114,55 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py get --channel-id 14888034
 
 ---
 
+### get-message — Fetch a single message
+
+Fetch and display a single message by its ID. The `--channel-id` is optional — if omitted,
+the CLI auto-resolves the channel by searching the guild (search API first, then brute-force
+scan of all channels/threads).
+
+```bash
+# With known channel ID (fast)
+uv run /home/cle/.claude/skills/discord/discord_cli.py get-message --message-id 1490020244155138158 --channel-id 1181560952123035729
+
+# Auto-resolve channel (slower — searches guild)
+uv run /home/cle/.claude/skills/discord/discord_cli.py get-message --message-id 1490020244155138158
+```
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `--message-id` | Yes | Message ID to fetch |
+| `--channel-id` | No | Channel or thread ID (auto-resolved if omitted) |
+
+---
+
+### download — Download attachments
+
+Download file attachments from a message. Like `get-message`, the channel is auto-resolved
+if `--channel-id` is omitted. Downloads all attachments by default.
+
+```bash
+# Download all attachments to current directory
+uv run /home/cle/.claude/skills/discord/discord_cli.py download --message-id 1490020244155138158
+
+# Download to a specific path
+uv run /home/cle/.claude/skills/discord/discord_cli.py download --message-id 1490020244155138158 --output ./downloads/
+
+# Download only the first attachment with a custom filename
+uv run /home/cle/.claude/skills/discord/discord_cli.py download --message-id 1490020244155138158 --index 0 --output ./my-file.md
+
+# With known channel ID (skips search)
+uv run /home/cle/.claude/skills/discord/discord_cli.py download --message-id 1490020244155138158 --channel-id 1181560952123035729
+```
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `--message-id` | Yes | Message ID containing attachments |
+| `--channel-id` | No | Channel or thread ID (auto-resolved if omitted) |
+| `--output` | No | Output path — file or directory (default: current dir with original filename) |
+| `--index` | No | Attachment index (0-based). Default: -1 (all attachments) |
+
+---
+
 ### channels — List guild channels
 
 Lists all channels grouped by category.
@@ -185,6 +237,19 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py thread --channel-id 12345
 | `--name` | Yes | Thread name |
 | `--message-id` | No | Message to create thread from |
 | `--type` | No | Thread type: `PUBLIC`, `PRIVATE`, or `ANNOUNCEMENT` (default: `PUBLIC`) |
+
+---
+
+### rename — Rename a thread
+
+```bash
+uv run /home/cle/.claude/skills/discord/discord_cli.py rename --thread-id 345678 --name "New Thread Name"
+```
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `--thread-id` | Yes | Thread ID to rename |
+| `--name` | Yes | New thread name |
 
 ---
 
