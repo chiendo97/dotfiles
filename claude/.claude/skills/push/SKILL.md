@@ -1,18 +1,22 @@
 ---
 name: push
 description: |
-  Go from uncommitted changes to a GitHub PR with a linked Notion ticket in one step.
+  Go from uncommitted changes to a GitHub PR or GitLab MR with a linked Notion ticket in one step.
   Checks git status, creates a branch/worktree if on main/master, commits changes,
-  finds or creates a Notion ticket, pushes, and opens a PR following team conventions.
-  Use whenever the user says "push", "ship", "ship it", "create PR", "open PR",
-  "submit", "push changes", "/push", "wrap up", "send this out", or when the user
-  has finished coding and wants to get their changes into a PR. Even casual phrases
-  like "let's get this merged" or "I'm done, push it" should trigger this skill.
+  finds or creates a Notion ticket, pushes, and opens a PR/MR following team conventions.
+  Also handles post-push tasks like attaching a Notion ticket to an existing PR/MR.
+  Use whenever the user says "push", "ship", "ship it", "create PR", "create MR",
+  "open PR", "open MR", "submit", "push changes", "/push", "wrap up", "send this out",
+  or when the user has finished coding and wants to get their changes into a PR/MR.
+  Even casual phrases like "let's get this merged" or "I'm done, push it" should trigger this.
+  Also triggers for "create ticket and attach to MR", "link notion ticket", or similar.
 ---
 
 # Push
 
-One-command workflow: uncommitted changes → commit → Notion ticket → GitHub PR.
+One-command workflow: uncommitted changes -> commit -> Notion ticket -> PR/MR.
+
+Also handles partial flows: already pushed but need a ticket, existing MR needs a ticket link, etc.
 
 ## Step 1: Assess the Situation
 
@@ -29,10 +33,36 @@ git remote show origin | grep 'HEAD branch'
 Extract:
 - **current_branch**: the branch you're on
 - **has_changes**: whether there are staged, unstaged, or untracked changes
-- **remote_url**: to derive `owner` and `repo` (parse `git@github.com:owner/repo.git` or `https://github.com/owner/repo.git`)
+- **remote_url**: to derive the forge type and repo path (see Step 1b)
 - **default_branch**: `main` or `master` (from `HEAD branch`)
 
-If the working tree is clean (no changes at all), tell the user "Nothing to push — working tree is clean" and stop.
+### Step 1b: Detect Forge Type
+
+Parse the remote URL to determine GitHub vs GitLab:
+
+| Remote URL pattern | Forge | CLI tool |
+|---|---|---|
+| `github.com` in URL | GitHub | `gh` |
+| Anything else (e.g. `git.urieljsc.com`, self-hosted GitLab) | GitLab | `glab` |
+
+Extract `owner` and `repo` from the URL:
+- SSH: `git@<host>:<owner>/<repo>.git` -> owner, repo
+- HTTPS: `https://<host>/<owner>/<repo>.git` -> owner, repo
+
+Store `forge_type` (`github` or `gitlab`) and `forge_cli` (`gh` or `glab`) for later steps.
+
+### Step 1c: Decide Flow
+
+Not every push needs every step. Decide what to do based on the current state:
+
+| State | Action |
+|---|---|
+| Has uncommitted changes | Full flow: commit -> lint -> ticket -> push -> PR/MR |
+| Clean tree, not pushed yet | Partial: lint -> ticket -> push -> PR/MR |
+| Clean tree, already pushed, no PR/MR | Partial: ticket -> create PR/MR |
+| Clean tree, already pushed, PR/MR exists | Partial: ticket -> update PR/MR description |
+
+The user's arguments (e.g. "create new notion ticket") also guide which steps to run. If the user specifically asks to create/attach a ticket, always do the Notion step even if the tree is clean.
 
 ## Step 2: Branch Strategy
 
@@ -40,7 +70,7 @@ If the working tree is clean (no changes at all), tell the user "Nothing to push
 
 If `current_branch` is NOT `main`/`master`, skip to Step 3. The branch is ready.
 
-### On main/master with changes — create a worktree
+### On main/master with changes -- create a worktree
 
 The user is working directly on the default branch. Create a new branch in an isolated worktree under `.worktrees/` in the current project root so main/master stays clean and reusable for future worktrees.
 
@@ -69,8 +99,10 @@ The user is working directly on the default branch. Create a new branch in an is
 
 ## Step 3: Commit
 
+Skip if working tree is clean (no changes to commit).
+
 1. Run `git diff --stat` and `git diff` to understand the changes.
-2. Stage relevant files explicitly (`git add <file> ...`). Avoid `git add -A` — never stage `.env`, credentials, or secrets.
+2. Stage relevant files explicitly (`git add <file> ...`). Avoid `git add -A` -- never stage `.env`, credentials, or secrets.
 3. Generate a concise commit message:
    - Use conventional prefix: `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`
    - Focus on the "why", not the "what"
@@ -85,7 +117,7 @@ The user is working directly on the default branch. Create a new branch in an is
    )"
    ```
 
-If pre-commit hooks fail, fix the issues and create a NEW commit — never amend.
+If pre-commit hooks fail, fix the issues and create a NEW commit -- never amend.
 
 ## Step 4: Lint
 
@@ -99,11 +131,19 @@ Do not proceed to Step 5 until `make lint` passes.
 
 ## Step 5: Notion Ticket
 
-Find or create a Notion ticket in the **genbook-global** project so the PR has a ticket reference.
+Find or create a Notion ticket in the **genbook-global** project so the PR/MR has a ticket reference.
+
+The Notion CLI lives at: `~/.claude/skills/notion/notion_cli.py`
+Run it with: `uv run <path>/notion_cli.py <command> [options]`
 
 ### Search first
 
-Use the `notion` skill to search for existing tickets assigned to `$USER` in the current sprint, using `--project genbook-global`.
+```bash
+uv run ~/.claude/skills/notion/notion_cli.py search \
+  --project genbook-global \
+  --assignee $USER \
+  --status "In Progress"
+```
 
 Scan the results for a ticket whose title relates to the changes being committed. Consider:
 - Keywords from the branch name or commit message
@@ -111,40 +151,58 @@ Scan the results for a ticket whose title relates to the changes being committed
 
 ### Reuse or create
 
-- **If a matching ticket exists**: Confirm with the user — "Found ticket `XXXX`: '_title_'. Use this?"
-- **If no match or user declines**: Use the `notion` skill to create a new ticket with `--project genbook-global`, a title matching the PR, a summary description, medium priority, and assigned to `$USER`.
+- **If a matching ticket exists**: Confirm with the user -- "Found ticket `XXXX`: '_title_'. Use this?"
+- **If no match or user declines**: Create a new ticket:
+
+```bash
+uv run ~/.claude/skills/notion/notion_cli.py create \
+  --project genbook-global \
+  --title "Short description matching the PR/MR" \
+  --description "Summary of the changes" \
+  --priority Medium \
+  --assignee $USER \
+  --status "In progress"
+```
 
 ### Get the ticket ID
 
-Extract the ticket ID (prefix + number, e.g. `GB-456`) and page URL from the output. If the ID is not visible, ask the user for it.
+The `create` command outputs:
+```
+Created: <title>
+Ticket: GGA-167
+ID: <uuid>
+URL: https://www.notion.so/<slug>-<page-id>
+```
 
-Store the ticket ID and page ID for Step 6.
+Extract the ticket ID (e.g. `GGA-167`) and the full Notion URL for Step 6.
 
-## Step 6: Push and Create PR
+## Step 6: Push and Create/Update PR or MR
 
-### Check for existing PR
+### Check for existing PR/MR
 
+**GitHub:**
 ```bash
 gh pr list --head <branch-name> --json number,url --jq '.[0]'
 ```
 
-If a PR already exists, just push and tell the user "Pushed to existing PR: <url>". Done.
-
-### Push
-
+**GitLab:**
 ```bash
-git push -u origin <branch-name>
+glab mr list --source-branch <branch-name>
 ```
 
-### Create PR
+### If PR/MR already exists -- update it
 
-Use `gh pr create`:
+Push any new commits, then update the title and description to include the ticket:
 
+**GitLab:**
 ```bash
-gh pr create --base <default_branch> --title "[<ticket-id>] type: short description" --body "$(cat <<'EOF'
+git push
+glab mr update <mr-number> \
+  --title "[<ticket-id>] type: short description" \
+  --description "$(cat <<'EOF'
 ## Summary
 
-**Ticket:** [<ticket-id>](https://www.notion.so/<page-id>)
+**Ticket:** [<ticket-id>](<notion-url>)
 
 - Bullet point describing what changed and why
 
@@ -153,15 +211,90 @@ gh pr create --base <default_branch> --title "[<ticket-id>] type: short descript
 - [x] `make lint` passes
 - [ ] `make test` passes
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+**GitHub:**
+```bash
+git push
+gh pr edit <pr-number> \
+  --title "[<ticket-id>] type: short description" \
+  --body "$(cat <<'EOF'
+## Summary
+
+**Ticket:** [<ticket-id>](<notion-url>)
+
+- Bullet point describing what changed and why
+
+## Test plan
+
+- [x] `make lint` passes
+- [ ] `make test` passes
+
+Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+Return the PR/MR URL to the user. Done.
+
+### If no PR/MR exists -- create one
+
+Push first:
+```bash
+git push -u origin <branch-name>
+```
+
+Then create:
+
+**GitLab:**
+```bash
+glab mr create --fill \
+  --title "[<ticket-id>] type: short description" \
+  --description "$(cat <<'EOF'
+## Summary
+
+**Ticket:** [<ticket-id>](<notion-url>)
+
+- Bullet point describing what changed and why
+
+## Test plan
+
+- [x] `make lint` passes
+- [ ] `make test` passes
+
+Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+**GitHub:**
+```bash
+gh pr create --base <default_branch> \
+  --title "[<ticket-id>] type: short description" \
+  --body "$(cat <<'EOF'
+## Summary
+
+**Ticket:** [<ticket-id>](<notion-url>)
+
+- Bullet point describing what changed and why
+
+## Test plan
+
+- [x] `make lint` passes
+- [ ] `make test` passes
+
+Generated with [Claude Code](https://claude.com/claude-code)
 EOF
 )"
 ```
 
 - **title**: `[<ticket-id>] type: short description` (under 70 characters total)
-- **base**: `master` or `main` — use whichever `default_branch` was detected
+- **base**: `master` or `main` -- use whichever `default_branch` was detected
 
-Return the PR URL to the user.
+Return the PR/MR URL to the user.
 
 ## Edge Cases
 
@@ -169,3 +302,5 @@ Return the PR URL to the user.
 - **Worktree path already exists**: If `.worktrees/<description>` already exists, append a suffix or ask the user for a different name.
 - **Push rejected**: If push fails (e.g. remote has newer commits), run `git pull --rebase` first, then retry the push.
 - **Multiple remotes**: Default to `origin`. If `origin` doesn't exist, list remotes and ask the user.
+- **Notion CLI not found**: If `~/.claude/skills/notion/notion_cli.py` doesn't exist, skip the Notion step and warn the user.
+- **User only wants ticket + MR update**: If the tree is clean and MR exists, skip commit/lint/push and go straight to Notion ticket + MR update.

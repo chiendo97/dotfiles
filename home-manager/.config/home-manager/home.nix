@@ -369,6 +369,9 @@
       vendor = "go mod vendor";
       tidy = "go mod tidy";
 
+      # Claude
+      _claude = "claude --dangerously-skip-permissions";
+
       # History backup/restore
       history-backup = "age -r \"$(cat ~/.ssh/id_ed25519_agenix.pub)\" -o ~/.config/home-manager/secrets/zsh_history.age ~/.zsh_history && echo 'History backed up'";
       history-restore = "age -d -i ~/.ssh/id_ed25519_agenix ~/.config/home-manager/secrets/zsh_history.age > ~/.zsh_history && echo 'History restored'";
@@ -378,6 +381,7 @@
     sessionVariables = {
       GO111MODULE = "auto";
       GOSUMDB = "off";
+      DISCORD_GUILD_ID = "1181560951141584926";
     };
 
     # Zsh init content using lib.mkOrder for proper ordering

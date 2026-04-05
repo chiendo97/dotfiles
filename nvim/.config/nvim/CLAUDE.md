@@ -9,6 +9,7 @@ Personal Neovim configuration using Lua with vim.pack (Neovim's native package m
 ## Architecture
 
 ### Loading Order
+
 1. `init.lua` — Entry point: loads config modules, registers PackChanged hooks for vim.pack
 2. `lua/config/` — Core modules: options, keymaps, autocmds, statusline, tabline, LSP, diagnostics
 3. `plugin/` — Plugin loading files, sourced automatically by Neovim in alphabetical order
@@ -18,6 +19,7 @@ Personal Neovim configuration using Lua with vim.pack (Neovim's native package m
 5. `after/ftplugin/` — Filetype-specific overrides
 
 ### Plugin Management: vim.pack (NOT lazy.nvim)
+
 Plugins are managed via `vim.pack.add()` — **not** lazy.nvim. The lock file is `nvim-pack-lock.json`. Each plugin has its own file in `plugin/`.
 
 Four loading patterns are used:
@@ -28,6 +30,7 @@ Four loading patterns are used:
 4. **Command-triggered**: `nvim_create_user_command(...)` — StartupTime, JqPlayground, rarely-used tools
 
 ### Plugin Configuration Pattern
+
 ```lua
 -- plugin/example.lua
 vim.pack.add({ "https://github.com/author/plugin.nvim" })
@@ -35,6 +38,7 @@ require("plugin").setup({ ... })
 ```
 
 ### LSP Architecture
+
 - Uses native `vim.lsp.config()` / `vim.lsp.enable()` (not nvim-lspconfig)
 - Global config in `lua/config/lsp.lua`, loaded from `plugin/zz-lsp.lua`
 - Per-server configs in `lsp/` return `{ cmd, filetypes, root_markers, settings }`
@@ -42,6 +46,7 @@ require("plugin").setup({ ... })
 - Custom user commands: `:LspStart`, `:LspStop`, `:LspRestart`, `:LspInfo`, `:LspLog`
 
 ### Core Plugin Infrastructure
+
 - **mini.nvim**: statusline, completion, snippets, file explorer (`<leader>c`), surround, AI text objects, cmdline, icons
 - **snacks.nvim**: fuzzy picker, notifications, and UI utilities
 - **conform.nvim**: formatting
