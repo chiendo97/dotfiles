@@ -109,3 +109,17 @@ vim.api.nvim_create_user_command("R", function(opts)
     })
     vim.api.nvim_buf_set_keymap(0, "n", "q", ":q!<CR>", { noremap = true, silent = true })
 end, { nargs = "+", complete = "shellcmd" })
+
+-- Install hooks (must be registered before any vim.pack.add() in plugin/ files)
+vim.api.nvim_create_autocmd("PackChanged", {
+    callback = function(ev)
+        local name, kind = ev.data.spec.name, ev.data.kind
+        if name == "nvim-treesitter" and kind == "update" then
+            if not ev.data.active then
+                vim.cmd.packadd("nvim-treesitter")
+            end
+            vim.cmd("TSUpdate")
+        end
+    end,
+})
+-- config.lsp is loaded from plugin/zz-lsp.lua (after vim.pack plugins are available)
