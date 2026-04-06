@@ -480,6 +480,7 @@
     ZK_NOTEBOOK_DIR = "${config.home.homeDirectory}/Source/selfhost/zk";
     CLAUDE_CODE_NO_FLICKER = "1";
   } // lib.optionalAttrs pkgs.stdenv.isLinux {
+    SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
     DOCKER_HOST = "unix:///run/user/1000/podman/podman.sock";
   } // lib.optionalAttrs pkgs.stdenv.isDarwin {
     DOCKER_HOST = "unix:///var/folders/s6/svtg9t310t167pdfqqcj4gvw0000gn/T/podman/podman-machine-default-api.sock";
