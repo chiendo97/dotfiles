@@ -111,6 +111,16 @@
     };
   };
 
+  # Beszel agent (lightweight server monitoring, reports to remote hub)
+  services.beszel.agent = {
+    enable = true;
+    openFirewall = false;  # accessible via Tailscale trusted interface
+    environmentFile = config.age.secrets.beszel_agent.path;
+    environment = {
+      PORT = "45876";
+    };
+  };
+
   # QEMU guest agent
   services.qemuGuest.enable = true;
 
@@ -122,6 +132,10 @@
   age.secrets.wg_urieljsc_office = {
     file = ../../secrets/wg_urieljsc_office.age;
     mode = "600";
+  };
+  age.secrets.beszel_agent = {
+    file = ../../secrets/beszel_agent.age;
+    mode = "400";
   };
 
   # WireGuard VPN tunnels (auto-start on boot)
