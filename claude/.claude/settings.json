@@ -13,6 +13,18 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/journal-action-items.sh",
+            "timeout": 60
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
