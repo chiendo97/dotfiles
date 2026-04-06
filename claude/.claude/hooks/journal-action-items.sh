@@ -116,6 +116,7 @@ else
     INSERT_LINE=$((SECTION_START + NEXT_SECTION - 1))
     # Use head/tail to splice the file (robust for multi-line SUMMARY)
     TMPFILE=$(mktemp)
+    trap 'rm -f "$TMPFILE"' EXIT
     head -n "$((INSERT_LINE - 1))" "$JOURNAL_FILE" > "$TMPFILE"
     printf '%s\n' "$SUMMARY" >> "$TMPFILE"
     tail -n +"$INSERT_LINE" "$JOURNAL_FILE" >> "$TMPFILE"
