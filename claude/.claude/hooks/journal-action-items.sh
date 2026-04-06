@@ -109,7 +109,7 @@ else
   SECTION_START=$(grep -n '^## Claude Code' "$JOURNAL_FILE" | head -1 | cut -d: -f1)
 
   # Find the next ## heading after Claude Code section
-  NEXT_SECTION=$(tail -n +"$((SECTION_START + 1))" "$JOURNAL_FILE" | grep -n '^## ' | head -1 | cut -d: -f1)
+  NEXT_SECTION=$(tail -n +"$((SECTION_START + 1))" "$JOURNAL_FILE" | grep -n '^## ' | head -1 | cut -d: -f1 || true)
 
   if [ -n "$NEXT_SECTION" ]; then
     # Insert before the next section
