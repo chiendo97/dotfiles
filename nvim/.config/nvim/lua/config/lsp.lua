@@ -113,6 +113,7 @@ local lsp_servers = {
     "dartls",
     "filepaths_ls",
     "gopls",
+    "harper_ls",
     "jsonls",
     "lua_ls",
     -- "markdown_oxide",
