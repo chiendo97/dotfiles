@@ -122,9 +122,21 @@
         };
 
         # macOS (Apple Silicon) - username: chiendo97
-        "chiendo97" = mkHomeConfiguration { system = "aarch64-darwin"; username = "chiendo97"; };
-        "chiendo97@darwin" = mkHomeConfiguration { system = "aarch64-darwin"; username = "chiendo97"; };
-        "chiendo97@macos" = mkHomeConfiguration { system = "aarch64-darwin"; username = "chiendo97"; };
+        "chiendo97" = mkHomeConfiguration {
+          system = "aarch64-darwin";
+          username = "chiendo97";
+          extraModules = [ ./modules/personal-secrets.nix ];
+        };
+        "chiendo97@darwin" = mkHomeConfiguration {
+          system = "aarch64-darwin";
+          username = "chiendo97";
+          extraModules = [ ./modules/personal-secrets.nix ];
+        };
+        "chiendo97@macos" = mkHomeConfiguration {
+          system = "aarch64-darwin";
+          username = "chiendo97";
+          extraModules = [ ./modules/personal-secrets.nix ];
+        };
       };
 
       # --- NixOS System Configurations ---
