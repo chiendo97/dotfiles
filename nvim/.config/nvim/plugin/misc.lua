@@ -2,8 +2,8 @@
 vim.pack.add({
     "https://github.com/b0o/schemastore.nvim",
     "https://github.com/nvim-lua/plenary.nvim",
-    "https://github.com/antonk52/filepaths_ls.nvim",
     "https://github.com/jrop/tuis.nvim",
+    { src = "https://github.com/chiendo97/filepaths_ls.nvim", version = "use-cwd-instead-of-buf-dir" },
 })
 
 vim.schedule(function()

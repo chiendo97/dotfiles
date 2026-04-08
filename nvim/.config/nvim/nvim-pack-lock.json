@@ -27,7 +27,8 @@
     },
     "filepaths_ls.nvim": {
       "rev": "c5ebc0aa1cb0c7dc4509be834ca54f2c8364c11b",
-      "src": "https://github.com/antonk52/filepaths_ls.nvim"
+      "src": "https://github.com/chiendo97/filepaths_ls.nvim",
+      "version": "'use-cwd-instead-of-buf-dir'"
     },
     "friendly-snippets": {
       "rev": "6cd7280adead7f586db6fccbd15d2cac7e2188b9",
