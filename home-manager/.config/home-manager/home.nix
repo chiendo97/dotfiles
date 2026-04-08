@@ -165,7 +165,8 @@
     escapeTime = 0;
     baseIndex = 1;
     prefix = "C-Space";
-    terminal = "xterm-256color";
+    terminal = "tmux-256color";
+    focusEvents = true;
     historyLimit = 50000;
     sensibleOnTop = true;
 
@@ -193,7 +194,7 @@
       set -g detach-on-destroy off
       # baseIndex only sets base-index, not pane-base-index
       set -g pane-base-index 1
-      set -as terminal-features ',xterm-256color:RGB:clipboard'
+      set -as terminal-features ',tmux-256color:RGB:clipboard'
       set -g renumber-windows on
       set -g set-titles on
       set -g set-titles-string "#{session_name}"
@@ -329,11 +330,12 @@
       # Load and initialize completion system
       autoload -Uz compinit
 
-      # Regenerate completion dump if it's older than 24 hours
-      if [[ -n "$zcompdump"(#qN.mh+24) ]]; then
-        compinit -d "$zcompdump"
-      else
+      # Use cached completions unless dump is older than 24 hours
+      if [[ -f "$zcompdump" && $(find "$zcompdump" -mtime -1 2>/dev/null) ]]; then
         compinit -C -d "$zcompdump"
+      else
+        compinit -d "$zcompdump"
+        touch "$zcompdump"
       fi
     '';
 

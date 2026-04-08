@@ -9,3 +9,5 @@ require("config.tabline")
 require("config.keymaps")
 require("config.autocmds")
 require("config.path_picker").setup()
+
+require("vim._core.ui2").enable({})
