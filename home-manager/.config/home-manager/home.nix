@@ -105,7 +105,11 @@
   # ============================================================================
   # Programs with Home Manager modules
   # ============================================================================
-  programs.neovim.enable = true;
+  programs.neovim = {
+    enable = true;
+    withRuby = false;
+    withPython3 = false;
+  };
 
   programs.fzf = {
     enable = true;
