@@ -419,6 +419,15 @@
       ''
     ];
 
+    envExtra = ''
+      # Source nix profile early (in .zshenv) so nix is available in all shell types
+      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+      fi
+    '';
+
     autosuggestion.enable = true;
   };
 
