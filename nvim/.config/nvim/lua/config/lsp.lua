@@ -26,7 +26,9 @@ vim.diagnostic.config({
         end,
     },
     jump = {
-        on_jump = "float",
+        on_jump = function(_, bufnr)
+            vim.diagnostic.open_float({ bufnr = bufnr })
+        end,
     },
 })
 
