@@ -26,7 +26,7 @@
       "src": "https://github.com/j-hui/fidget.nvim"
     },
     "filepaths_ls.nvim": {
-      "rev": "c5ebc0aa1cb0c7dc4509be834ca54f2c8364c11b",
+      "rev": "8e3f8c347a9ecbb192aff4c5d36ff974b71c2a1e",
       "src": "https://github.com/chiendo97/filepaths_ls.nvim",
       "version": "'use-cwd-instead-of-buf-dir'"
     },
