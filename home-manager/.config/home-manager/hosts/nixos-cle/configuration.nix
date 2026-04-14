@@ -120,6 +120,10 @@
       PORT = "45876";
     };
   };
+  systemd.services.beszel-agent.serviceConfig = {
+    Nice = -10;             # higher scheduling priority so it gets CPU time under heavy load
+    OOMScoreAdjust = -900;  # strongly protected from OOM killer
+  };
 
   # QEMU guest agent
   services.qemuGuest.enable = true;
