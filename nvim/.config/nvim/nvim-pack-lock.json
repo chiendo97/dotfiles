@@ -78,6 +78,10 @@
       "rev": "169e170c3d2318877d446f0bf35121445c26d6fa",
       "src": "https://github.com/jrop/morph.nvim"
     },
+    "nvim": {
+      "rev": "4736d0362cdb621bed4189d789b5ba00a66d33c7",
+      "src": "https://github.com/ember-theme/nvim"
+    },
     "nvim-bqf": {
       "rev": "c282a62bec6c0621a1ef5132aa3f4c9fc4dcc2c7",
       "src": "https://github.com/kevinhwang91/nvim-bqf"

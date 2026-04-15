@@ -1,69 +1,30 @@
-vim.pack.add({ "https://gitlab.com/motaz-shokry/gruvbox.nvim" })
+vim.pack.add({ "https://github.com/ember-theme/nvim" })
 
-require("gruvbox").setup({
-    variant = "medium",
-    dark_variant = "hard",
-    dim_inactive_windows = true,
-    extend_background_behind_borders = true,
+require("ember").setup({
+    variant = "ember",
+    on_highlights = function(hl, theme)
+        -- Code block background
+        hl.ColorColumn = { bg = theme.ui.base3 }
 
-    enable = {
-        terminal = true,
-        legacy_highlights = true,
-        migrations = true,
-        devicons = true,
-        lualine = true,
-    },
+        -- Borders: brighten for visibility
+        hl.FloatBorder = { fg = theme.ui.base5, bg = theme.ui.float_bg }
+        hl.WinSeparator = { fg = theme.ui.base5 }
 
-    styles = {
-        bold = true,
-        italic = true,
-        transparency = false,
-    },
+        -- Render-markdown: bullets, code, tables
+        hl.RenderMarkdownBullet = { fg = theme.syn.sage }
+        hl.RenderMarkdownCode = { bg = theme.ui.base2 }
+        hl.RenderMarkdownCodeBorder = { bg = theme.ui.base1 }
+        hl.RenderMarkdownTableHead = { fg = theme.syn.steel, bold = true }
+        hl.RenderMarkdownTableRow = { fg = theme.syn.steel }
 
-    groups = {
-        border = "gray",
-        link = "purple_lite",
-        panel = "bg_second",
-
-        error = "red_lite",
-        hint = "aqua_lite",
-        info = "blue_lite",
-        ok = "green_lite",
-        warn = "yellow_lite",
-        note = "yellow_dark",
-        todo = "aqua_dark",
-
-        git_add = "green_dark",
-        git_change = "yellow_dark",
-        git_delete = "red_dark",
-        git_dirty = "orange_dark",
-        git_ignore = "gray",
-        git_merge = "purple_dark",
-        git_rename = "blue_dark",
-        git_stage = "purple_dark",
-        git_text = "yellow_lite",
-        git_untracked = "bg2",
-
-        h1 = "red_dark",
-        h2 = "yellow_dark",
-        h3 = "green_dark",
-        h4 = "aqua_dark",
-        h5 = "blue_dark",
-        h6 = "purple_dark",
-    },
-
-    highlight_groups = {
-        -- render-markdown
-        RenderMarkdownBullet = { fg = "green_dark" },
-        RenderMarkdownCode = { bg = "bg_second" },
-        RenderMarkdownCodeBorder = { bg = "bg1" },
-        RenderMarkdownTableHead = { fg = "purple_lite" },
-        RenderMarkdownTableRow = { fg = "purple_lite" },
-
-        -- Treesitter markup
-        ["@markup.heading"] = { fg = "green_dark" },
-        ["@markup.strong"] = { fg = "green_dark", bold = true },
-        ["@markup.italic"] = { fg = "green_dark", italic = true },
-    },
+        -- Render-markdown: heading backgrounds (subtle tinted bands)
+        hl.RenderMarkdownH1Bg = { bg = "#2b2220" }
+        hl.RenderMarkdownH2Bg = { bg = "#2a2520" }
+        hl.RenderMarkdownH3Bg = { bg = "#2a2822" }
+        hl.RenderMarkdownH4Bg = { bg = "#252820" }
+        hl.RenderMarkdownH5Bg = { bg = "#202528" }
+        hl.RenderMarkdownH6Bg = { bg = "#252425" }
+    end,
 })
-vim.cmd.colorscheme("gruvbox")
+
+vim.cmd.colorscheme("ember")
