@@ -26,7 +26,8 @@
     "superpowers@claude-plugins-official": true,
     "impeccable@impeccable": true,
     "code-simplifier@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "andrej-karpathy-skills@karpathy-skills": true
   },
   "extraKnownMarketplaces": {
     "impeccable": {
@@ -34,7 +35,14 @@
         "source": "github",
         "repo": "pbakaus/impeccable"
       }
+    },
+    "karpathy-skills": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/forrestchang/andrej-karpathy-skills.git"
+      }
     }
   },
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "high"
 }

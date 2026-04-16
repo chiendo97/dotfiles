@@ -9,6 +9,12 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Swap (8 GB swapfile)
+  swapDevices = [{
+    device = "/swapfile";
+    size = 8192;  # MiB
+  }];
+
   # Networking
   networking.hostName = "nixos-cle";
   networking.useDHCP = lib.mkDefault true;
@@ -29,7 +35,9 @@
   };
 
   # Enable zsh system-wide (required for user shell)
+  # Disable system-level completion init — home-manager handles compinit with caching
   programs.zsh.enable = true;
+  programs.zsh.enableCompletion = false;
 
   # Passwordless sudo for wheel
   security.sudo.wheelNeedsPassword = false;

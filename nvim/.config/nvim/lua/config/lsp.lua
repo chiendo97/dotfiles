@@ -126,6 +126,7 @@ local lsp_servers = {
     -- "ts_ls",
     "tsgo",
     "zk",
+    "terraformls",
     "zls",
     -- "pyrefly",
     -- "ty",

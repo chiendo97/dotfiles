@@ -9,6 +9,8 @@ require("conform").setup({
         bash = { "shfmt" },
         zsh = { "shfmt" },
         go = { "gofumpt", "goimports", "golines" },
+        terraform = { "terraform_fmt" },
+        ["terraform-vars"] = { "terraform_fmt" },
         yaml = { "yamlfmt" },
         ledger = { "hledger" },
         typescriptreact = { "eslint_d", "prettierd" },
