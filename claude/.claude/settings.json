@@ -3,6 +3,9 @@
     "DISCORD_GUILD_ID": "1181560951141584926",
     "ENABLE_CLAUDEAI_MCP_SERVERS": "false"
   },
+  "permissions": {
+    "defaultMode": "auto"
+  },
   "hooks": {
     "Notification": [
       {
@@ -27,7 +30,8 @@
     "impeccable@impeccable": true,
     "code-simplifier@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "andrej-karpathy-skills@karpathy-skills": true
+    "andrej-karpathy-skills@karpathy-skills": true,
+    "linus-torvalds-skills@linus-torvalds-skills": true
   },
   "extraKnownMarketplaces": {
     "impeccable": {
@@ -41,9 +45,16 @@
         "source": "git",
         "url": "https://github.com/forrestchang/andrej-karpathy-skills.git"
       }
+    },
+    "linus-torvalds-skills": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/leopiney/linus-torvalds-skills.git"
+      }
     }
   },
   "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
-  "preferredNotifChannel": "notifications_disabled"
+  "effortLevel": "xhigh",
+  "skipAutoPermissionPrompt": true
 }

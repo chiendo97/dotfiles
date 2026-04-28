@@ -2,4 +2,5 @@
 with pkgs; [
   awscli2
   rclone
+  terraform
 ]
