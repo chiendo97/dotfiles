@@ -505,4 +505,8 @@
     "$HOME/.cargo/bin"
     "$HOME/go/bin"
   ];
+
+  home.file.".npmrc".text = ''
+    prefix=${config.home.homeDirectory}/.local
+  '';
 }

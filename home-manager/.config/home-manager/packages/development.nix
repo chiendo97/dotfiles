@@ -9,6 +9,7 @@ with pkgs; [
   gnumake
   lazygit
   nodejs
+  rumdl
   rustup
   tree-sitter
   zk
