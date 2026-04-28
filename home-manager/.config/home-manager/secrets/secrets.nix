@@ -26,6 +26,7 @@ in
   "homic_rsa.age".publicKeys = [ cle ];
   "oracle.age".publicKeys = [ cle ];
   "nixos_cle.age".publicKeys = [ cle ];
+  "homelab_pve.age".publicKeys = [ cle ];
 
   # === Uriel/work API keys (cle + uriel-dev keys) ===
   "uriel-api-keys.age".publicKeys = [ cle uriel-dev ];

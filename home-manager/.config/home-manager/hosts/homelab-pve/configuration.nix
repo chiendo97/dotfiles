@@ -39,7 +39,7 @@
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILDumojeNQeQ590WBhI+m4LyeLwoiK1okP/fdLyabtG3 chiendo97@gmail.com"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINjcLllQWX0DfhaSKDR5b4y2Ok/Y7lp7614GVvBv/kXM cle@nixos-cle"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINWp6os3wDN+NAy8FPTfrwGdfS6BTX9+qY3naCkJxAX7 cle@dotfiles -> homelab-pve"
     ];
   };
 

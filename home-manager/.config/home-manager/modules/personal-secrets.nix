@@ -25,6 +25,7 @@
     "homic_rsa"
     "oracle"
     "nixos_cle"
+    "homelab_pve"
   ]);
 
   programs.ssh.matchBlocks = {
@@ -57,6 +58,12 @@
       hostname = "192.168.50.55";
       user = "cle";
       identityFile = "~/.ssh/nixos_cle";
+    };
+
+    "homelab-pve" = {
+      hostname = "192.168.50.130";
+      user = "cle";
+      identityFile = "~/.ssh/homelab_pve";
     };
   };
 
