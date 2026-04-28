@@ -74,6 +74,14 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # nix-ld: dynamic linker for generic Linux binaries (uv-managed cpython, etc.)
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    fuse
+    fuse3
+  ];
+  environment.sessionVariables.LD_LIBRARY_PATH = [ "/run/current-system/sw/share/nix-ld/lib" ];
+
   networking.firewall.enable = true;
   networking.firewall.allowedTCPPorts = [ 22 ];
   networking.firewall.trustedInterfaces = [ "tailscale0" ];

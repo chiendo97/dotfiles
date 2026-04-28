@@ -127,6 +127,13 @@
           extraModules = [ ./modules/uriel-secrets.nix ];
         };
 
+        # Homelab Proxmox VM — personal secrets only, no work mounts/keys.
+        "homelab-pve" = mkHomeConfiguration {
+          system = "x86_64-linux";
+          username = "cle";
+          extraModules = [ ./modules/personal-secrets.nix ];
+        };
+
         # macOS (Apple Silicon) - username: chiendo97
         "chiendo97" = mkHomeConfiguration {
           system = "aarch64-darwin";
