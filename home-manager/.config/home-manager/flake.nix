@@ -31,12 +31,18 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Build NixOS images in alternative formats (Proxmox VMA, LXC, qcow2, etc.)
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   # --- Flake Outputs ---
   # Destructure all inputs so they can be referenced below.
   outputs =
-    { nixpkgs, home-manager, neovim-nightly-overlay, claude-code, agenix, ... }:
+    { nixpkgs, home-manager, neovim-nightly-overlay, claude-code, agenix, nixos-generators, ... }:
     let
       # Helper function to build a Home Manager configuration.
       # Arguments:
@@ -121,6 +127,13 @@
           extraModules = [ ./modules/uriel-secrets.nix ];
         };
 
+        # Homelab Proxmox VM — personal secrets only, no work mounts/keys.
+        "homelab-pve" = mkHomeConfiguration {
+          system = "x86_64-linux";
+          username = "cle";
+          extraModules = [ ./modules/personal-secrets.nix ];
+        };
+
         # macOS (Apple Silicon) - username: chiendo97
         "chiendo97" = mkHomeConfiguration {
           system = "aarch64-darwin";
@@ -149,6 +162,35 @@
             ./hosts/nixos-cle/configuration.nix
           ];
         };
+
+        # Proxmox VM — managed with `nixos-rebuild switch --flake .#homelab-pve`
+        # after the initial image has been imported.
+        "homelab-pve" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            agenix.nixosModules.default
+            ./hosts/homelab-pve/hardware-configuration.nix
+            ./hosts/homelab-pve/configuration.nix
+          ];
+        };
+      };
+
+      # --- Build artifacts ---
+      # Proxmox VMA image: `nix build .#homelab-pve-image`
+      # Output: result/vzdump-qemu-*.vma.zst — restore via Proxmox UI or `qmrestore`.
+      packages.x86_64-linux.homelab-pve-image = nixos-generators.nixosGenerate {
+        system = "x86_64-linux";
+        format = "proxmox";
+        modules = [
+          ./hosts/homelab-pve/configuration.nix
+          {
+            proxmox.qemuConf = {
+              name = "homelab-pve";
+              cores = 4;
+              memory = 8192;
+            };
+          }
+        ];
       };
     };
 }
