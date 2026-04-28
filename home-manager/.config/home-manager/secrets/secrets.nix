@@ -5,6 +5,9 @@ let
   # NixOS host key - needed for system-level agenix (WireGuard, etc.)
   nixos-cle = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOSnjSJMlot12qH5y87DmAMhwwKkSiK+iyLPaNdJh+Kc root@nixos-cle";
 
+  # Homelab Proxmox VM host key - for system-level agenix on homelab-pve
+  homelab-pve = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKE8Wi+35loyZOJBLXqXLqEs/6oePL9/zQoZDpq7y0Jh root@homelab-pve";
+
   # Uriel dev machine key - for work-related secrets on aws-dev
   uriel-dev = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILvvaSiAV2bFJgiEiSPZswFq/j4lDBB0WoDu7/talMJN cle@uriel-dev";
 in
