@@ -9,8 +9,6 @@
   # UV tools (Python CLIs in isolated venvs, managed outside Nix)
   # ============================================================================
   uvTools.tools = [
-    { package = "codegraphcontext"; }
-    { package = "mkdocs"; }
   ];
 
   # ============================================================================
