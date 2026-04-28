@@ -15,6 +15,7 @@ in
 
   # === Personal SSH keys (cle key only) ===
   "aws_bastion_rsa.age".publicKeys = [ cle ];
+  "cle_pve.age".publicKeys = [ cle ];
   "cle_viettel_idc.age".publicKeys = [ cle ];
   "cle_vpn.age".publicKeys = [ cle ];
   "github_key.age".publicKeys = [ cle ];

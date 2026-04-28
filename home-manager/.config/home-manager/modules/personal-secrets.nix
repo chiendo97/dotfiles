@@ -17,6 +17,7 @@
     };
   }) [
     "aws_bastion_rsa"
+    "cle_pve"
     "github_key"
     "github_rsa"
     "cle_viettel_idc"
@@ -33,6 +34,12 @@
       user = "cle";
       identityFile = "~/.ssh/aws_bastion_rsa";
       identitiesOnly = true;
+    };
+
+    "cle-pve" = {
+      hostname = "192.168.50.13";
+      user = "root";
+      identityFile = "~/.ssh/cle_pve";
     };
 
     "cle-viettel" = {
