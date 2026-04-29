@@ -30,6 +30,12 @@
   ]);
 
   programs.ssh.matchBlocks = {
+    "github.com" = {
+      hostname = "github.com";
+      identityFile = "~/.ssh/github_key";
+      identitiesOnly = true;
+    };
+
     "aws-dev" = {
       hostname = "10.26.136.50";
       user = "cle";
