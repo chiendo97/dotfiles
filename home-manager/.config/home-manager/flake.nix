@@ -96,7 +96,6 @@
           extraModules = [
             ./modules/personal-secrets.nix
             ./modules/uriel-secrets.nix
-            ./profiles/genbook.nix
           ];
         };
         "cle@linux" = mkHomeConfiguration {
@@ -105,7 +104,6 @@
           extraModules = [
             ./modules/personal-secrets.nix
             ./modules/uriel-secrets.nix
-            ./profiles/genbook.nix
           ];
         };
 

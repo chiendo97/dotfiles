@@ -13,3 +13,17 @@ vim/vim.symlink/plugged/
 Brewfile.lock.json
 home-manager/.config/home-manager/result
 __pycache__/
+
+# Local Claude Code runtime state
+claude/.claude/.credentials.json
+claude/.claude/backups/
+claude/.claude/cache/
+claude/.claude/file-history/
+claude/.claude/history.jsonl
+claude/.claude/hooks/notification.log
+claude/.claude/plugins/
+claude/.claude/projects/
+claude/.claude/tasks/
+
+# Nix build outputs
+result-pve

@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 
 {
   age.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519_uriel_dev" ];
@@ -49,7 +49,14 @@
 
     "github.com" = {
       hostname = "github.com";
+      identityFile = lib.mkDefault "~/.ssh/id_ed25519_github";
+    };
+
+    "github-uriel" = {
+      hostname = "github.com";
+      user = "git";
       identityFile = "~/.ssh/id_ed25519_github";
+      identitiesOnly = true;
     };
 
     "vng-dev" = {
