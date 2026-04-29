@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   age.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519_agenix" ];
@@ -43,6 +43,11 @@
       identityFile = "~/.ssh/cle_pve";
     };
 
+    "unraid-cle" = {
+      hostname = "unraid-cle";
+      user = "root";
+    };
+
     "cle-viettel" = {
       hostname = "171.244.62.91";
       user = "root";
@@ -79,5 +84,18 @@
     source ~/.secrets/api-keys 2>/dev/null
     unset GITHUB_TOKEN
     unset ANTHROPIC_API_KEY
+  '';
+
+  home.activation.dockerContextUnraidCle = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    docker_bin="${pkgs.docker-client}/bin/docker"
+    if "$docker_bin" context inspect unraid-cle >/dev/null 2>&1; then
+      "$docker_bin" context update unraid-cle \
+        --description "Unraid CLE Docker daemon" \
+        --docker "host=ssh://root@unraid-cle" >/dev/null
+    else
+      "$docker_bin" context create unraid-cle \
+        --description "Unraid CLE Docker daemon" \
+        --docker "host=ssh://root@unraid-cle" >/dev/null
+    fi
   '';
 }
