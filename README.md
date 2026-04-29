@@ -10,6 +10,8 @@ dotfiles/
 ├── nvim/            # Neovim configuration (Lua, lazy.nvim, LSP)
 ├── alacritty/       # Terminal emulator (Gruvbox theme)
 ├── zellij/          # Terminal multiplexer alternative
+├── claude/          # Claude Code settings, hooks, rules, and skills
+├── codex/           # Codex local skills bridge
 └── Makefile         # Stow commands
 ```
 
@@ -97,6 +99,25 @@ make stow      # Symlink all packages
 make unstow    # Remove all symlinks
 make restow    # Re-symlink all (after changes)
 make nvim      # Stow individual package
+make codex     # Link Claude and Claude-plugin skills into Codex discovery
+```
+
+### Codex
+
+`make codex` links the current Claude Code skills into Codex:
+
+- `~/.codex/skills/claude` -> `~/.claude/skills`
+- `~/.codex/skills/impeccable` -> installed Impeccable Claude plugin skill
+- `~/.codex/skills/karpathy-guidelines` -> installed Karpathy guidelines skill
+- `~/.codex/skills/torvalds-doctrine` -> installed Torvalds doctrine skill
+
+Register the Claude Code marketplaces with Codex after the Claude package has been stowed:
+
+```bash
+codex plugin marketplace add ~/.claude/plugins/marketplaces/claude-plugins-official
+codex plugin marketplace add ~/.claude/plugins/marketplaces/impeccable
+codex plugin marketplace add ~/.claude/plugins/marketplaces/karpathy-skills
+codex plugin marketplace add ~/.claude/plugins/marketplaces/linus-torvalds-skills
 ```
 
 ### Neovim

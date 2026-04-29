@@ -1,4 +1,4 @@
-PACKAGES := alacritty claude git home-manager nvim zellij
+PACKAGES := alacritty claude codex git home-manager nvim zellij
 
 .PHONY: all stow unstow restow pve-build pve-upload pve-image $(PACKAGES)
 
