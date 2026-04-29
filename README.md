@@ -109,6 +109,7 @@ make codex     # Link Claude and Claude-plugin skills into Codex discovery
 - `~/.codex/skills/claude` -> `~/.claude/skills`
 - `~/.codex/skills/impeccable` -> installed Impeccable Claude plugin skill
 - `~/.codex/skills/karpathy-guidelines` -> installed Karpathy guidelines skill
+- `~/.codex/skills/superpowers` -> installed Superpowers Claude plugin skills
 - `~/.codex/skills/torvalds-doctrine` -> installed Torvalds doctrine skill
 
 Register the Claude Code marketplaces with Codex after the Claude package has been stowed:
