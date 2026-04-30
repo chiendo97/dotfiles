@@ -21,9 +21,15 @@ claude/.claude/cache/
 claude/.claude/file-history/
 claude/.claude/history.jsonl
 claude/.claude/hooks/notification.log
+claude/.claude/mcp-needs-auth-cache.json
 claude/.claude/plugins/
 claude/.claude/projects/
+claude/.claude/session-env/
+claude/.claude/sessions/
+claude/.claude/settings.local.json
+claude/.claude/shell-snapshots/
 claude/.claude/tasks/
+claude/.claude/telemetry/
 
 # Nix build outputs
 result-pve
