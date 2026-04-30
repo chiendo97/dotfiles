@@ -8,6 +8,9 @@ let
   # Homelab Proxmox VM host key - for system-level agenix on homelab-pve
   homelab-pve = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKE8Wi+35loyZOJBLXqXLqEs/6oePL9/zQoZDpq7y0Jh root@homelab-pve";
 
+  # Selfhost Proxmox VM host key - for system-level agenix on selfhost-pve
+  selfhost-pve = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID4v4a+akIQEq8U1z5/vG9K5mouwV12dKc8POSjndZ1U root@apps-docker-pve-nixos";
+
   # Uriel dev machine key - for work-related secrets on aws-dev
   uriel-dev = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILvvaSiAV2bFJgiEiSPZswFq/j4lDBB0WoDu7/talMJN cle@uriel-dev";
 in
@@ -28,6 +31,10 @@ in
   "oracle.age".publicKeys = [ cle ];
   "nixos_cle.age".publicKeys = [ cle ];
   "homelab_pve.age".publicKeys = [ cle ];
+  "id_ed25519_selfhost.age".publicKeys = [ cle ];
+
+  # === Selfhost VM system secrets (cle + selfhost-pve host key) ===
+  "tailscale_selfhost_pve_auth_key.age".publicKeys = [ cle selfhost-pve ];
 
   # === Uriel/work API keys (cle + uriel-dev keys) ===
   "uriel-api-keys.age".publicKeys = [ cle uriel-dev ];

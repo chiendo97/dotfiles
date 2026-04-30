@@ -27,6 +27,7 @@
     "oracle"
     "nixos_cle"
     "homelab_pve"
+    "id_ed25519_selfhost"
   ]);
 
   programs.ssh.matchBlocks = {
@@ -82,6 +83,13 @@
       hostname = "192.168.50.130";
       user = "cle";
       identityFile = "~/.ssh/homelab_pve";
+    };
+
+    "selfhost-pve" = {
+      hostname = "192.168.50.121";
+      user = "cle";
+      identityFile = "~/.ssh/id_ed25519_selfhost";
+      identitiesOnly = true;
     };
   };
 

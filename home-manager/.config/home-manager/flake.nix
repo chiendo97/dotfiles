@@ -132,6 +132,17 @@
           extraModules = [ ./modules/personal-secrets.nix ];
         };
 
+        # Apps Docker VM — personal shell config, but use the system Docker
+        # daemon instead of the default rootless Podman socket.
+        "apps-docker-pve" = mkHomeConfiguration {
+          system = "x86_64-linux";
+          username = "cle";
+          extraModules = [
+            ./modules/personal-secrets.nix
+            ./profiles/apps-docker-pve.nix
+          ];
+        };
+
         # macOS (Apple Silicon) - username: chiendo97
         "chiendo97" = mkHomeConfiguration {
           system = "aarch64-darwin";
@@ -171,24 +182,51 @@
             ./hosts/homelab-pve/configuration.nix
           ];
         };
+
+        # Replacement for Debian VM 120. Built first as VM 121, then cut over
+        # after Docker Compose validation.
+        "apps-docker-pve" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            agenix.nixosModules.default
+            ./hosts/apps-docker-pve/configuration.nix
+          ];
+        };
       };
 
       # --- Build artifacts ---
       # Proxmox VMA image: `nix build .#homelab-pve-image`
       # Output: result/vzdump-qemu-*.vma.zst — restore via Proxmox UI or `qmrestore`.
-      packages.x86_64-linux.homelab-pve-image = nixos-generators.nixosGenerate {
-        system = "x86_64-linux";
-        format = "proxmox";
-        modules = [
-          ./hosts/homelab-pve/configuration.nix
-          {
-            proxmox.qemuConf = {
-              name = "homelab-pve";
-              cores = 4;
-              memory = 8192;
-            };
-          }
-        ];
+      packages.x86_64-linux = {
+        homelab-pve-image = nixos-generators.nixosGenerate {
+          system = "x86_64-linux";
+          format = "proxmox";
+          modules = [
+            ./hosts/homelab-pve/configuration.nix
+            {
+              proxmox.qemuConf = {
+                name = "homelab-pve";
+                cores = 4;
+                memory = 8192;
+              };
+            }
+          ];
+        };
+
+        apps-docker-pve-image = nixos-generators.nixosGenerate {
+          system = "x86_64-linux";
+          format = "proxmox";
+          modules = [
+            ./hosts/apps-docker-pve/configuration.nix
+            {
+              proxmox.qemuConf = {
+                name = "apps-docker-pve";
+                cores = 8;
+                memory = 12288;
+              };
+            }
+          ];
+        };
       };
     };
 }
