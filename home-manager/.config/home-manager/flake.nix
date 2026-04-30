@@ -147,6 +147,17 @@
           ];
         };
 
+        # Proxmox VM — managed with `nixos-rebuild switch --flake .#homelab-pve`
+        # after the initial image has been imported.
+        "homelab-pve" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            agenix.nixosModules.default
+            ./hosts/homelab-pve/hardware-configuration.nix
+            ./hosts/homelab-pve/configuration.nix
+          ];
+        };
+
         # Selfhost Proxmox VM. Replaces the old Debian Docker VM.
         "selfhost-pve" = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
@@ -158,7 +169,24 @@
       };
 
       # --- Build artifacts ---
+      # Proxmox VMA image: `nix build .#homelab-pve-image`
+      # Output: result/vzdump-qemu-*.vma.zst — restore via Proxmox UI or `qmrestore`.
       packages.x86_64-linux = {
+        homelab-pve-image = nixos-generators.nixosGenerate {
+          system = "x86_64-linux";
+          format = "proxmox";
+          modules = [
+            ./hosts/homelab-pve/configuration.nix
+            {
+              proxmox.qemuConf = {
+                name = "homelab-pve";
+                cores = 4;
+                memory = 8192;
+              };
+            }
+          ];
+        };
+
         selfhost-pve-image = nixos-generators.nixosGenerate {
           system = "x86_64-linux";
           format = "proxmox";
