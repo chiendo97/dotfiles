@@ -98,14 +98,6 @@
             ./modules/uriel-secrets.nix
           ];
         };
-        "cle@linux" = mkHomeConfiguration {
-          system = "x86_64-linux";
-          username = "cle";
-          extraModules = [
-            ./modules/personal-secrets.nix
-            ./modules/uriel-secrets.nix
-          ];
-        };
 
         # Linux (x86_64) with extra genbook-specific modules
         "genbook" = mkHomeConfiguration {
@@ -125,36 +117,19 @@
           extraModules = [ ./modules/uriel-secrets.nix ];
         };
 
-        # Homelab Proxmox VM — personal secrets only, no work mounts/keys.
-        "homelab-pve" = mkHomeConfiguration {
-          system = "x86_64-linux";
-          username = "cle";
-          extraModules = [ ./modules/personal-secrets.nix ];
-        };
-
-        # Apps Docker VM — personal shell config, but use the system Docker
+        # Selfhost Proxmox VM — personal shell config, but use the system Docker
         # daemon instead of the default rootless Podman socket.
-        "apps-docker-pve" = mkHomeConfiguration {
+        "selfhost-pve" = mkHomeConfiguration {
           system = "x86_64-linux";
           username = "cle";
           extraModules = [
             ./modules/personal-secrets.nix
-            ./profiles/apps-docker-pve.nix
+            ./profiles/selfhost-pve.nix
           ];
         };
 
         # macOS (Apple Silicon) - username: chiendo97
         "chiendo97" = mkHomeConfiguration {
-          system = "aarch64-darwin";
-          username = "chiendo97";
-          extraModules = [ ./modules/personal-secrets.nix ];
-        };
-        "chiendo97@darwin" = mkHomeConfiguration {
-          system = "aarch64-darwin";
-          username = "chiendo97";
-          extraModules = [ ./modules/personal-secrets.nix ];
-        };
-        "chiendo97@macos" = mkHomeConfiguration {
           system = "aarch64-darwin";
           username = "chiendo97";
           extraModules = [ ./modules/personal-secrets.nix ];
@@ -183,13 +158,12 @@
           ];
         };
 
-        # Replacement for Debian VM 120. Built first as VM 121, then cut over
-        # after Docker Compose validation.
-        "apps-docker-pve" = nixpkgs.lib.nixosSystem {
+        # Selfhost Proxmox VM. Replaces the old Debian Docker VM.
+        "selfhost-pve" = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
             agenix.nixosModules.default
-            ./hosts/apps-docker-pve/configuration.nix
+            ./hosts/selfhost-pve/configuration.nix
           ];
         };
       };
@@ -213,14 +187,15 @@
           ];
         };
 
-        apps-docker-pve-image = nixos-generators.nixosGenerate {
+        selfhost-pve-image = nixos-generators.nixosGenerate {
           system = "x86_64-linux";
           format = "proxmox";
           modules = [
-            ./hosts/apps-docker-pve/configuration.nix
+            agenix.nixosModules.default
+            ./hosts/selfhost-pve/configuration.nix
             {
               proxmox.qemuConf = {
-                name = "apps-docker-pve";
+                name = "selfhost-pve";
                 cores = 8;
                 memory = 12288;
               };

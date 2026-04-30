@@ -9,7 +9,7 @@ let
   homelab-pve = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKE8Wi+35loyZOJBLXqXLqEs/6oePL9/zQoZDpq7y0Jh root@homelab-pve";
 
   # Selfhost Proxmox VM host key - for system-level agenix on selfhost-pve
-  selfhost-pve = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID4v4a+akIQEq8U1z5/vG9K5mouwV12dKc8POSjndZ1U root@apps-docker-pve-nixos";
+  selfhost-pve = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID4v4a+akIQEq8U1z5/vG9K5mouwV12dKc8POSjndZ1U root@selfhost-pve";
 
   # Uriel dev machine key - for work-related secrets on aws-dev
   uriel-dev = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILvvaSiAV2bFJgiEiSPZswFq/j4lDBB0WoDu7/talMJN cle@uriel-dev";

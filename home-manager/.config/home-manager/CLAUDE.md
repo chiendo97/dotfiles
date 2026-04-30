@@ -48,9 +48,11 @@ sudo nixos-rebuild switch --flake .#nixos-cle
 
 | Name | System | Notes |
 |------|--------|-------|
-| `cle` / `cle@linux` | x86_64-linux | Default Linux config |
+| `cle` | x86_64-linux | Default Linux config |
 | `genbook` | x86_64-linux | Linux + rclone mount services |
-| `chiendo97` / `chiendo97@darwin` / `chiendo97@macos` | aarch64-darwin | macOS config |
+| `uriel-dev` | x86_64-linux | Work-only dev config |
+| `selfhost-pve` | x86_64-linux | Selfhost Proxmox VM config |
+| `chiendo97` | aarch64-darwin | macOS config |
 
 ### Platform Handling
 

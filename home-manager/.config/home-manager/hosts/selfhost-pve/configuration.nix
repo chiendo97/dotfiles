@@ -1,31 +1,5 @@
 { config, lib, pkgs, modulesPath, ... }:
 
-let
-  selfhostComposeServices = [
-    "bazarr"
-    "dockerproxy"
-    "dockge"
-    "dockhand"
-    "dozzle"
-    "filebrowser"
-    "flaresolverr"
-    "hledger-webapp"
-    "homepage"
-    "openspeedtest"
-    "playwright-mcp"
-    "prowlarr"
-    "qbittorrent"
-    "radarr"
-    "sabnzbd"
-    "silverbullet"
-    "sonarr"
-    "speedtest-tracker"
-    "syncthing"
-    "tailscale-mcp"
-    "traefik"
-  ];
-  selfhostComposeServiceArgs = lib.concatStringsSep " " selfhostComposeServices;
-in
 {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
@@ -125,16 +99,9 @@ in
   systemd.tmpfiles.rules = [
     "d /srv/selfhost 0755 root root -"
     "d /mnt/user 0755 root root -"
-    "d /mnt/user/selfhost 0755 root root -"
     "d /mnt/user/media 0755 root root -"
     "d /mnt/user/frigate 0755 root root -"
   ];
-
-  fileSystems."/mnt/user/selfhost" = {
-    device = "/srv/selfhost";
-    fsType = "none";
-    options = [ "bind" ];
-  };
 
   fileSystems."/mnt/user/media" = {
     device = "192.168.50.244:/media";
@@ -160,29 +127,6 @@ in
       "x-systemd.idle-timeout=600"
       "vers=4.2"
     ];
-  };
-
-  systemd.services.selfhost-compose = {
-    description = "Selfhost Docker Compose stack";
-    after = [
-      "docker.service"
-      "network-online.target"
-      "mnt-user-media.automount"
-      "mnt-user-frigate.automount"
-    ];
-    wants = [ "network-online.target" ];
-    requires = [ "docker.service" ];
-    unitConfig.ConditionPathExists = "/srv/selfhost/docker-compose.yml";
-    path = [ pkgs.docker pkgs.docker-compose ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      WorkingDirectory = "/srv/selfhost";
-      ExecStart = "${pkgs.docker-compose}/bin/docker-compose up -d --remove-orphans ${selfhostComposeServiceArgs}";
-      ExecStop = "${pkgs.docker-compose}/bin/docker-compose down";
-      TimeoutStartSec = 0;
-      TimeoutStopSec = 300;
-    };
   };
 
   environment.systemPackages = with pkgs; [
