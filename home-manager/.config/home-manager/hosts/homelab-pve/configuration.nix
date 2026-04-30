@@ -62,41 +62,6 @@
   # QEMU guest agent — lets Proxmox see VM IP, do clean shutdowns, etc.
   services.qemuGuest.enable = true;
 
-  # NFS mounts from Unraid host
-  fileSystems."/mnt/selfhost" = {
-    device = "unraid-cle:/mnt/user/selfhost";
-    fsType = "nfs";
-    options = [
-      "x-systemd.automount"
-      "noauto"
-      "x-systemd.idle-timeout=600"
-      "_netdev"
-      "nofail"
-    ];
-  };
-  fileSystems."/mnt/immich-app" = {
-    device = "unraid-cle:/mnt/user/immich-app";
-    fsType = "nfs";
-    options = [
-      "x-systemd.automount"
-      "noauto"
-      "x-systemd.idle-timeout=600"
-      "_netdev"
-      "nofail"
-    ];
-  };
-  fileSystems."/mnt/frigate" = {
-    device = "unraid-cle:/mnt/user/frigate";
-    fsType = "nfs";
-    options = [
-      "x-systemd.automount"
-      "noauto"
-      "x-systemd.idle-timeout=600"
-      "_netdev"
-      "nofail"
-    ];
-  };
-
   environment.systemPackages = with pkgs; [
     vim
     git
