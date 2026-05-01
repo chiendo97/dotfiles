@@ -50,6 +50,55 @@
       identityFile = "~/.ssh/cle_pve";
     };
 
+    "backup-pve" = {
+      hostname = "192.168.50.53";
+      user = "root";
+      identityFile = "~/.ssh/id_ed25519_selfhost";
+      identitiesOnly = true;
+    };
+
+    "pulse" = {
+      hostname = "192.168.50.18";
+      user = "root";
+      identityFile = "~/.ssh/id_ed25519_selfhost";
+      identitiesOnly = true;
+    };
+
+    "plex-pve" = {
+      hostname = "192.168.50.242";
+      user = "root";
+      identityFile = "~/.ssh/id_ed25519_selfhost";
+      identitiesOnly = true;
+    };
+
+    "jellyfin-pve" = {
+      hostname = "192.168.50.243";
+      user = "root";
+      identityFile = "~/.ssh/id_ed25519_selfhost";
+      identitiesOnly = true;
+    };
+
+    "nas-pve" = {
+      hostname = "192.168.50.244";
+      user = "root";
+      identityFile = "~/.ssh/id_ed25519_selfhost";
+      identitiesOnly = true;
+    };
+
+    "frigate-pve" = {
+      hostname = "192.168.50.245";
+      user = "root";
+      identityFile = "~/.ssh/id_ed25519_selfhost";
+      identitiesOnly = true;
+    };
+
+    "immich-pve" = {
+      hostname = "192.168.50.246";
+      user = "root";
+      identityFile = "~/.ssh/id_ed25519_selfhost";
+      identitiesOnly = true;
+    };
+
     "unraid-cle" = {
       hostname = "unraid-cle";
       user = "root";

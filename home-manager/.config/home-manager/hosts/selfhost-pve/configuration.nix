@@ -100,7 +100,6 @@
     "d /srv/selfhost 0755 root root -"
     "d /mnt/user 0755 root root -"
     "d /mnt/user/media 0755 root root -"
-    "d /mnt/user/frigate 0755 root root -"
   ];
 
   fileSystems."/mnt/user/media" = {
@@ -108,19 +107,6 @@
     fsType = "nfs4";
     options = [
       "rw"
-      "_netdev"
-      "nofail"
-      "x-systemd.automount"
-      "x-systemd.idle-timeout=600"
-      "vers=4.2"
-    ];
-  };
-
-  fileSystems."/mnt/user/frigate" = {
-    device = "192.168.50.244:/frigate";
-    fsType = "nfs4";
-    options = [
-      "ro"
       "_netdev"
       "nofail"
       "x-systemd.automount"
