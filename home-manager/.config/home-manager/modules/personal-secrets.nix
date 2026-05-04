@@ -57,7 +57,7 @@
       identitiesOnly = true;
     };
 
-    "pulse" = {
+    "pulse-pve" = {
       hostname = "192.168.50.18";
       user = "root";
       identityFile = "~/.ssh/id_ed25519_selfhost";
@@ -122,11 +122,11 @@
       identityFile = "~/.ssh/oracle";
     };
 
-    "nixos-cle" = {
-      hostname = "192.168.50.55";
-      user = "cle";
-      identityFile = "~/.ssh/nixos_cle";
-    };
+    # "nixos-cle" = {
+    #   hostname = "192.168.50.55";
+    #   user = "cle";
+    #   identityFile = "~/.ssh/nixos_cle";
+    # };
 
     "homelab-pve" = {
       hostname = "100.112.172.58";
@@ -149,16 +149,16 @@
     unset ANTHROPIC_API_KEY
   '';
 
-  home.activation.dockerContextUnraidCle = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    docker_bin="${pkgs.docker-client}/bin/docker"
-    if "$docker_bin" context inspect unraid-cle >/dev/null 2>&1; then
-      "$docker_bin" context update unraid-cle \
-        --description "Unraid CLE Docker daemon" \
-        --docker "host=ssh://root@unraid-cle" >/dev/null
-    else
-      "$docker_bin" context create unraid-cle \
-        --description "Unraid CLE Docker daemon" \
-        --docker "host=ssh://root@unraid-cle" >/dev/null
-    fi
-  '';
+  # home.activation.dockerContextUnraidCle = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #   docker_bin="${pkgs.docker-client}/bin/docker"
+  #   if "$docker_bin" context inspect unraid-cle >/dev/null 2>&1; then
+  #     "$docker_bin" context update unraid-cle \
+  #       --description "Unraid CLE Docker daemon" \
+  #       --docker "host=ssh://root@unraid-cle" >/dev/null
+  #   else
+  #     "$docker_bin" context create unraid-cle \
+  #       --description "Unraid CLE Docker daemon" \
+  #       --docker "host=ssh://root@unraid-cle" >/dev/null
+  #   fi
+  # '';
 }
