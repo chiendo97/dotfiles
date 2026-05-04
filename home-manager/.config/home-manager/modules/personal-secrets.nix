@@ -72,7 +72,7 @@
     };
 
     "jellyfin-pve" = {
-      hostname = "192.168.50.243";
+      hostname = "100.111.70.79";
       user = "root";
       identityFile = "~/.ssh/id_ed25519_selfhost";
       identitiesOnly = true;
@@ -100,7 +100,7 @@
     };
 
     "unraid-cle" = {
-      hostname = "unraid-cle";
+      hostname = "100.89.182.96";
       user = "root";
     };
 
@@ -117,7 +117,7 @@
     };
 
     "oracle" = {
-      hostname = "168.138.176.219";
+      hostname = "100.79.39.73";
       user = "ubuntu";
       identityFile = "~/.ssh/oracle";
     };
@@ -129,13 +129,13 @@
     };
 
     "homelab-pve" = {
-      hostname = "192.168.50.130";
+      hostname = "100.112.172.58";
       user = "cle";
       identityFile = "~/.ssh/homelab_pve";
     };
 
     "selfhost-pve" = {
-      hostname = "192.168.50.121";
+      hostname = "100.81.144.82";
       user = "cle";
       identityFile = "~/.ssh/id_ed25519_selfhost";
       identitiesOnly = true;
