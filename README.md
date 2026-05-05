@@ -105,12 +105,14 @@ make codex-update-skills  # Pull Codex-managed skill sources
 
 ### Codex
 
-`make codex` links personal and upstream skills into Codex native skill discovery.
-It installs symlinks under `~/.agents/skills`, which is the shared Agent Skills
-location Codex scans for user skills. External skill repos are cloned into
-`~/.codex/skill-sources` on first run, so Codex does not depend on Claude's
-plugin cache or marketplace installation state.
+`make codex` links the tracked Codex config plus personal and upstream skills
+into Codex native skill discovery. It stows `codex/.codex/config.toml` to
+`~/.codex/config.toml` and installs skill symlinks under `~/.agents/skills`,
+which is the shared Agent Skills location Codex scans for user skills. External
+skill repos are cloned into `~/.codex/skill-sources` on first run, so Codex does
+not depend on Claude's plugin cache or marketplace installation state.
 
+- `~/.codex/config.toml` -> `codex/.codex/config.toml`
 - `~/.agents/skills/claude` -> this repo's `claude/.claude/skills`
 - `~/.agents/skills/impeccable` -> `~/.codex/skill-sources/impeccable`
 - `~/.agents/skills/karpathy-guidelines` -> `~/.codex/skill-sources/andrej-karpathy-skills`
