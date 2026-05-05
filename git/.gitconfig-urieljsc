@@ -1,3 +1,6 @@
 [user]
     name = cle
     email = cle@urieljsc.com
+
+[url "ssh://git@git.urieljsc.com/"]
+    insteadOf = https://git.urieljsc.com/

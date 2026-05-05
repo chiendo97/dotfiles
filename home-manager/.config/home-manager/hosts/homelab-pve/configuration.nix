@@ -62,6 +62,12 @@
   # QEMU guest agent — lets Proxmox see VM IP, do clean shutdowns, etc.
   services.qemuGuest.enable = true;
 
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 100;
+  };
+
   environment.systemPackages = with pkgs; [
     vim
     git
