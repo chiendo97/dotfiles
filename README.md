@@ -104,7 +104,9 @@ make codex     # Link Claude and Claude-plugin skills into Codex discovery
 
 ### Codex
 
-`make codex` links the current Claude Code skills into Codex:
+`make codex` links the tracked Codex config and current Claude Code skills into Codex:
+
+- `~/.codex/config.toml` -> `codex/.codex/config.toml`
 
 - `~/.codex/skills/claude` -> `~/.claude/skills`
 - `~/.codex/skills/impeccable` -> installed Impeccable Claude plugin skill
