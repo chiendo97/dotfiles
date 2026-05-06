@@ -132,7 +132,10 @@
         "chiendo97" = mkHomeConfiguration {
           system = "aarch64-darwin";
           username = "chiendo97";
-          extraModules = [ ./modules/personal-secrets.nix ];
+          extraModules = [
+            ./modules/personal-secrets.nix
+            ./modules/uriel-secrets.nix
+          ];
         };
       };
 
