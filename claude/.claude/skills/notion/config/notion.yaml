@@ -1,4 +1,5 @@
 default_project: genbooks
+default_creator_alias: cle
 projects:
   genbooks:
     project_id: 271d67a3-7e1d-8081-b144-ce1b112c7bb0
