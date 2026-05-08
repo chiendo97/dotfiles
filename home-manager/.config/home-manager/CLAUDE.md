@@ -93,6 +93,7 @@ To add a new secret: (1) add entry to `secrets/secrets.nix`, (2) encrypt with ag
 QEMU/KVM guest on Unraid with:
 
 - **VirtioFS mounts** — `~/Source/selfhost` and `~/Source/media` from Unraid host (configured in VM XML + `fileSystems`)
+- **zk notebook** — `/srv/selfhost/zk` from `nas-pve` NFS export `192.168.50.244:/zk`
 - **WireGuard VPN** — `genbook-aws` and `urieljsc-office` tunnels, auto-start on boot via `networking.wg-quick` with agenix-decrypted configs
 - **Rootless podman** — `virtualisation.podman.enable` + subuid/subgid ranges; socket activated via Home Manager systemd user unit. `DOCKER_HOST` points to the user podman socket so `docker compose` works transparently
 - **nix-ld** — enabled for generic Linux binary compatibility (uv, etc.)

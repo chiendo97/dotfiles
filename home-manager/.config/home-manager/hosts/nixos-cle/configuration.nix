@@ -136,6 +136,27 @@
   # QEMU guest agent
   services.qemuGuest.enable = true;
 
+  boot.supportedFilesystems = [ "nfs" ];
+  services.rpcbind.enable = true;
+
+  systemd.tmpfiles.rules = [
+    "d /srv/selfhost 0755 root root -"
+    "d /srv/selfhost/zk 0755 cle users -"
+  ];
+
+  fileSystems."/srv/selfhost/zk" = {
+    device = "192.168.50.244:/zk";
+    fsType = "nfs4";
+    options = [
+      "rw"
+      "_netdev"
+      "nofail"
+      "x-systemd.automount"
+      "x-systemd.idle-timeout=0"
+      "vers=4.2"
+    ];
+  };
+
   # Agenix secrets (system-level, uses host SSH key)
   age.secrets.wg_genbook_aws = {
     file = ../../secrets/wg_genbook_aws.age;
