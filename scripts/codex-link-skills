@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd "$script_dir/.." && pwd)"
+
+skills_dir="${CODEX_USER_SKILLS_DIR:-$HOME/.agents/skills}"
+source_dir="${CODEX_SKILL_SOURCE_DIR:-$HOME/.codex/skill-sources}"
+update_sources="${CODEX_UPDATE_SKILLS:-0}"
+
+managed_names=(
+  claude
+  impeccable
+  karpathy-guidelines
+  superpowers
+  torvalds-doctrine
+)
+
+log() {
+  printf '%s\n' "$*" >&2
+}
+
+warn() {
+  printf 'WARN: %s\n' "$*" >&2
+}
+
+first_existing_dir() {
+  local path
+  for path in "$@"; do
+    [ -n "$path" ] || continue
+    if [ -d "$path" ]; then
+      printf '%s\n' "$path"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+cleanup_links() {
+  local name path old_path
+
+  for name in "${managed_names[@]}"; do
+    path="$skills_dir/$name"
+    if [ -L "$path" ]; then
+      rm "$path"
+      log "UNLINK: $path"
+    fi
+
+    old_path="$HOME/.codex/skills/$name"
+    if [ -L "$old_path" ]; then
+      rm "$old_path"
+      log "UNLINK: $old_path"
+    fi
+  done
+}
+
+ensure_repo() {
+  local name="$1"
+  local url="$2"
+  local dest="$source_dir/$name"
+
+  if [ -d "$dest/.git" ]; then
+    if [ "$update_sources" = "1" ]; then
+      log "UPDATE: $dest"
+      git -C "$dest" pull --ff-only >&2
+    fi
+    printf '%s\n' "$dest"
+    return 0
+  fi
+
+  if [ -e "$dest" ]; then
+    warn "skip $name clone: $dest exists and is not a git repo"
+    return 1
+  fi
+
+  log "CLONE: $url -> $dest"
+  if git clone --depth 1 "$url" "$dest" >&2; then
+    printf '%s\n' "$dest"
+    return 0
+  fi
+
+  warn "clone failed for $name: $url"
+  return 1
+}
+
+link_dir() {
+  local name="$1"
+  local target="$2"
+  local link_path="$skills_dir/$name"
+
+  if [ ! -d "$target" ]; then
+    warn "missing $name source: $target"
+    return 0
+  fi
+
+  if [ -e "$link_path" ] && [ ! -L "$link_path" ]; then
+    warn "skip $name: $link_path exists and is not a symlink"
+    return 0
+  fi
+
+  ln -sfn "$target" "$link_path"
+  log "LINK: $link_path -> $target"
+}
+
+link_first() {
+  local name="$1"
+  shift
+
+  local target
+  if target="$(first_existing_dir "$@")"; then
+    link_dir "$name" "$target"
+  else
+    warn "skip $name: no source directory found"
+  fi
+}
+
+link_repo_skill() {
+  local name="$1"
+  local repo="$2"
+  shift 2
+
+  local candidates=()
+  local relpath
+  for relpath in "$@"; do
+    candidates+=("$repo/$relpath")
+  done
+
+  link_first "$name" "${candidates[@]}"
+}
+
+if [ "${1:-}" = "--clean" ]; then
+  cleanup_links
+  exit 0
+fi
+
+mkdir -p "$skills_dir" "$source_dir"
+cleanup_links
+
+link_first "claude" \
+  "$repo_root/claude/.claude/skills"
+
+if repo="$(ensure_repo "impeccable" "https://github.com/pbakaus/impeccable.git")"; then
+  link_repo_skill "impeccable" "$repo" \
+    ".agents/skills/impeccable" \
+    ".claude/skills/impeccable" \
+    "skills/impeccable" \
+    "plugin/skills/impeccable"
+fi
+
+if repo="$(ensure_repo "andrej-karpathy-skills" "https://github.com/forrestchang/andrej-karpathy-skills.git")"; then
+  link_repo_skill "karpathy-guidelines" "$repo" \
+    "skills/karpathy-guidelines"
+fi
+
+if repo="$(ensure_repo "superpowers" "https://github.com/obra/superpowers.git")"; then
+  link_repo_skill "superpowers" "$repo" \
+    "skills"
+fi
+
+if repo="$(ensure_repo "linus-torvalds-skills" "https://github.com/leopiney/linus-torvalds-skills.git")"; then
+  link_repo_skill "torvalds-doctrine" "$repo" \
+    "skills/torvalds-doctrine"
+fi

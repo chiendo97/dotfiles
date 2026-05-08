@@ -57,7 +57,7 @@
       identitiesOnly = true;
     };
 
-    "pulse" = {
+    "pulse-pve" = {
       hostname = "192.168.50.18";
       user = "root";
       identityFile = "~/.ssh/id_ed25519_selfhost";
@@ -72,7 +72,7 @@
     };
 
     "jellyfin-pve" = {
-      hostname = "192.168.50.243";
+      hostname = "100.111.70.79";
       user = "root";
       identityFile = "~/.ssh/id_ed25519_selfhost";
       identitiesOnly = true;
@@ -100,7 +100,7 @@
     };
 
     "unraid-cle" = {
-      hostname = "unraid-cle";
+      hostname = "100.89.182.96";
       user = "root";
     };
 
@@ -117,25 +117,25 @@
     };
 
     "oracle" = {
-      hostname = "168.138.176.219";
+      hostname = "100.79.39.73";
       user = "ubuntu";
       identityFile = "~/.ssh/oracle";
     };
 
-    "nixos-cle" = {
-      hostname = "192.168.50.55";
-      user = "cle";
-      identityFile = "~/.ssh/nixos_cle";
-    };
+    # "nixos-cle" = {
+    #   hostname = "192.168.50.55";
+    #   user = "cle";
+    #   identityFile = "~/.ssh/nixos_cle";
+    # };
 
     "homelab-pve" = {
-      hostname = "192.168.50.130";
+      hostname = "100.112.172.58";
       user = "cle";
       identityFile = "~/.ssh/homelab_pve";
     };
 
     "selfhost-pve" = {
-      hostname = "192.168.50.121";
+      hostname = "100.81.144.82";
       user = "cle";
       identityFile = "~/.ssh/id_ed25519_selfhost";
       identitiesOnly = true;
@@ -149,16 +149,16 @@
     unset ANTHROPIC_API_KEY
   '';
 
-  home.activation.dockerContextUnraidCle = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    docker_bin="${pkgs.docker-client}/bin/docker"
-    if "$docker_bin" context inspect unraid-cle >/dev/null 2>&1; then
-      "$docker_bin" context update unraid-cle \
-        --description "Unraid CLE Docker daemon" \
-        --docker "host=ssh://root@unraid-cle" >/dev/null
-    else
-      "$docker_bin" context create unraid-cle \
-        --description "Unraid CLE Docker daemon" \
-        --docker "host=ssh://root@unraid-cle" >/dev/null
-    fi
-  '';
+  # home.activation.dockerContextUnraidCle = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #   docker_bin="${pkgs.docker-client}/bin/docker"
+  #   if "$docker_bin" context inspect unraid-cle >/dev/null 2>&1; then
+  #     "$docker_bin" context update unraid-cle \
+  #       --description "Unraid CLE Docker daemon" \
+  #       --docker "host=ssh://root@unraid-cle" >/dev/null
+  #   else
+  #     "$docker_bin" context create unraid-cle \
+  #       --description "Unraid CLE Docker daemon" \
+  #       --docker "host=ssh://root@unraid-cle" >/dev/null
+  #   fi
+  # '';
 }

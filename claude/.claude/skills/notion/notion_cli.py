@@ -42,6 +42,7 @@ from pydantic import BaseModel, ConfigDict
 
 NOTION_API_URL = "https://api.notion.com/v1"
 NOTION_VERSION = "2022-06-28"
+DATA_SOURCE_NOTION_VERSION = "2026-03-11"
 SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 DEFAULT_CONFIG_PATHS = [
@@ -84,8 +85,11 @@ class ProjectConfig(BaseModel):
     model_config = ConfigDict(extra="ignore")  # pyright: ignore[reportUnannotatedClassAttribute]
 
     database_id: str
+    sprints_data_source_id: str = ""
     epics_database_id: str = ""
     prop_epic: str = "Epic"
+    prop_sprint: str = "Sprint"
+    prop_sprint_date: str = "Start Date"
     epic_status_type: Literal["select", "status"] = "select"
     date_property: str = "Sort Date"
     date_property_type: str = "formula"
@@ -95,6 +99,7 @@ class Config(BaseModel):
     model_config = ConfigDict(extra="ignore")  # pyright: ignore[reportUnannotatedClassAttribute]
 
     default_project: str = ""
+    default_creator_alias: str = ""
     projects: dict[str, ProjectConfig] = {}
     users: dict[str, str] = {}
 
@@ -239,19 +244,24 @@ def resolve_user_id(config: Config, name: str) -> str | None:
 # =============================================================================
 
 
-def _headers() -> dict[str, str]:
+def _headers(notion_version: str = NOTION_VERSION) -> dict[str, str]:
     return {
         "Authorization": f"Bearer {_token}",
-        "Notion-Version": NOTION_VERSION,
+        "Notion-Version": notion_version,
         "Content-Type": "application/json",
     }
 
 
-def _request(method: str, path: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
+def _request(
+    method: str,
+    path: str,
+    body: dict[str, Any] | None = None,
+    notion_version: str = NOTION_VERSION,
+) -> dict[str, Any]:
     """Make a Notion API request."""
     url = f"{NOTION_API_URL}{path}"
     data = json.dumps(body).encode() if body else None
-    req = urllib.request.Request(url, data=data, headers=_headers(), method=method)
+    req = urllib.request.Request(url, data=data, headers=_headers(notion_version), method=method)
 
     try:
         with urllib.request.urlopen(req, context=SSL_CTX) as resp:
@@ -503,6 +513,50 @@ def _query_database(database_id: str, body: dict[str, Any] | None = None) -> lis
     return all_results
 
 
+def _query_data_source(data_source_id: str, body: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    """Query a Notion data source, handling pagination."""
+    payload = dict(body) if body else {}
+    all_results: list[dict[str, Any]] = []
+    has_more = True
+    while has_more:
+        resp = _request("POST", f"/data_sources/{data_source_id}/query", payload, DATA_SOURCE_NOTION_VERSION)
+        all_results.extend(resp.get("results", []))
+        has_more = resp.get("has_more", False)
+        next_cursor = resp.get("next_cursor")
+        if has_more and next_cursor:
+            payload["start_cursor"] = next_cursor
+        else:
+            has_more = False
+    return all_results
+
+
+def _find_current_sprint_id(proj: ProjectConfig, today: date | None = None) -> str:
+    """Find the latest sprint whose configured start date is on or before today."""
+    if not proj.sprints_data_source_id:
+        print("Error: project is missing sprints_data_source_id", file=sys.stderr)
+        raise typer.Exit(1)
+
+    current_date = today or date.today()
+    body: dict[str, Any] = {
+        "page_size": 1,
+        "filter": {"property": proj.prop_sprint_date, "date": {"on_or_before": current_date.isoformat()}},
+        "sorts": [{"property": proj.prop_sprint_date, "direction": "descending"}],
+    }
+    results = _query_data_source(proj.sprints_data_source_id, body)
+    if not results:
+        print(
+            f"Error: no current sprint found with {proj.prop_sprint_date} on or before {current_date.isoformat()}",
+            file=sys.stderr,
+        )
+        raise typer.Exit(1)
+
+    sprint_id = str(results[0].get("id", ""))
+    if not sprint_id:
+        print("Error: current sprint result did not include a page ID", file=sys.stderr)
+        raise typer.Exit(1)
+    return sprint_id
+
+
 def _build_filter_body(
     config: Config,
     assignee: str | None = None,
@@ -702,23 +756,27 @@ def create(
     config = get_config()
     proj = get_project_config(config, project)
     database_id = proj.database_id
+    assignee_name = assignee or config.default_creator_alias
+    if not assignee_name:
+        print("Error: missing default_creator_alias in config; pass --assignee or configure a default", file=sys.stderr)
+        raise typer.Exit(1)
+    user_id = resolve_user_id(config, assignee_name)
+    if not user_id:
+        available = ", ".join(sorted(config.users.keys()))
+        print(f"Error: unknown assignee '{assignee_name}'. Available: {available}", file=sys.stderr)
+        raise typer.Exit(1)
+    sprint_id = _find_current_sprint_id(proj)
 
     properties: dict[str, Any] = {
         "Name": {"title": [{"text": {"content": title}}]},
+        "Assignee": {"people": [{"id": user_id}]},
+        proj.prop_sprint: {"relation": [{"id": sprint_id}]},
     }
 
     properties["Priority"] = {"select": {"name": priority.value}}
 
     if status is not None:
         properties["Status"] = {"status": {"name": status.value}}
-
-    if assignee:
-        user_id = resolve_user_id(config, assignee)
-        if not user_id:
-            available = ", ".join(sorted(config.users.keys()))
-            print(f"Error: unknown assignee '{assignee}'. Available: {available}", file=sys.stderr)
-            raise typer.Exit(1)
-        properties["Assignee"] = {"people": [{"id": user_id}]}
 
     if epic:
         epics_db = proj.epics_database_id

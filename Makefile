@@ -1,21 +1,36 @@
-PACKAGES := alacritty claude codex git home-manager nvim zellij
+STOW_PACKAGES := alacritty claude git home-manager nvim zellij
+PACKAGES := $(STOW_PACKAGES) codex
 
-.PHONY: all stow unstow restow pve-build pve-upload pve-image $(PACKAGES)
+.PHONY: all stow unstow restow codex-clean codex-update-skills pve-build pve-upload pve-image $(PACKAGES)
 
 all: stow
 
 stow:
-	stow -v -t ~ $(PACKAGES)
+	stow -v -t ~ $(STOW_PACKAGES)
+	$(MAKE) codex
 
 unstow:
-	stow -D -v -t ~ $(PACKAGES)
+	stow -D -v -t ~ $(STOW_PACKAGES)
+	$(MAKE) codex-clean
 
 restow:
-	stow -R -v -t ~ $(PACKAGES)
+	stow -R -v -t ~ $(STOW_PACKAGES)
+	$(MAKE) codex
 
 # Individual package targets
-$(PACKAGES):
+$(STOW_PACKAGES):
 	stow -v -t ~ $@
+
+codex:
+	stow -R -v -t ~ codex
+	./scripts/codex-link-skills
+
+codex-clean:
+	./scripts/codex-link-skills --clean
+	stow -D -v -t ~ codex || true
+
+codex-update-skills:
+	CODEX_UPDATE_SKILLS=1 ./scripts/codex-link-skills
 
 # --- Proxmox image build/upload ---
 # Override on the command line, e.g.:

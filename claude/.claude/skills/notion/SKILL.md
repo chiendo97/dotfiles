@@ -24,14 +24,16 @@ Override with `--config path/to/notion.yaml`.
 
 ```yaml
 default_project: genbooks
+default_creator_alias: cle
 projects:
   genbooks:
     project_id: "..."
     database_id: "..."          # tickets database
+    sprints_data_source_id: "..." # sprints database/data source
     epics_database_id: "..."    # epics database
     prop_epic: "Related Genbook | Epics"
-    prop_sprint: "Sprint"
-    prop_sprint_date: "Start Date"
+    prop_sprint: "Sprint"       # ticket relation property
+    prop_sprint_date: "Start Date" # sprint start-date property
     epic_status_type: "select"  # or "status"
 users:
   cle: "user-id-here"
@@ -41,6 +43,12 @@ users:
 ## Commands
 
 ### Create a ticket
+
+**Required ticket defaults:**
+
+- Always assign the ticket to the creator. The CLI uses `default_creator_alias` from config when `--assignee` is omitted; pass an explicit `--assignee` when the creator differs.
+- Always set the ticket's `Sprint` relation to the current active sprint for the selected project. The CLI resolves it from the project's configured sprint source using today's local date and `prop_sprint_date`.
+- If the creator or current active sprint cannot be resolved, stop and report the missing mapping/source instead of creating an incomplete ticket.
 
 ```bash
 uv run /home/cle/.claude/skills/notion/notion_cli.py create \
@@ -57,7 +65,7 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py create \
 - `--description`: Ticket description (added as page content)
 - `--priority`: Low | Medium | High | Critical (default: Medium)
 - `--status`: Not started | In progress | Done | Backlog
-- `--assignee`: User name from config
+- `--assignee`: User name from config. Optional only when `default_creator_alias` is configured; use the creator alias.
 - `--epic`: Epic name (searches epics database to link)
 - `--project`: Project key from config
 

@@ -1,0 +1,50 @@
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
+personality = "pragmatic"
+
+[projects."/Users/chiendo97/Source/demo/db-nbook.nvim"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/tex-corver/docs"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/tex-corver/genbook-api"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/demo/kulala.nvim"]
+trust_level = "trusted"
+
+[projects."/private/tmp/fix/genbook-api-codex"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/dotfiles"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/demo/playwright-mcp"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Downloads/3dfiles/12-bay-atx-nas-case-model_files"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/urieljsc/urieljsc-dc"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Downloads"]
+trust_level = "trusted"
+
+[mcp_servers]
+
+[notice.model_migrations]
+"gpt-5.1-codex-max" = "gpt-5.4"
+
+[tui]
+status_line = ["current-dir", "project-name", "git-branch", "run-state", "context-used", "thread-title", "task-progress"]
+
+[tui.keymap.editor]
+insert_newline = ["ctrl-j", "ctrl-m", "enter", "shift-enter", "alt-enter"]
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4

@@ -105,6 +105,7 @@
   # ============================================================================
   programs.neovim = {
     enable = true;
+    sideloadInitLua = true;
     withRuby = false;
     withPython3 = false;
   };
