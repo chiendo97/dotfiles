@@ -23,7 +23,7 @@ from pydantic import BaseModel
 # Constants
 # =============================================================================
 
-DEFAULT_NOTEBOOK_DIR = Path("/home/cle/Source/selfhost/zk")
+DEFAULT_NOTEBOOK_DIR = Path("/srv/selfhost/zk")
 TODO_OPEN_RE = re.compile(r"^(\s*)-\s*\[ \]\s*(.*)")
 TODO_DONE_RE = re.compile(r"^(\s*)-\s*\[x\]\s*(.*)", re.IGNORECASE)
 TASKS_HEADING_RE = re.compile(r"^##\s+Tasks\s*$")

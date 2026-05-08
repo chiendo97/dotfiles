@@ -105,12 +105,26 @@
 
   systemd.tmpfiles.rules = [
     "d /srv/selfhost 0755 root root -"
+    "d /srv/selfhost/zk 0755 cle users -"
     "d /mnt/user 0755 root root -"
     "d /mnt/user/media 0755 root root -"
   ];
 
   fileSystems."/mnt/user/media" = {
     device = "192.168.50.244:/media";
+    fsType = "nfs4";
+    options = [
+      "rw"
+      "_netdev"
+      "nofail"
+      "x-systemd.automount"
+      "x-systemd.idle-timeout=0"
+      "vers=4.2"
+    ];
+  };
+
+  fileSystems."/srv/selfhost/zk" = {
+    device = "192.168.50.244:/zk";
     fsType = "nfs4";
     options = [
       "rw"

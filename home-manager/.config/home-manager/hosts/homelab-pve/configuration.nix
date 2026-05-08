@@ -68,6 +68,27 @@
     memoryPercent = 100;
   };
 
+  boot.supportedFilesystems = [ "nfs" ];
+  services.rpcbind.enable = true;
+
+  systemd.tmpfiles.rules = [
+    "d /srv/selfhost 0755 root root -"
+    "d /srv/selfhost/zk 0755 cle users -"
+  ];
+
+  fileSystems."/srv/selfhost/zk" = {
+    device = "192.168.50.244:/zk";
+    fsType = "nfs4";
+    options = [
+      "rw"
+      "_netdev"
+      "nofail"
+      "x-systemd.automount"
+      "x-systemd.idle-timeout=0"
+      "vers=4.2"
+    ];
+  };
+
   environment.systemPackages = with pkgs; [
     vim
     git

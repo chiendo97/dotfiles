@@ -2,7 +2,7 @@
 # SessionEnd hook — summarize session work into daily zk journal
 set -euo pipefail
 
-JOURNAL_DIR="$HOME/Source/selfhost/zk/journal"
+JOURNAL_DIR="/srv/selfhost/zk/journal"
 LOG_FILE="$HOME/.claude/hooks/journal-action-items.log"
 LOCK_FILE="/tmp/journal-action-items.lock"
 

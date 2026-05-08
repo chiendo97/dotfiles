@@ -15,24 +15,24 @@ with `[[wiki-link]]` syntax. Journal entries live in `journal/` with date-based 
 
 ## Environment
 
-**Notebook path:** `/home/cle/Source/selfhost/zk`
+**Notebook path:** `/srv/selfhost/zk`
 
-All `zk` commands must run from this directory or use `--notebook-dir /home/cle/Source/selfhost/zk`.
+All `zk` commands must run from this directory or use `--notebook-dir /srv/selfhost/zk`.
 
 ## Note Operations (use zk CLI directly)
 
 | Task | Command |
 |------|---------|
-| Create a note | `zk new --title "Title" -p --notebook-dir /home/cle/Source/selfhost/zk` |
-| Create today's journal | `zk new journal --title "$(date +%Y-%m-%d)" -p --notebook-dir /home/cle/Source/selfhost/zk` |
-| List recent notes | `zk list --sort created- --created-after 'last two weeks' --notebook-dir /home/cle/Source/selfhost/zk` |
-| Search note content | `zk list --match "query" --notebook-dir /home/cle/Source/selfhost/zk` |
-| Filter by tag | `zk list --tag <tag> --notebook-dir /home/cle/Source/selfhost/zk` |
-| List all tags | `zk tag list --notebook-dir /home/cle/Source/selfhost/zk` |
-| Find notes linking to X | `zk list --link-to <note>.md --notebook-dir /home/cle/Source/selfhost/zk` |
-| Find backlinks to X | `zk list --linked-by <note>.md --notebook-dir /home/cle/Source/selfhost/zk` |
-| Find related notes | `zk list --related <note>.md --notebook-dir /home/cle/Source/selfhost/zk` |
-| Find orphan notes | `zk list --orphan --notebook-dir /home/cle/Source/selfhost/zk` |
+| Create a note | `zk new --title "Title" -p --notebook-dir /srv/selfhost/zk` |
+| Create today's journal | `zk new journal --title "$(date +%Y-%m-%d)" -p --notebook-dir /srv/selfhost/zk` |
+| List recent notes | `zk list --sort created- --created-after 'last two weeks' --notebook-dir /srv/selfhost/zk` |
+| Search note content | `zk list --match "query" --notebook-dir /srv/selfhost/zk` |
+| Filter by tag | `zk list --tag <tag> --notebook-dir /srv/selfhost/zk` |
+| List all tags | `zk tag list --notebook-dir /srv/selfhost/zk` |
+| Find notes linking to X | `zk list --link-to <note>.md --notebook-dir /srv/selfhost/zk` |
+| Find backlinks to X | `zk list --linked-by <note>.md --notebook-dir /srv/selfhost/zk` |
+| Find related notes | `zk list --related <note>.md --notebook-dir /srv/selfhost/zk` |
+| Find orphan notes | `zk list --orphan --notebook-dir /srv/selfhost/zk` |
 
 ### Templates
 
@@ -122,4 +122,4 @@ Total: 23 open todos across 12 notes
 
 - **Creating/searching/browsing notes** — use `zk` CLI commands from the table above
 - **Anything involving todos** (list, add, mark done, summarize) — use `zk_cli.py`
-- **Reading or editing note content** — use Read/Edit tools directly on the markdown files in `/home/cle/Source/selfhost/zk/`
+- **Reading or editing note content** — use Read/Edit tools directly on the markdown files in `/srv/selfhost/zk/`

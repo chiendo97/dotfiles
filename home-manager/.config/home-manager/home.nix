@@ -492,7 +492,7 @@
   home.sessionVariables = {
     EDITOR = "nvim";
     LC_CTYPE = "en_US.UTF-8";
-    ZK_NOTEBOOK_DIR = "${config.home.homeDirectory}/Source/selfhost/zk";
+    ZK_NOTEBOOK_DIR = "/srv/selfhost/zk";
     CLAUDE_CODE_NO_FLICKER = "1";
   } // lib.optionalAttrs pkgs.stdenv.isLinux {
     SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
