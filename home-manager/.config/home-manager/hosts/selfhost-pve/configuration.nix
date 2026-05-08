@@ -117,7 +117,7 @@
       "_netdev"
       "nofail"
       "x-systemd.automount"
-      "x-systemd.idle-timeout=600"
+      "x-systemd.idle-timeout=0"
       "vers=4.2"
     ];
   };
