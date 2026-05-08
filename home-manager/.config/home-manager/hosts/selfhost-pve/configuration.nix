@@ -64,6 +64,12 @@
 
   services.qemuGuest.enable = true;
 
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 100;
+  };
+
   age.secrets.tailscale_selfhost_pve_auth_key = {
     file = ../../secrets/tailscale_selfhost_pve_auth_key.age;
     owner = "root";
@@ -92,6 +98,7 @@
       };
     };
   };
+  systemd.services.docker.unitConfig.RequiresMountsFor = "/mnt/user/media";
 
   boot.supportedFilesystems = [ "nfs" ];
   services.rpcbind.enable = true;
