@@ -35,6 +35,15 @@ trust_level = "trusted"
 [projects."/Users/chiendo97/Downloads"]
 trust_level = "trusted"
 
+[projects."/srv/selfhost"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/dotfiles"]
+trust_level = "trusted"
+
+[projects."/srv/selfhost/ipay-crawler"]
+trust_level = "trusted"
+
 [mcp_servers]
 
 [notice.model_migrations]
@@ -48,3 +57,8 @@ insert_newline = ["ctrl-j", "ctrl-m", "enter", "shift-enter", "alt-enter"]
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
+
+[features]
+terminal_resize_reflow = true
+memories = true
+goals = true
