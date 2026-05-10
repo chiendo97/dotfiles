@@ -44,6 +44,9 @@ trust_level = "trusted"
 [projects."/srv/selfhost/ipay-crawler"]
 trust_level = "trusted"
 
+[projects."/srv/selfhost/hledger-webapp"]
+trust_level = "trusted"
+
 [mcp_servers]
 
 [notice.model_migrations]
