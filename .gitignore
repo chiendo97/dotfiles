@@ -31,5 +31,9 @@ claude/.claude/shell-snapshots/
 claude/.claude/tasks/
 claude/.claude/telemetry/
 
+# Local Codex runtime state
+codex/.codex/*
+!codex/.codex/config.toml
+
 # Nix build outputs
 result-pve
