@@ -11,6 +11,26 @@
   uvTools.tools = [
   ];
 
+  home.activation.installUvPython =
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      python3_bin="${config.home.homeDirectory}/.local/bin/python3"
+      uv_python_root="${config.home.homeDirectory}/.local/share/uv/python"
+
+      if [ -e "$python3_bin" ]; then
+        target="$(readlink -f "$python3_bin" 2>/dev/null || true)"
+        case "$target" in
+          "$uv_python_root"/*)
+            ;;
+          *)
+            echo "uv python: refusing to replace existing $python3_bin -> $target" >&2
+            exit 1
+            ;;
+        esac
+      fi
+
+      ${pkgs.uv}/bin/uv python install 3 --default --upgrade
+    '';
+
   # ============================================================================
   # Cargo tools (Rust CLIs, installed via cargo-binstall)
   # ============================================================================
