@@ -38,13 +38,34 @@ trust_level = "trusted"
 [projects."/srv/selfhost"]
 trust_level = "trusted"
 
-[projects."/home/cle/Source/dotfiles"]
-trust_level = "trusted"
-
 [projects."/srv/selfhost/ipay-crawler"]
 trust_level = "trusted"
 
 [projects."/srv/selfhost/hledger-webapp"]
+trust_level = "trusted"
+
+[projects."/home/cle"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/terraform"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/document-portal-api"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/dotfiles"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/genbook-mono"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/headscale"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/deployments"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/document-portal-ui"]
 trust_level = "trusted"
 
 [mcp_servers]
