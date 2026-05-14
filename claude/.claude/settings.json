@@ -53,8 +53,8 @@
       }
     }
   },
-  "effortLevel": "high",
-  "skipDangerousModePermissionPrompt": true,
   "effortLevel": "xhigh",
-  "skipAutoPermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "skipAutoPermissionPrompt": true,
+  "preferredNotifChannel": "notifications_disabled"
 }
