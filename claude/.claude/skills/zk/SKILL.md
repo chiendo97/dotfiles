@@ -75,10 +75,11 @@ uv run /home/cle/.claude/skills/zk/zk_cli.py list --done
 uv run /home/cle/.claude/skills/zk/zk_cli.py list --all
 ```
 
-Output includes file path and line number for each todo:
+Output is a Rich table with file path and line number for each todo:
 ```
-genbook-api.md:12  [ ] Review PR #331
-genbook-api.md:13  [ ] Check Axios dependency
+File            Line  Status  Task
+genbook-api.md    12  open    Review PR #331
+genbook-api.md    13  open    Check Axios dependency
 ```
 
 ### Add a todo
@@ -98,6 +99,12 @@ uv run /home/cle/.claude/skills/zk/zk_cli.py add journal/2026-04-04 "Write summa
 uv run /home/cle/.claude/skills/zk/zk_cli.py done genbook-api.md 12
 ```
 
+Done items keep org-mode-style completion evidence on the same Markdown line:
+
+```markdown
+- [x] Review PR #331  CLOSED: [2026-05-14 Thu 22:39]
+```
+
 ### Summary of open todos
 
 ```bash
@@ -108,12 +115,12 @@ uv run /home/cle/.claude/skills/zk/zk_cli.py summary
 uv run /home/cle/.claude/skills/zk/zk_cli.py summary --filter genbook
 ```
 
-Output groups todos by note with counts:
+Output is a Rich table grouped by note with counts:
 ```
-genbook-api (3 todos)
-  - Review PR #331 — hoangi19
-  - Check Axios transitive dependency exposure
-  - Verify JE-to-ClickHouse migration progress
+Note         Count  Tasks
+genbook-api      3  - Review PR #331 — hoangi19
+                    - Check Axios transitive dependency exposure
+                    - Verify JE-to-ClickHouse migration progress
 
 Total: 23 open todos across 12 notes
 ```

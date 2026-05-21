@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["typer", "pydantic"]
+# dependencies = ["typer", "pydantic", "rich"]
 # ///
 """ZK Todo CLI — line-level todo operations for a Zettelkasten notebook.
 
@@ -13,11 +13,16 @@ from __future__ import annotations
 
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
 import typer
 from pydantic import BaseModel
+from rich import box
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
 
 # =============================================================================
 # Constants
@@ -26,7 +31,10 @@ from pydantic import BaseModel
 DEFAULT_NOTEBOOK_DIR = Path("/srv/selfhost/zk")
 TODO_OPEN_RE = re.compile(r"^(\s*)-\s*\[ \]\s*(.*)")
 TODO_DONE_RE = re.compile(r"^(\s*)-\s*\[x\]\s*(.*)", re.IGNORECASE)
+ORG_CLOSED_RE = re.compile(r"\s+CLOSED:\s*\[[^\]]+\]\s*$")
 TASKS_HEADING_RE = re.compile(r"^##\s+Tasks\s*$")
+console = Console(highlight=False)
+error_console = Console(stderr=True, highlight=False)
 
 # =============================================================================
 # Models
@@ -38,24 +46,6 @@ class TodoItem(BaseModel):
     line: int
     text: str
     done: bool
-
-    def display(self, relative_to: Path) -> str:
-        rel = Path(self.file).relative_to(relative_to)
-        marker = "[x]" if self.done else "[ ]"
-        return f"{rel}:{self.line}  {marker} {self.text}"
-
-
-class TodoSummaryGroup(BaseModel):
-    file: str
-    todos: list[TodoItem]
-
-    def display(self, relative_to: Path) -> str:
-        rel = Path(self.file).relative_to(relative_to)
-        stem = rel.with_suffix("").as_posix()
-        lines = [f"{stem} ({len(self.todos)} todos)"]
-        for todo in self.todos:
-            lines.append(f"  - {todo.text}")
-        return "\n".join(lines)
 
 
 # =============================================================================
@@ -116,7 +106,7 @@ def resolve_note_path(notebook_dir: Path, note: str) -> Path:
     if not path.suffix:
         path = path.with_suffix(".md")
     if not path.exists():
-        typer.echo(f"Error: note not found: {path}", err=True)
+        print_error(f"note not found: {path}")
         raise typer.Exit(1)
     return path
 
@@ -146,6 +136,75 @@ def find_tasks_section_end(lines: list[str]) -> int | None:
             insert_at = i + 1
 
     return insert_at
+
+
+def format_org_closed_timestamp() -> str:
+    """Return an org-mode style CLOSED timestamp in the local timezone."""
+    return datetime.now().astimezone().strftime("%Y-%m-%d %a %H:%M")
+
+
+def mark_todo_done_line(line: str) -> tuple[str, str, str]:
+    """Mark an open todo line done and append a CLOSED timestamp."""
+    match = TODO_OPEN_RE.match(line)
+    if match is None:
+        raise ValueError("line is not an open todo")
+
+    indent = match.group(1)
+    text = ORG_CLOSED_RE.sub("", match.group(2).rstrip()).rstrip()
+    closed_at = format_org_closed_timestamp()
+    return f"{indent}- [x] {text}  CLOSED: [{closed_at}]", text, closed_at
+
+
+def render_todo_table(todos: list[TodoItem], relative_to: Path) -> None:
+    """Render todos as a compact Rich table."""
+    table = Table(title="Todos", box=box.SIMPLE_HEAVY)
+    table.add_column("File", style="cyan", no_wrap=True)
+    table.add_column("Line", justify="right", style="magenta", no_wrap=True)
+    table.add_column("Status", no_wrap=True)
+    table.add_column("Task")
+
+    for todo in todos:
+        rel = Path(todo.file).relative_to(relative_to)
+        status = Text("done", style="green") if todo.done else Text("open", style="yellow")
+        table.add_row(rel.as_posix(), str(todo.line), status, Text(todo.text))
+
+    console.print(table)
+
+
+def render_summary_table(groups: dict[str, list[TodoItem]], relative_to: Path) -> None:
+    """Render open todos grouped by note."""
+    table = Table(title="Open Todos", box=box.SIMPLE_HEAVY)
+    table.add_column("Note", style="cyan", no_wrap=True)
+    table.add_column("Count", justify="right", style="magenta", no_wrap=True)
+    table.add_column("Tasks")
+
+    total_todos = 0
+    for file, todos in groups.items():
+        rel = Path(file).relative_to(relative_to).with_suffix("").as_posix()
+        task_text = Text("\n".join(f"- {todo.text}" for todo in todos))
+        table.add_row(rel, str(len(todos)), task_text)
+        total_todos += len(todos)
+
+    console.print(table)
+    console.print(
+        Text(
+            f"Total: {total_todos} open todos across {len(groups)} notes",
+            style="bold",
+        )
+    )
+
+
+def print_success(prefix: str, location: str, text: str) -> None:
+    message = Text(f"{prefix}: ", style="green")
+    message.append(location, style="cyan")
+    message.append(f"  {text}")
+    console.print(message)
+
+
+def print_error(message: str) -> None:
+    output = Text("Error: ", style="red bold")
+    output.append(message)
+    error_console.print(output)
 
 
 # =============================================================================
@@ -183,11 +242,10 @@ def list_cmd(
     )
 
     if not todos:
-        typer.echo("No todos found.")
+        console.print("[yellow]No todos found.[/yellow]")
         raise typer.Exit(0)
 
-    for todo in todos:
-        typer.echo(todo.display(notebook_dir))
+    render_todo_table(todos, notebook_dir)
 
 
 @app.command()
@@ -205,14 +263,20 @@ def add(
 
     if insert_at is not None:
         lines.insert(insert_at, todo_line)
+        line_number = insert_at + 1
     else:
         # Append at end, with blank line separator if needed
         if lines and lines[-1].strip():
             lines.append("")
         lines.append(todo_line)
+        line_number = len(lines)
 
     path.write_text("\n".join(lines) + "\n")
-    typer.echo(f"Added to {path.relative_to(notebook_dir)}:{insert_at or len(lines)}: {todo_line}")
+    print_success(
+        "Added",
+        f"{path.relative_to(notebook_dir)}:{line_number}",
+        todo_line,
+    )
 
 
 @app.command()
@@ -226,17 +290,22 @@ def done(
     lines = path.read_text().splitlines()
 
     if line < 1 or line > len(lines):
-        typer.echo(f"Error: line {line} out of range (file has {len(lines)} lines).", err=True)
+        print_error(f"line {line} out of range (file has {len(lines)} lines).")
         raise typer.Exit(1)
 
     target = lines[line - 1]
     if not TODO_OPEN_RE.match(target):
-        typer.echo(f"Error: line {line} is not an open todo: {target.strip()!r}", err=True)
+        print_error(f"line {line} is not an open todo: {target.strip()!r}")
         raise typer.Exit(1)
 
-    lines[line - 1] = target.replace("- [ ]", "- [x]", 1)
+    done_line, todo_text, closed_at = mark_todo_done_line(target)
+    lines[line - 1] = done_line
     path.write_text("\n".join(lines) + "\n")
-    typer.echo(f"Done: {path.relative_to(notebook_dir)}:{line}  [x] {TODO_OPEN_RE.match(target).group(2).strip()}")  # type: ignore[union-attr]
+    print_success(
+        "Done",
+        f"{path.relative_to(notebook_dir)}:{line}",
+        f"[x] {todo_text}  CLOSED: [{closed_at}]",
+    )
 
 
 @app.command()
@@ -250,7 +319,7 @@ def summary(
     todos = find_todos(notebook_dir, filter_prefix=filter_prefix, include_open=True)
 
     if not todos:
-        typer.echo("No open todos found.")
+        console.print("[yellow]No open todos found.[/yellow]")
         raise typer.Exit(0)
 
     # Group by file
@@ -258,14 +327,7 @@ def summary(
     for todo in todos:
         groups.setdefault(todo.file, []).append(todo)
 
-    total_todos = 0
-    for file, items in groups.items():
-        group = TodoSummaryGroup(file=file, todos=items)
-        typer.echo(group.display(notebook_dir))
-        typer.echo("")
-        total_todos += len(items)
-
-    typer.echo(f"Total: {total_todos} open todos across {len(groups)} notes")
+    render_summary_table(groups, notebook_dir)
 
 
 if __name__ == "__main__":

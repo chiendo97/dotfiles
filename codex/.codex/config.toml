@@ -73,6 +73,30 @@ trust_level = "trusted"
 [projects."/Users/chiendo97/Source/demo"]
 trust_level = "trusted"
 
+[projects."/home/cle/Source/genbook-api"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/claude-boy"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/uriel"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/genbooks-crm-ui"]
+trust_level = "trusted"
+
+[projects."/srv/selfhost/zk"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/office-dc"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/infra"]
+trust_level = "trusted"
+
 [mcp_servers]
 
 [notice]
