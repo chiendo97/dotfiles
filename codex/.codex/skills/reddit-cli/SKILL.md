@@ -1,0 +1,87 @@
+---
+name: reddit-cli
+description: "Use the local reddit-cli wrapper for Reddit read workflows: resolving Reddit share links, fetching submissions and comments, searching posts or subreddits, and summarizing Reddit discussions. Trigger when the user asks to inspect, summarize, research, search, or quote Reddit content using the local CLI rather than MCP/browser scraping."
+---
+
+# Reddit CLI
+
+Use the bundled single-file Reddit CLI for read-only Reddit operations:
+
+```bash
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" ...
+```
+
+The script is a PEP 723 `uv` script backed by PRAW. It reads credentials from `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET`; `REDDIT_USER_AGENT` is optional. An editable package entrypoint named `reddit-cli` may also exist, but prefer the bundled script because the skill carries it alongside these instructions and the script carries its dependencies inline.
+
+## First Checks
+
+Verify the tool and credentials without exposing secrets:
+
+```bash
+test -f "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py"
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" status --compact
+```
+
+If status fails with missing env vars, report that Reddit API credentials are not available. Do not print secret values. If status succeeds, continue with the requested Reddit task.
+
+## Summarize a Reddit Link
+
+For `reddit.com/r/.../s/...` share links, resolve the canonical URL first:
+
+```bash
+curl -Ls -o /dev/null -w '%{url_effective}\n' '<url>'
+```
+
+Extract the submission id from `/comments/<id>/...`, then fetch the post and a bounded comment set:
+
+```bash
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" get-submission <id> --compact
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" get-comments <id> --no-replace-more --limit 25 --compact
+```
+
+Summarize from the CLI JSON:
+
+- Include the resolved post path or id.
+- State the OP question or claim.
+- Identify the main consensus and meaningful disagreements.
+- Highlight concrete links, libraries, tools, commands, or next steps mentioned in comments.
+- Mention limitations, such as only summarizing the fetched comment sample when not all comments are loaded.
+- Deduplicate comments by `id` when aggregating because flattened comment output can repeat replies that also appear nested under parents.
+
+Use `--replace-more` only when the user needs a deeper thread read; it can be slower and produce much larger output.
+
+## Search Reddit
+
+Search posts in a subreddit:
+
+```bash
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" search-posts <subreddit> '<query>' --sort relevance --time all --limit 10 --compact
+```
+
+Search subreddits:
+
+```bash
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" search-subreddits '<query>' --limit 10 --compact
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" search-subreddits '<query>' --by description --limit 10 --compact
+```
+
+For research tasks, prefer a short search first, then fetch individual submissions and comments only for the most relevant posts.
+
+## Fetch Specific Objects
+
+Use these commands for direct lookups:
+
+```bash
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" get-subreddit <name> --compact
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" get-submission <id> --compact
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" get-comment <id> --compact
+uv run "${CODEX_HOME:-$HOME/.codex}/skills/reddit-cli/scripts/reddit_cli.py" get-comments <submission_id> --no-replace-more --limit 25 --compact
+```
+
+All successful commands emit JSON to stdout. Errors emit structured JSON to stderr and exit non-zero.
+
+## Boundaries
+
+- Treat the tool as read-only. It does not post, vote, save, subscribe, or access account-private feeds.
+- Prefer this CLI over generic web scraping for Reddit because it uses the configured API credentials and returns structured JSON.
+- Do not browse Reddit in a browser unless the CLI cannot resolve or fetch the content.
