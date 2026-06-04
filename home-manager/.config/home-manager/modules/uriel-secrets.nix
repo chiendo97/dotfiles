@@ -23,6 +23,11 @@
       path = "${config.home.homeDirectory}/.config/wireguard/urieljsc-office.conf";
       mode = "600";
     };
+    wg_colo = {
+      file = ../secrets/wg_colo.age;
+      path = "${config.home.homeDirectory}/.config/wireguard/colo.conf";
+      mode = "600";
+    };
   } // builtins.listToAttrs (map (name: {
     inherit name;
     value = {
@@ -75,6 +80,13 @@
 
     "urieljsc" = {
       hostname = "ssh.urieljsc.com";
+      user = "chienle";
+      identityFile = "~/.ssh/uriel_rsa";
+      identitiesOnly = true;
+    };
+
+    "100.64.0.6" = {
+      hostname = "100.64.0.6";
       user = "chienle";
       identityFile = "~/.ssh/uriel_rsa";
       identitiesOnly = true;

@@ -2,6 +2,7 @@
 with pkgs; [
   bun
   cht-sh
+  cmake
   delta
   fixjson
   gcc

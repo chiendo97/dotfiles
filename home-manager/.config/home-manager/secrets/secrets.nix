@@ -47,6 +47,9 @@ in
   "id_ed25519_github.age".publicKeys = [ cle uriel-dev ];
   "id_ed25519_vng_dev.age".publicKeys = [ cle uriel-dev ];
 
+  # === Uriel/work WireGuard configs (cle + uriel-dev keys) ===
+  "wg_colo.age".publicKeys = [ cle uriel-dev ];
+
   # === Beszel agent (cle + nixos-cle host key) ===
   "beszel_agent.age".publicKeys = [ cle nixos-cle ];
 
