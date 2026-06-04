@@ -58,6 +58,10 @@
       "rev": "c1fcf75c5f9c9c01dd392852de44204b60f1b5b1",
       "src": "https://github.com/brianhuster/live-preview.nvim"
     },
+    "lspeek.nvim": {
+      "rev": "48999134df6e8076dde079094c81b07fb7b56559",
+      "src": "https://github.com/r4ppz/lspeek.nvim"
+    },
     "markdown-plus.nvim": {
       "rev": "74d9a854b39dc76d5a29c8954622d16d116fca1e",
       "src": "https://github.com/yousefhadder/markdown-plus.nvim"

@@ -66,7 +66,6 @@ api.nvim_create_autocmd("LspAttach", {
             })
         end
 
-        keymap.set("n", "gD", lsp.buf.declaration, _opts("Go to declaration"))
         keymap.set("n", "gd", lsp.buf.definition, _opts("Go to definition"))
         keymap.set("n", "gr", lsp.buf.references, _opts("Go to references"))
         keymap.set("n", "K", lsp.buf.hover, _opts("Hover for info"))
