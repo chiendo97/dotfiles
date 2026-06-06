@@ -41,3 +41,6 @@ When `--project` is omitted, commands query **all** configured projects. Combine
 - `_rich_text()` must chunk content into 2000-char segments (Notion's per-element limit).
 - `_query_database()` must shallow-copy the body dict before paginating (it mutates `start_cursor`).
 - `_find_epic_id()` uses a title filter, not a full table scan.
+- `create` must resolve `--epic` before posting the page; missing config or unknown epic is fatal.
+- `create` uses `tickets_data_source_id` for `parent.data_source_id` when configured; keep `database_id` as the fallback for older configs.
+- `create` requires configured `prop_*_id` values for data-source-backed projects; do not fetch data-source schema to infer payload keys.

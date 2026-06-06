@@ -152,7 +152,15 @@ Scan the results for a ticket whose title relates to the changes being committed
 ### Reuse or create
 
 - **If a matching ticket exists**: Confirm with the user -- "Found ticket `XXXX`: '_title_'. Use this?"
-- **If no match or user declines**: Create a new ticket:
+- **If no match or user declines**: Create a new ticket. New tickets must always be linked to an epic. Determine the existing epic from the user's request, the branch/repo domain, or the project convention. If no suitable epic is obvious, list active epics and ask before creating:
+
+```bash
+uv run ~/.claude/skills/notion/notion_cli.py epics \
+  --project genbook-global \
+  --status "In progress"
+```
+
+Do not create a ticket with a missing, placeholder, or guessed epic. The Notion CLI treats `--epic` as a hard requirement and fails before ticket creation when the epic is missing or cannot be resolved.
 
 ```bash
 uv run ~/.claude/skills/notion/notion_cli.py create \
@@ -161,6 +169,7 @@ uv run ~/.claude/skills/notion/notion_cli.py create \
   --description "Summary of the changes" \
   --priority Medium \
   --assignee $USER \
+  --epic "Existing epic name" \
   --status "In progress"
 ```
 

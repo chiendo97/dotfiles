@@ -290,7 +290,7 @@
       bind X kill-pane
 
       # Popup scratch terminal
-      bind t display-popup -E -w 80% -h 80% -d '#{pane_current_path}'
+      bind t display-popup -E -w 90% -h 90% -d '#{pane_current_path}'
 
       # Swap windows
       bind-key -n C-S-Left swap-window -d -t -1
@@ -374,6 +374,7 @@
       # General
       l = "eza";
       t = "tree --gitignore";
+      kb = "kanban-md --dir /srv/selfhost/zk/kanban";
       c = "clear";
       v = "vim";
       n = "nvim";

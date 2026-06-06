@@ -9,8 +9,14 @@ projects:
     epics_data_source_id: 242e6b4e-4218-441c-b278-7ccc700bad7e
     epics_database_id: d6c00c58-cea6-40a2-a347-1d0193c928f2
     prop_epic: Related Genbook | Epics
+    prop_epic_id: "wS!%25"
     prop_sprint: Sprint
+    prop_sprint_id: atqA
     prop_sprint_date: Start Date
+    prop_title_id: title
+    prop_assignee_id: eXwz
+    prop_priority_id: jOI1
+    prop_status_id: aDxM
     prop_project: ''
     epic_status_type: select
   genbook-global:
@@ -21,9 +27,15 @@ projects:
     sprints_data_source_id: a0557733-3eae-43a2-aae4-4bb0b351a73d
     epics_data_source_id: 9f5800b6-a4db-4fe9-85ed-ed521d11ff16
     epics_database_id: 619c4eb7-dd42-4c8c-a071-617c229f3ca2
-    prop_epic: Epic
+    prop_epic: Epics
+    prop_epic_id: OOon
     prop_sprint: Sprint
+    prop_sprint_id: "D%23n5"
     prop_sprint_date: Start Date
+    prop_title_id: title
+    prop_assignee_id: "VK%23T"
+    prop_priority_id: "Q%26F%26"
+    prop_status_id: AUxd
     prop_project: ''
     epic_status_type: status
 users:
