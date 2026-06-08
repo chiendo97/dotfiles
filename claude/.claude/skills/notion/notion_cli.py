@@ -29,7 +29,7 @@ import urllib.request
 from datetime import date, datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, cast
 
 import certifi
 import typer
@@ -85,11 +85,18 @@ class ProjectConfig(BaseModel):
     model_config = ConfigDict(extra="ignore")  # pyright: ignore[reportUnannotatedClassAttribute]
 
     database_id: str
+    tickets_data_source_id: str = ""
     sprints_data_source_id: str = ""
     epics_database_id: str = ""
     prop_epic: str = "Epic"
+    prop_epic_id: str = ""
     prop_sprint: str = "Sprint"
+    prop_sprint_id: str = ""
     prop_sprint_date: str = "Start Date"
+    prop_title_id: str = ""
+    prop_assignee_id: str = ""
+    prop_priority_id: str = ""
+    prop_status_id: str = ""
     epic_status_type: Literal["select", "status"] = "select"
     date_property: str = "Sort Date"
     date_property_type: str = "formula"
@@ -275,8 +282,8 @@ def _request(
         sys.exit(1)
 
 
-def _post(path: str, body: dict[str, Any]) -> dict[str, Any]:
-    return _request("POST", path, body)
+def _post(path: str, body: dict[str, Any], notion_version: str = NOTION_VERSION) -> dict[str, Any]:
+    return _request("POST", path, body, notion_version)
 
 
 def _patch(path: str, body: dict[str, Any]) -> dict[str, Any]:
@@ -285,6 +292,38 @@ def _patch(path: str, body: dict[str, Any]) -> dict[str, Any]:
 
 def _get(path: str) -> dict[str, Any]:
     return _request("GET", path)
+
+
+def _get_database_properties(database_id: str) -> dict[str, Any]:
+    database = _get(f"/databases/{database_id}")
+    props = database.get("properties")
+    return cast(dict[str, Any], props) if isinstance(props, dict) else {}
+
+
+def _create_property_keys(proj: ProjectConfig) -> tuple[str, str, str, str, str, str]:
+    if not proj.tickets_data_source_id:
+        return ("Name", "Assignee", proj.prop_sprint, proj.prop_epic, "Priority", "Status")
+
+    required = {
+        "prop_title_id": proj.prop_title_id,
+        "prop_assignee_id": proj.prop_assignee_id,
+        "prop_sprint_id": proj.prop_sprint_id,
+        "prop_epic_id": proj.prop_epic_id,
+        "prop_priority_id": proj.prop_priority_id,
+        "prop_status_id": proj.prop_status_id,
+    }
+    missing = [name for name, value in required.items() if not value]
+    if missing:
+        print(f"Error: project is missing create property id(s): {', '.join(missing)}", file=sys.stderr)
+        raise typer.Exit(1)
+    return (
+        proj.prop_title_id,
+        proj.prop_assignee_id,
+        proj.prop_sprint_id,
+        proj.prop_epic_id,
+        proj.prop_priority_id,
+        proj.prop_status_id,
+    )
 
 
 # =============================================================================
@@ -745,17 +784,16 @@ def get_config() -> Config:
 @app.command()
 def create(
     title: Annotated[str, typer.Option(help="Ticket title")],
+    epic: Annotated[str, typer.Option(help="Epic name to link")],
     description: Annotated[str, typer.Option(help="Ticket description (markdown)")] = "",
     priority: Annotated[Priority, typer.Option(help="Ticket priority")] = Priority.MEDIUM,
     status: Annotated[Status | None, typer.Option(help="Ticket status")] = None,
     assignee: Annotated[str | None, typer.Option(help="Assignee name (from config users)")] = None,
-    epic: Annotated[str | None, typer.Option(help="Epic name to link")] = None,
     project: Annotated[str | None, typer.Option(help="Project key")] = None,
 ) -> None:
     """Create a ticket."""
     config = get_config()
     proj = get_project_config(config, project)
-    database_id = proj.database_id
     assignee_name = assignee or config.default_creator_alias
     if not assignee_name:
         print("Error: missing default_creator_alias in config; pass --assignee or configure a default", file=sys.stderr)
@@ -765,38 +803,42 @@ def create(
         available = ", ".join(sorted(config.users.keys()))
         print(f"Error: unknown assignee '{assignee_name}'. Available: {available}", file=sys.stderr)
         raise typer.Exit(1)
+    epic_name = epic.strip()
+    epics_db = proj.epics_database_id
+    if not epics_db:
+        print("Error: selected project has no epics_database_id configured", file=sys.stderr)
+        raise typer.Exit(1)
+    epic_id = _find_epic_id(epics_db, epic_name)
+    if not epic_id:
+        print(f"Error: epic '{epic_name}' not found; run the epics command and pass an existing epic", file=sys.stderr)
+        raise typer.Exit(1)
     sprint_id = _find_current_sprint_id(proj)
+    title_key, assignee_key, sprint_key, epic_key, priority_key, status_key = _create_property_keys(proj)
 
     properties: dict[str, Any] = {
-        "Name": {"title": [{"text": {"content": title}}]},
-        "Assignee": {"people": [{"id": user_id}]},
-        proj.prop_sprint: {"relation": [{"id": sprint_id}]},
+        title_key: {"title": [{"text": {"content": title}}]},
+        assignee_key: {"people": [{"id": user_id}]},
+        sprint_key: {"relation": [{"id": sprint_id}]},
+        epic_key: {"relation": [{"id": epic_id}]},
     }
 
-    properties["Priority"] = {"select": {"name": priority.value}}
+    properties[priority_key] = {"select": {"name": priority.value}}
 
     if status is not None:
-        properties["Status"] = {"status": {"name": status.value}}
-
-    if epic:
-        epics_db = proj.epics_database_id
-        if epics_db:
-            epic_id = _find_epic_id(epics_db, epic)
-            if epic_id:
-                properties[proj.prop_epic] = {"relation": [{"id": epic_id}]}
-            else:
-                print(f"Warning: epic '{epic}' not found, skipping epic link", file=sys.stderr)
+        properties[status_key] = {"status": {"name": status.value}}
 
     children = _markdown_to_blocks(description) if description else []
 
+    parent = {"data_source_id": proj.tickets_data_source_id} if proj.tickets_data_source_id else {"database_id": proj.database_id}
+    notion_version = DATA_SOURCE_NOTION_VERSION if proj.tickets_data_source_id else NOTION_VERSION
     payload: dict[str, Any] = {
-        "parent": {"database_id": database_id},
+        "parent": parent,
         "properties": properties,
     }
     if children:
         payload["children"] = children
 
-    page = _post("/pages", payload)
+    page = _post("/pages", payload, notion_version)
 
     page_id = page.get("id", "")
     url = page.get("url", "")
@@ -812,13 +854,19 @@ def create(
 
 def _find_epic_id(epics_db: str, epic_name: str) -> str | None:
     """Search epics database for an epic by name using a title filter."""
+    schema_props = _get_database_properties(epics_db)
+    title_props: list[str] = []
+    for prop_name in ("Epic", "Name"):
+        raw = schema_props.get(prop_name)
+        prop = cast(dict[str, Any], raw) if isinstance(raw, dict) else {}
+        if prop.get("type") == "title":
+            title_props.append(prop_name)
+    if not title_props:
+        return None
+
+    filters = [{"property": prop_name, "title": {"equals": epic_name}} for prop_name in title_props]
     body: dict[str, Any] = {
-        "filter": {
-            "or": [
-                {"property": "Epic", "title": {"equals": epic_name}},
-                {"property": "Name", "title": {"equals": epic_name}},
-            ]
-        }
+        "filter": filters[0] if len(filters) == 1 else {"or": filters}
     }
     results = _query_database(epics_db, body)
     for page in results:
