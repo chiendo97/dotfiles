@@ -50,6 +50,10 @@
       "rev": "c14c475585494c592ef48064ad338424f15f8bad",
       "src": "https://gitlab.com/motaz-shokry/gruvbox.nvim"
     },
+    "hi-pos.nvim": {
+      "rev": "1cbe6be670fe9f8566049508778ee0df0ac78674",
+      "src": "https://github.com/maxonvim/hi-pos.nvim"
+    },
     "lazydev.nvim": {
       "rev": "ff2cbcba459b637ec3fd165a2be59b7bbaeedf0d",
       "src": "https://github.com/folke/lazydev.nvim"
