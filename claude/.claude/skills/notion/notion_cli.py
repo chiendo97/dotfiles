@@ -13,7 +13,7 @@ Environment:
     NOTION_TOKEN: Required. Notion integration token.
 
 Config:
-    Reads from ./config/notion.yaml or ~/Source/claude-boy/config/notion.yaml.
+    Reads from the skill-local notion.yaml, then ./config/notion.yaml.
     Override with --config flag.
 """
 
@@ -46,9 +46,8 @@ DATA_SOURCE_NOTION_VERSION = "2026-03-11"
 SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 DEFAULT_CONFIG_PATHS = [
-    Path(__file__).resolve().parent / "config" / "notion.yaml",
+    Path(__file__).resolve().parent / "notion.yaml",
     Path("./config/notion.yaml"),
-    Path.home() / "Source" / "claude-boy" / "config" / "notion.yaml",
 ]
 
 
@@ -884,13 +883,12 @@ def update(
     status: Annotated[Status | None, typer.Option(help="New status")] = None,
     priority: Annotated[Priority | None, typer.Option(help="New priority")] = None,
     assignee: Annotated[str | None, typer.Option(help="New assignee name")] = None,
+    epic: Annotated[str | None, typer.Option(help="Epic name to link")] = None,
     ah: Annotated[float | None, typer.Option(help="Actual working hours")] = None,
     description: Annotated[str | None, typer.Option(help="New description (replaces existing)")] = None,
     project: Annotated[str | None, typer.Option(help="Project key")] = None,
 ) -> None:
     """Update a ticket."""
-    # project is accepted for consistency but not used for update (page_id is enough)
-    _ = project
     config = get_config()
     properties: dict[str, Any] = {}
 
@@ -909,6 +907,17 @@ def update(
             print(f"Error: unknown assignee '{assignee}'. Available: {available}", file=sys.stderr)
             raise typer.Exit(1)
         properties["Assignee"] = {"people": [{"id": user_id}]}
+    if epic:
+        proj = get_project_config(config, project)
+        epics_db = proj.epics_database_id
+        if not epics_db:
+            print("Error: selected project has no epics_database_id configured", file=sys.stderr)
+            raise typer.Exit(1)
+        epic_id = _find_epic_id(epics_db, epic.strip())
+        if not epic_id:
+            print(f"Error: epic '{epic}' not found; run the epics command and pass an existing epic", file=sys.stderr)
+            raise typer.Exit(1)
+        properties[proj.prop_epic] = {"relation": [{"id": epic_id}]}
 
     if not properties and not description:
         print("Error: nothing to update. Provide at least one field.", file=sys.stderr)

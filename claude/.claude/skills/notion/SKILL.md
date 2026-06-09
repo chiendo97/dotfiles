@@ -17,7 +17,7 @@ Requires `NOTION_TOKEN` environment variable (Notion integration token).
 
 ## Config
 
-Reads from `./config/notion.yaml` or `~/Source/claude-boy/config/notion.yaml` by default.
+Reads from the skill-local `notion.yaml` by default, then `./config/notion.yaml` if the skill-local file is absent.
 Override with `--config path/to/notion.yaml`.
 
 ### Config structure
@@ -101,6 +101,7 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py update \
   --status "In progress" \
   --priority High \
   --assignee huy \
+  --epic "Sprint Planning v2" \
   --project genbooks
 ```
 
@@ -111,6 +112,7 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py update \
 - `--priority`: Low | Medium | High | Critical
 - `--ah`: Actual working hours (number)
 - `--assignee`: New assignee name
+- `--epic`: Existing epic name to link. Uses the selected project's configured epic database and relation property.
 - `--description`: New description (replaces existing page content)
 - `--project`: Project key from config
 

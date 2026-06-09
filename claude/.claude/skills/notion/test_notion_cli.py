@@ -4,6 +4,7 @@ import io
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import date
+from pathlib import Path
 from unittest.mock import patch
 
 import typer
@@ -37,6 +38,12 @@ class NotionCliCreateTests(unittest.TestCase):
         })
 
         self.assertEqual(config.default_creator_alias, "owner")
+
+    def test_default_config_paths_use_skill_local_config_not_claude_boy(self) -> None:
+        skill_dir = Path(notion_cli.__file__).resolve().parent
+
+        self.assertEqual(notion_cli.DEFAULT_CONFIG_PATHS, [skill_dir / "notion.yaml", Path("./config/notion.yaml")])
+        self.assertNotIn("claude-boy", "\n".join(str(path) for path in notion_cli.DEFAULT_CONFIG_PATHS))
 
     def test_find_current_sprint_queries_sprint_data_source(self) -> None:
         proj = notion_cli.ProjectConfig.model_validate({
@@ -311,6 +318,57 @@ class NotionCliCreateTests(unittest.TestCase):
             notion_cli.create(title="Fix auth bug", epic="Sprint Planning v2")
 
         post.assert_not_called()
+
+
+class NotionCliUpdateTests(unittest.TestCase):
+    def test_update_epic_resolves_project_epic_and_patches_relation_property(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "genbook-global",
+            "projects": {
+                "genbook-global": {
+                    "database_id": "tickets-db",
+                    "epics_database_id": "epics-db",
+                    "prop_epic": "Epics",
+                }
+            },
+        })
+
+        with (
+            patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_find_epic_id", return_value="epic-page") as find_epic,
+            patch.object(notion_cli, "_patch", return_value={"url": "https://notion.so/ticket"}) as patch_page,
+            redirect_stdout(io.StringIO()),
+        ):
+            notion_cli.update(page_id="ticket-page", epic="Onboarding Amz Data", project="genbook-global")
+
+        find_epic.assert_called_once_with("epics-db", "Onboarding Amz Data")
+        patch_page.assert_called_once_with(
+            "/pages/ticket-page",
+            {"properties": {"Epics": {"relation": [{"id": "epic-page"}]}}},
+        )
+
+    def test_update_epic_fails_before_patch_when_epic_not_found(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "genbook-global",
+            "projects": {
+                "genbook-global": {
+                    "database_id": "tickets-db",
+                    "epics_database_id": "epics-db",
+                    "prop_epic": "Epics",
+                }
+            },
+        })
+
+        with (
+            patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_find_epic_id", return_value=None),
+            patch.object(notion_cli, "_patch") as patch_page,
+            redirect_stderr(io.StringIO()),
+            self.assertRaises(typer.Exit),
+        ):
+            notion_cli.update(page_id="ticket-page", epic="Missing Epic", project="genbook-global")
+
+        patch_page.assert_not_called()
 
 
 if __name__ == "__main__":
