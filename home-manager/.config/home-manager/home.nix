@@ -149,26 +149,26 @@
     enable = true;
     enableDefaultConfig = false;
 
-    matchBlocks = {
+    settings = {
       "*" = {
-        addKeysToAgent = "yes";
+        AddKeysToAgent = "yes";
       };
 
       "cle-home-server" = {
-        hostname = "100.118.125.39";
-        user = "cle";
+        HostName = "100.118.125.39";
+        User = "cle";
       };
 
       "vng-gateway-01" = {
-        hostname = "42.1.126.5";
-        port = 234;
-        user = "cle";
-        identityFile = "~/.ssh/id_ed25519_vng_gateway_01";
+        HostName = "42.1.126.5";
+        Port = 234;
+        User = "cle";
+        IdentityFile = "~/.ssh/id_ed25519_vng_gateway_01";
       };
 
       "cle-homic" = {
-        hostname = "100.83.74.104";
-        user = "root";
+        HostName = "100.83.74.104";
+        User = "root";
       };
     };
   };
@@ -411,6 +411,11 @@
       DISCORD_GUILD_ID = "1181560951141584926";
     };
 
+    profileExtra = lib.optionalString pkgs.stdenv.isDarwin ''
+      # OrbStack command-line tools and integration
+      source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+    '';
+
     # Zsh init content using lib.mkOrder for proper ordering
     initContent = lib.mkMerge [
       # Early init (source nix first)
@@ -453,6 +458,11 @@
     '';
 
     autosuggestion.enable = true;
+  };
+
+  home.file."./.zprofile" = lib.mkIf pkgs.stdenv.isDarwin {
+    force = true;
+    target = ".zprofile";
   };
 
   # ============================================================================
