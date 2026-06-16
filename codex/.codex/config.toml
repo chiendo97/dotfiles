@@ -1,6 +1,7 @@
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
 personality = "pragmatic"
+plan_mode_reasoning_effort = "xhigh"
 
 [projects."/Users/chiendo97/Source/demo/db-nbook.nvim"]
 trust_level = "trusted"
@@ -66,6 +67,7 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/home/cle/Source/document-portal-ui"]
+trust_level = "trusted"
 
 [projects."/Users/chiendo97/Source/hledger"]
 trust_level = "trusted"
@@ -97,6 +99,24 @@ trust_level = "trusted"
 [projects."/home/cle/Source/infra"]
 trust_level = "trusted"
 
+[projects."/tmp/kanban-md"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/demo/kanban-md"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/imagination"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/demo/mdterm"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/gentech-intune"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/demo/notion-fs"]
+trust_level = "trusted"
+
 [mcp_servers]
 
 [notice]
@@ -106,7 +126,7 @@ fast_default_opt_out = true
 "gpt-5.1-codex-max" = "gpt-5.4"
 
 [tui]
-status_line = ["current-dir", "project-name", "git-branch", "run-state", "context-used", "thread-title", "task-progress"]
+status_line = ["current-dir", "project-name", "git-branch", "run-state", "context-used", "task-progress"]
 
 [tui.keymap.editor]
 insert_newline = ["ctrl-j", "ctrl-m", "enter", "shift-enter", "alt-enter"]
