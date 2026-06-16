@@ -30,115 +30,115 @@
     "id_ed25519_selfhost"
   ]);
 
-  programs.ssh.matchBlocks = {
+  programs.ssh.settings = {
     "github.com" = {
-      hostname = "github.com";
-      identityFile = "~/.ssh/github_key";
-      identitiesOnly = true;
+      HostName = "github.com";
+      IdentityFile = "~/.ssh/github_key";
+      IdentitiesOnly = true;
     };
 
     "aws-dev" = {
-      hostname = "10.26.136.50";
-      user = "cle";
-      identityFile = "~/.ssh/aws_bastion_rsa";
-      identitiesOnly = true;
+      HostName = "10.26.136.50";
+      User = "cle";
+      IdentityFile = "~/.ssh/aws_bastion_rsa";
+      IdentitiesOnly = true;
     };
 
     "cle-pve" = {
-      hostname = "192.168.50.13";
-      user = "root";
-      identityFile = "~/.ssh/cle_pve";
+      HostName = "192.168.50.13";
+      User = "root";
+      IdentityFile = "~/.ssh/cle_pve";
     };
 
     "backup-pve" = {
-      hostname = "192.168.50.53";
-      user = "root";
-      identityFile = "~/.ssh/id_ed25519_selfhost";
-      identitiesOnly = true;
+      HostName = "192.168.50.53";
+      User = "root";
+      IdentityFile = "~/.ssh/id_ed25519_selfhost";
+      IdentitiesOnly = true;
     };
 
     "pulse-pve" = {
-      hostname = "192.168.50.18";
-      user = "root";
-      identityFile = "~/.ssh/id_ed25519_selfhost";
-      identitiesOnly = true;
+      HostName = "192.168.50.18";
+      User = "root";
+      IdentityFile = "~/.ssh/id_ed25519_selfhost";
+      IdentitiesOnly = true;
     };
 
     "plex-pve" = {
-      hostname = "192.168.50.242";
-      user = "root";
-      identityFile = "~/.ssh/id_ed25519_selfhost";
-      identitiesOnly = true;
+      HostName = "192.168.50.242";
+      User = "root";
+      IdentityFile = "~/.ssh/id_ed25519_selfhost";
+      IdentitiesOnly = true;
     };
 
     "jellyfin-pve" = {
-      hostname = "100.111.70.79";
-      user = "root";
-      identityFile = "~/.ssh/id_ed25519_selfhost";
-      identitiesOnly = true;
+      HostName = "100.111.70.79";
+      User = "root";
+      IdentityFile = "~/.ssh/id_ed25519_selfhost";
+      IdentitiesOnly = true;
     };
 
     "nas-pve" = {
-      hostname = "192.168.50.244";
-      user = "root";
-      identityFile = "~/.ssh/id_ed25519_selfhost";
-      identitiesOnly = true;
+      HostName = "192.168.50.244";
+      User = "root";
+      IdentityFile = "~/.ssh/id_ed25519_selfhost";
+      IdentitiesOnly = true;
     };
 
     "frigate-pve" = {
-      hostname = "192.168.50.245";
-      user = "root";
-      identityFile = "~/.ssh/id_ed25519_selfhost";
-      identitiesOnly = true;
+      HostName = "192.168.50.245";
+      User = "root";
+      IdentityFile = "~/.ssh/id_ed25519_selfhost";
+      IdentitiesOnly = true;
     };
 
     "immich-pve" = {
-      hostname = "192.168.50.246";
-      user = "root";
-      identityFile = "~/.ssh/id_ed25519_selfhost";
-      identitiesOnly = true;
+      HostName = "192.168.50.246";
+      User = "root";
+      IdentityFile = "~/.ssh/id_ed25519_selfhost";
+      IdentitiesOnly = true;
     };
 
     "unraid-cle" = {
-      hostname = "100.89.182.96";
-      user = "root";
+      HostName = "100.89.182.96";
+      User = "root";
     };
 
     "cle-viettel" = {
-      hostname = "171.244.62.91";
-      user = "root";
-      identityFile = "~/.ssh/cle_viettel_idc";
+      HostName = "171.244.62.91";
+      User = "root";
+      IdentityFile = "~/.ssh/cle_viettel_idc";
     };
 
     "homic-olympus" = {
-      hostname = "100.69.202.110";
-      user = "cle";
-      identityFile = "~/.ssh/homic_olympus";
+      HostName = "100.69.202.110";
+      User = "cle";
+      IdentityFile = "~/.ssh/homic_olympus";
     };
 
     "oracle" = {
-      hostname = "100.79.39.73";
-      user = "ubuntu";
-      identityFile = "~/.ssh/oracle";
+      HostName = "100.79.39.73";
+      User = "ubuntu";
+      IdentityFile = "~/.ssh/oracle";
     };
 
     # "nixos-cle" = {
-    #   hostname = "192.168.50.55";
-    #   user = "cle";
-    #   identityFile = "~/.ssh/nixos_cle";
+    #   HostName = "192.168.50.55";
+    #   User = "cle";
+    #   IdentityFile = "~/.ssh/nixos_cle";
     # };
 
     "homelab-pve" = {
-      hostname = "100.112.172.58";
-      user = "cle";
-      identityFile = "~/.ssh/homelab_pve";
+      HostName = "100.112.172.58";
+      User = "cle";
+      IdentityFile = "~/.ssh/homelab_pve";
     };
 
     "selfhost-pve" = {
-      hostname = "100.81.144.82";
-      user = "cle";
-      identityFile = "~/.ssh/id_ed25519_selfhost";
-      identitiesOnly = true;
+      HostName = "100.81.144.82";
+      User = "cle";
+      IdentityFile = "~/.ssh/id_ed25519_selfhost";
+      IdentitiesOnly = true;
     };
   };
 

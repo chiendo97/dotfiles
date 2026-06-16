@@ -43,53 +43,51 @@
     "id_ed25519_vng_dev"
   ]);
 
-  programs.ssh.matchBlocks = {
+  programs.ssh.settings = {
     "gitlab.com" = {
-      hostname = "gitlab.com";
-      identityFile = "~/.ssh/uriel_rsa";
-      extraOptions = {
-        PreferredAuthentications = "publickey";
-      };
+      HostName = "gitlab.com";
+      IdentityFile = "~/.ssh/uriel_rsa";
+      PreferredAuthentications = "publickey";
     };
 
     "github.com" = {
-      hostname = "github.com";
-      identityFile = lib.mkDefault "~/.ssh/id_ed25519_github";
+      HostName = "github.com";
+      IdentityFile = lib.mkDefault "~/.ssh/id_ed25519_github";
     };
 
     "github-uriel" = {
-      hostname = "github.com";
-      user = "git";
-      identityFile = "~/.ssh/id_ed25519_github";
-      identitiesOnly = true;
+      HostName = "github.com";
+      User = "git";
+      IdentityFile = "~/.ssh/id_ed25519_github";
+      IdentitiesOnly = true;
     };
 
     "vng-dev" = {
-      hostname = "100.64.0.37";
-      port = 234;
-      user = "cle";
-      identityFile = "~/.ssh/id_ed25519_vng_dev";
+      HostName = "100.64.0.37";
+      Port = 234;
+      User = "cle";
+      IdentityFile = "~/.ssh/id_ed25519_vng_dev";
     };
 
     "git.urieljsc.com" = {
-      hostname = "git.urieljsc.com";
-      user = "git";
-      identityFile = "~/.ssh/id_ed25519_urieljsc_gitlab";
-      identitiesOnly = true;
+      HostName = "git.urieljsc.com";
+      User = "git";
+      IdentityFile = "~/.ssh/id_ed25519_urieljsc_gitlab";
+      IdentitiesOnly = true;
     };
 
     "urieljsc" = {
-      hostname = "ssh.urieljsc.com";
-      user = "chienle";
-      identityFile = "~/.ssh/uriel_rsa";
-      identitiesOnly = true;
+      HostName = "ssh.urieljsc.com";
+      User = "chienle";
+      IdentityFile = "~/.ssh/uriel_rsa";
+      IdentitiesOnly = true;
     };
 
     "100.64.0.6" = {
-      hostname = "100.64.0.6";
-      user = "chienle";
-      identityFile = "~/.ssh/uriel_rsa";
-      identitiesOnly = true;
+      HostName = "100.64.0.6";
+      User = "chienle";
+      IdentityFile = "~/.ssh/uriel_rsa";
+      IdentitiesOnly = true;
     };
   };
 
