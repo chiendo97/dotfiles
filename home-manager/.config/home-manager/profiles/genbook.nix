@@ -1,6 +1,17 @@
 { config, pkgs, ... }:
 
 {
+  age.secrets.genbook-minuet-env = {
+    file = ../secrets/genbook-minuet-env.age;
+    path = "${config.home.homeDirectory}/.secrets/genbook-minuet-env";
+    mode = "600";
+  };
+
+  programs.zsh.initContent = ''
+    # Genbook Minuet/vLLM endpoint - managed by agenix
+    source ~/.secrets/genbook-minuet-env 2>/dev/null
+  '';
+
   systemd.user.services.rclone-gdrive = {
     Unit = {
       Description = "Rclone mount for Google Drive";
