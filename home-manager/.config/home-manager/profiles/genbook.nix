@@ -1,6 +1,8 @@
 { config, pkgs, ... }:
 
 {
+  home.sessionVariables.OPENAI_BASE_URL = "http://100.64.0.98:8080/v1";
+
   age.secrets.genbook-minuet-env = {
     file = ../secrets/genbook-minuet-env.age;
     path = "${config.home.homeDirectory}/.secrets/genbook-minuet-env";
@@ -10,6 +12,7 @@
   programs.zsh.initContent = ''
     # Genbook Minuet/vLLM endpoint - managed by agenix
     source ~/.secrets/genbook-minuet-env 2>/dev/null
+    export OPENAI_BASE_URL="http://100.64.0.98:8080/v1"
   '';
 
   systemd.user.services.rclone-gdrive = {
