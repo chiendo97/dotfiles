@@ -83,43 +83,8 @@ api.nvim_create_autocmd("LspAttach", {
         if client.server_capabilities.inlineCompletionProvider then
             lsp.inline_completion.enable(true, { bufnr = bufnr })
 
-            local replace_current_keyword = function(item)
-                if type(item.insert_text) ~= "string" then
-                    return item
-                end
-
-                local cursor = api.nvim_win_get_cursor(0)
-                local row = cursor[1] - 1
-                local col = cursor[2]
-                local line = api.nvim_get_current_line()
-                local prefix = line:sub(1, col):match("[%w_]+$")
-                local range = item.range
-
-                if not prefix or prefix == "" or not vim.startswith(item.insert_text, prefix) then
-                    return item
-                end
-
-                if range then
-                    local start_row, start_col, end_row, end_col = range:to_extmark()
-                    local is_cursor_range = range:is_empty()
-                        and start_row == row
-                        and start_col == col
-                        and end_row == row
-                        and end_col == col
-
-                    if not is_cursor_range then
-                        return item
-                    end
-                end
-
-                item.range = vim.range(bufnr, row, col - #prefix, row, col)
-                return item
-            end
-
             keymap.set("i", "<c-g>", function()
-                lsp.inline_completion.get({
-                    on_accept = replace_current_keyword,
-                })
+                lsp.inline_completion.get()
                 return ""
             end, {
                 expr = true,
