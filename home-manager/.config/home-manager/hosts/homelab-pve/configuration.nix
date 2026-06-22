@@ -106,6 +106,33 @@
   programs.nix-ld.libraries = with pkgs; [
     fuse
     fuse3
+
+    # Runtime libraries for generic downloaded browsers used by Playwright,
+    # Puppeteer, and browser-based agent screenshot checks.
+    glib
+    nss
+    nspr
+    dbus
+    expat
+    libdrm
+    libxkbcommon
+    libgbm
+    pango
+    cairo
+    at-spi2-core
+    gtk3
+    gdk-pixbuf
+    cups
+    alsa-lib
+    mesa
+    libx11
+    libxcomposite
+    libxdamage
+    libxext
+    libxfixes
+    libxrandr
+    libxcb
+    libxshmfence
   ];
   environment.sessionVariables.LD_LIBRARY_PATH = [ "/run/current-system/sw/share/nix-ld/lib" ];
 
