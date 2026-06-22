@@ -117,6 +117,12 @@ trust_level = "trusted"
 [projects."/home/cle/Source/demo/notion-fs"]
 trust_level = "trusted"
 
+[projects."/home/cle/Source/genbook-mono/languages/rust/genbook-ingest"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/urieljsc-dc"]
+trust_level = "trusted"
+
 [mcp_servers]
 
 [notice]
@@ -127,6 +133,7 @@ fast_default_opt_out = true
 
 [tui]
 status_line = ["current-dir", "project-name", "git-branch", "run-state", "context-used", "task-progress"]
+theme = "gruvbox-dark"
 
 [tui.keymap.editor]
 insert_newline = ["ctrl-j", "ctrl-m", "enter", "shift-enter", "alt-enter"]
@@ -138,3 +145,4 @@ insert_newline = ["ctrl-j", "ctrl-m", "enter", "shift-enter", "alt-enter"]
 terminal_resize_reflow = true
 memories = true
 goals = true
+apps = false
