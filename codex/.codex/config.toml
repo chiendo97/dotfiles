@@ -2,6 +2,8 @@ model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
 personality = "pragmatic"
 
+notify = ["/Users/chiendo97/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+
 [projects."/Users/chiendo97/Source/demo/db-nbook.nvim"]
 trust_level = "trusted"
 
@@ -97,7 +99,48 @@ trust_level = "trusted"
 [projects."/home/cle/Source/infra"]
 trust_level = "trusted"
 
-[mcp_servers]
+[projects."/Users/chiendo97/Source/selfhost"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/demo/text-to-cad"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/urieljsc/headscale"]
+trust_level = "trusted"
+
+# [mcp_servers.genbook-prefect]
+# command = "uvx"
+# args = [
+#     "--from",
+#     "prefect-mcp",
+#     "prefect-mcp-server",
+# ]
+
+# [mcp_servers.genbook-prefect.env]
+# PREFECT_API_URL = "http://prefect.genbooks.io/api"
+
+# [mcp_servers.reddit-mcp]
+# command = "uvx"
+# args = ["reddit-no-auth-mcp-server"]
+
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/chiendo97/.codex"
+CODEX_HOME = "/Users/chiendo97/.codex"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "27dca86fd6b571c49414a4b78e46b57bcf683a46cd1319799c11fbb6cfae3110"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.609.41114"
+CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
 
 [notice]
 fast_default_opt_out = true
@@ -106,10 +149,24 @@ fast_default_opt_out = true
 "gpt-5.1-codex-max" = "gpt-5.4"
 
 [tui]
-status_line = ["current-dir", "project-name", "git-branch", "run-state", "context-used", "thread-title", "task-progress"]
+status_line = [
+    "current-dir",
+    "project-name",
+    "git-branch",
+    "run-state",
+    "context-used",
+    "thread-title",
+    "task-progress",
+]
 
 [tui.keymap.editor]
-insert_newline = ["ctrl-j", "ctrl-m", "enter", "shift-enter", "alt-enter"]
+insert_newline = [
+    "ctrl-j",
+    "ctrl-m",
+    "enter",
+    "shift-enter",
+    "alt-enter",
+]
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
@@ -118,3 +175,79 @@ insert_newline = ["ctrl-j", "ctrl-m", "enter", "shift-enter", "alt-enter"]
 terminal_resize_reflow = true
 memories = true
 goals = true
+js_repl = false
+
+[marketplaces.openai-bundled]
+last_updated = "2026-06-14T12:08:49Z"
+source_type = "local"
+source = "/Users/chiendo97/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.claude-plugins-official]
+last_updated = "2026-06-23T11:04:04Z"
+last_revision = "f57f28050818b8ee4558996d16cb925e47661a5c"
+source_type = "git"
+source = "https://github.com/anthropics/claude-plugins-official.git"
+
+[marketplaces.impeccable]
+last_updated = "2026-06-23T11:04:10Z"
+last_revision = "d2ab4ddee6fa63002fae680652b5fbd31735e280"
+source_type = "git"
+source = "https://github.com/pbakaus/impeccable.git"
+
+[marketplaces.karpathy-skills]
+last_updated = "2026-06-17T03:12:19Z"
+last_revision = "2c606141936f1eeef17fa3043a72095b4765b9c2"
+source_type = "git"
+source = "https://github.com/forrestchang/andrej-karpathy-skills.git"
+
+[marketplaces.linus-torvalds-skills]
+last_updated = "2026-06-17T03:12:22Z"
+last_revision = "792d1625c776d4ebbd223fdb13e562973ab7d0bb"
+source_type = "git"
+source = "https://github.com/leopiney/linus-torvalds-skills.git"
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-06-14T13:06:12Z"
+source_type = "local"
+source = "/Users/chiendo97/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+DISCORD_GUILD_ID = "1181560951141584926"
+ENABLE_CLAUDEAI_MCP_SERVERS = "false"
+
+[plugins."code-simplifier@claude-plugins-official"]
+enabled = true
+
+[plugins."skill-creator@claude-plugins-official"]
+enabled = true
+
+[plugins."superpowers@claude-plugins-official"]
+enabled = true
+
+[plugins."impeccable@impeccable"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[desktop]
+conversationDetailMode = "STEPS_COMMANDS"
+ambient-suggestions-enabled = true
+
+[hooks.state]
+
+[hooks.state."superpowers@claude-plugins-official:hooks/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:62acbaff2b2f55f41971e21a164990aaa53c96919baa0a5eae2eb5db73b9e6e6"
+enabled = true
