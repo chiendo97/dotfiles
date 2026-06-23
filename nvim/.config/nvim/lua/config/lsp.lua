@@ -81,15 +81,13 @@ api.nvim_create_autocmd("LspAttach", {
         end
 
         if client.server_capabilities.inlineCompletionProvider then
-            lsp.inline_completion.enable(true)
+            lsp.inline_completion.enable(true, { bufnr = bufnr })
 
             keymap.set("i", "<c-g>", function()
-                if not vim.lsp.inline_completion.get() then
-                    return false
-                end
-                return true
+                lsp.inline_completion.get()
+                return ""
             end, {
-                remap = true,
+                expr = true,
                 desc = "Accept the current inline completion",
                 buffer = bufnr,
             })
@@ -110,7 +108,6 @@ lsp.config("*", {
 local lsp_servers = {
     "basedpyright",
     "bashls",
-    "copilot",
     "dartls",
     "filepaths_ls",
     "gopls",

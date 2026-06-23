@@ -62,11 +62,11 @@
       IdentitiesOnly = true;
     };
 
-    "vng-dev" = {
-      HostName = "100.64.0.37";
-      Port = 234;
-      User = "cle";
+    "vng-dev zariel-sv01" = {
+      HostName = "10.100.20.11";
+      User = "chienle";
       IdentityFile = "~/.ssh/id_ed25519_vng_dev";
+      IdentitiesOnly = true;
     };
 
     "git.urieljsc.com" = {

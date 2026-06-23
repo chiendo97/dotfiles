@@ -24,6 +24,10 @@ require("ember").setup({
         hl.RenderMarkdownH4Bg = { bg = "#252820" }
         hl.RenderMarkdownH5Bg = { bg = "#202528" }
         hl.RenderMarkdownH6Bg = { bg = "#252425" }
+
+        -- Embedded SQL in Rust sqlx query strings
+        hl["@sqlx.query"] = { bg = theme.ui.base2 }
+        hl["@sqlx.query.rust"] = { bg = theme.ui.base2 }
     end,
 })
 

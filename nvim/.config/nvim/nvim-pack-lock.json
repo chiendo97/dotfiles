@@ -78,6 +78,10 @@
       "rev": "cbae4fa396bbf9c802b3d2dc2e9c5362e8fb9468",
       "src": "https://github.com/echasnovski/mini.nvim"
     },
+    "minuet-ai.nvim": {
+      "rev": "d29dec4c36be2b41aa10e70938b7b09a03f0bdba",
+      "src": "https://github.com/milanglacier/minuet-ai.nvim"
+    },
     "mkdnflow.nvim": {
       "rev": "f20732686f70f60f18f09f4befe984ae63a99201",
       "src": "https://github.com/jakewvincent/mkdnflow.nvim"

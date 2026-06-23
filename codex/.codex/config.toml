@@ -1,6 +1,7 @@
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
 personality = "pragmatic"
+plan_mode_reasoning_effort = "xhigh"
 
 notify = ["/Users/chiendo97/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
 
@@ -68,6 +69,7 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/home/cle/Source/document-portal-ui"]
+trust_level = "trusted"
 
 [projects."/Users/chiendo97/Source/hledger"]
 trust_level = "trusted"
@@ -108,39 +110,29 @@ trust_level = "trusted"
 [projects."/Users/chiendo97/Source/urieljsc/headscale"]
 trust_level = "trusted"
 
-# [mcp_servers.genbook-prefect]
-# command = "uvx"
-# args = [
-#     "--from",
-#     "prefect-mcp",
-#     "prefect-mcp-server",
-# ]
+[projects."/tmp/kanban-md"]
+trust_level = "trusted"
 
-# [mcp_servers.genbook-prefect.env]
-# PREFECT_API_URL = "http://prefect.genbooks.io/api"
+[projects."/home/cle/Source/demo/kanban-md"]
+trust_level = "trusted"
 
-# [mcp_servers.reddit-mcp]
-# command = "uvx"
-# args = ["reddit-no-auth-mcp-server"]
+[projects."/home/cle/Source/imagination"]
+trust_level = "trusted"
 
-[mcp_servers.node_repl]
-args = []
-command = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node_repl"
-startup_timeout_sec = 120
+[projects."/home/cle/Source/demo/mdterm"]
+trust_level = "trusted"
 
-[mcp_servers.node_repl.env]
-NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
-NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
-NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
-NODE_REPL_TRUSTED_CODE_PATHS = "/Users/chiendo97/.codex"
-CODEX_HOME = "/Users/chiendo97/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "27dca86fd6b571c49414a4b78e46b57bcf683a46cd1319799c11fbb6cfae3110"
-BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
-NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
-BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.609.41114"
-CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+[projects."/home/cle/Source/gentech-intune"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/demo/notion-fs"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/genbook-mono/languages/rust/genbook-ingest"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/urieljsc-dc"]
+trust_level = "trusted"
 
 [notice]
 fast_default_opt_out = true

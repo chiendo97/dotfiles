@@ -22,6 +22,10 @@ vim.o.wrap = false
 vim.wo.signcolumn = "yes" -- Always show sign column (for git, diagnostics, etc.)
 vim.o.showmatch = true -- Always show matching brackets
 
+-- Keep LSP semantic token highlights below Treesitter, including modifier
+-- layers which render at semantic_tokens + 1 and + 2.
+vim.hl.priorities.semantic_tokens = vim.hl.priorities.treesitter - 3
+
 -- Completion settings
 vim.o.pumheight = 10
 vim.o.completeopt = "menuone,noselect,nosort"
