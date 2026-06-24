@@ -99,46 +99,21 @@ make stow      # Symlink all packages
 make unstow    # Remove all symlinks
 make restow    # Re-symlink all (after changes)
 make nvim      # Stow individual package
-make codex     # Link personal and upstream skills into Codex discovery
-make codex-update-skills  # Pull Codex-managed skill sources
+make codex     # Stow tracked Codex config and local skills
 ```
 
 ### Codex
 
-`make codex` links the tracked Codex config plus personal and upstream skills
-into Codex native skill discovery. It stows `codex/.codex/config.toml` to
-`~/.codex/config.toml` and installs skill symlinks under `~/.agents/skills`,
-which is the shared Agent Skills location Codex scans for user skills. External
-skill repos are cloned into `~/.codex/skill-sources` on first run, so Codex does
-not depend on Claude's plugin cache or marketplace installation state.
+`make codex` only stows the tracked Codex files. It links
+`codex/.codex/config.toml` to `~/.codex/config.toml` and any tracked local skills
+under `codex/.codex/skills` to `~/.codex/skills`.
 
 - `~/.codex/config.toml` -> `codex/.codex/config.toml`
-- `~/.agents/skills/claude` -> this repo's `claude/.claude/skills`
-- `~/.agents/skills/impeccable` -> `~/.codex/skill-sources/impeccable`
-- `~/.agents/skills/karpathy-guidelines` -> `~/.codex/skill-sources/andrej-karpathy-skills`
-- `~/.agents/skills/superpowers` -> `~/.codex/skill-sources/superpowers`
-- `~/.agents/skills/torvalds-doctrine` -> `~/.codex/skill-sources/linus-torvalds-skills`
+- `~/.codex/skills/reddit-cli/SKILL.md` -> `codex/.codex/skills/reddit-cli/SKILL.md`
 
-Run `make codex-update-skills` to `git pull --ff-only` the Codex-managed source
-repos and refresh links.
-
-The target also removes the old stowed bridge links under `~/.codex/skills` for
-these names, leaving Codex's bundled system skills alone.
-
-For OpenAI curated skills, use Codex's built-in `$skill-installer`. For generic
-community skills, `npx skills add ... -a codex` also works, but it is a
-third-party installer; set `DISABLE_TELEMETRY=1` if using it.
-
-Registering Claude Code marketplaces with Codex is optional and mainly useful for
-the `/plugins` UI. It is not required for the direct skill symlinks above and is
-kept separate from the Codex-owned skill install:
-
-```bash
-codex plugin marketplace add ~/.claude/plugins/marketplaces/claude-plugins-official
-codex plugin marketplace add ~/.claude/plugins/marketplaces/impeccable
-codex plugin marketplace add ~/.claude/plugins/marketplaces/karpathy-skills
-codex plugin marketplace add ~/.claude/plugins/marketplaces/linus-torvalds-skills
-```
+Codex plugins and external skills are managed outside this dotfiles repo. This
+avoids tracking marketplace cache state or cloning third-party plugin sources
+from repository scripts.
 
 ### Neovim
 
