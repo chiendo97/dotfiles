@@ -21,11 +21,13 @@ let
             hash = "sha256-PjWtb1OXGpg0v55nhuKt9ytfGSHMmpxf3gc9KXKUQHY=";
           };
           "x86_64-linux" = pkgs.fetchurl {
-            url = "https://github.com/oven-sh/bun/releases/download/bun-v${finalAttrs.version}/bun-linux-x64.zip";
-            hash = "sha256-lR7iruhV8IWVruxiJSJqKY0/6oOj3NZGXAnLzN9+hI8=";
+            url = "https://github.com/oven-sh/bun/releases/download/bun-v${finalAttrs.version}/bun-linux-x64-baseline.zip";
+            hash = "sha256-oGOQiuCLeFLKEJObvcbO7T3avOj7lALc6D1l1zs25sc=";
           };
         };
       };
+      postPhases = pkgs.lib.optionals (!pkgs.stdenv.hostPlatform.isLinux) previousAttrs.postPhases;
+      postPatchelf = previousAttrs.postPatchelf;
     }
   );
 in

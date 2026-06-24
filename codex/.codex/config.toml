@@ -169,17 +169,6 @@ memories = true
 goals = true
 js_repl = false
 
-[marketplaces.openai-bundled]
-last_updated = "2026-06-14T12:08:49Z"
-source_type = "local"
-source = "/Users/chiendo97/.codex/.tmp/bundled-marketplaces/openai-bundled"
-
-[marketplaces.claude-plugins-official]
-last_updated = "2026-06-23T11:04:04Z"
-last_revision = "f57f28050818b8ee4558996d16cb925e47661a5c"
-source_type = "git"
-source = "https://github.com/anthropics/claude-plugins-official.git"
-
 [marketplaces.impeccable]
 last_updated = "2026-06-23T11:04:10Z"
 last_revision = "d2ab4ddee6fa63002fae680652b5fbd31735e280"
@@ -197,11 +186,6 @@ last_updated = "2026-06-17T03:12:22Z"
 last_revision = "792d1625c776d4ebbd223fdb13e562973ab7d0bb"
 source_type = "git"
 source = "https://github.com/leopiney/linus-torvalds-skills.git"
-
-[marketplaces.openai-primary-runtime]
-last_updated = "2026-06-14T13:06:12Z"
-source_type = "local"
-source = "/Users/chiendo97/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
 [shell_environment_policy]
 inherit = "core"
