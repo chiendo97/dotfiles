@@ -170,8 +170,8 @@ goals = true
 js_repl = false
 
 [marketplaces.impeccable]
-last_updated = "2026-06-23T11:04:10Z"
-last_revision = "d2ab4ddee6fa63002fae680652b5fbd31735e280"
+last_updated = "2026-06-27T16:27:52Z"
+last_revision = "3590bf9e37c84ecbc92f9c205ce1aebf2185a971"
 source_type = "git"
 source = "https://github.com/pbakaus/impeccable.git"
 
