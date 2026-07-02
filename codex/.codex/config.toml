@@ -3,6 +3,8 @@ model_reasoning_effort = "xhigh"
 personality = "pragmatic"
 plan_mode_reasoning_effort = "xhigh"
 
+notify = ["/Users/chiendo97/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+
 [projects."/Users/chiendo97/Source/demo/db-nbook.nvim"]
 trust_level = "trusted"
 
@@ -99,6 +101,15 @@ trust_level = "trusted"
 [projects."/home/cle/Source/infra"]
 trust_level = "trusted"
 
+[projects."/Users/chiendo97/Source/selfhost"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/demo/text-to-cad"]
+trust_level = "trusted"
+
+[projects."/Users/chiendo97/Source/urieljsc/headscale"]
+trust_level = "trusted"
+
 [projects."/tmp/kanban-md"]
 trust_level = "trusted"
 
@@ -123,8 +134,6 @@ trust_level = "trusted"
 [projects."/home/cle/Source/urieljsc-dc"]
 trust_level = "trusted"
 
-[mcp_servers]
-
 [notice]
 fast_default_opt_out = true
 
@@ -132,11 +141,24 @@ fast_default_opt_out = true
 "gpt-5.1-codex-max" = "gpt-5.4"
 
 [tui]
-status_line = ["current-dir", "project-name", "git-branch", "run-state", "context-used", "task-progress"]
-theme = "gruvbox-dark"
+status_line = [
+    "current-dir",
+    "project-name",
+    "git-branch",
+    "run-state",
+    "context-used",
+    "thread-title",
+    "task-progress",
+]
 
 [tui.keymap.editor]
-insert_newline = ["ctrl-j", "ctrl-m", "enter", "shift-enter", "alt-enter"]
+insert_newline = [
+    "ctrl-j",
+    "ctrl-m",
+    "enter",
+    "shift-enter",
+    "alt-enter",
+]
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
@@ -145,4 +167,63 @@ insert_newline = ["ctrl-j", "ctrl-m", "enter", "shift-enter", "alt-enter"]
 terminal_resize_reflow = true
 memories = true
 goals = true
-apps = false
+js_repl = false
+
+[marketplaces.impeccable]
+last_updated = "2026-06-27T16:27:52Z"
+last_revision = "3590bf9e37c84ecbc92f9c205ce1aebf2185a971"
+source_type = "git"
+source = "https://github.com/pbakaus/impeccable.git"
+
+[marketplaces.karpathy-skills]
+last_updated = "2026-06-17T03:12:19Z"
+last_revision = "2c606141936f1eeef17fa3043a72095b4765b9c2"
+source_type = "git"
+source = "https://github.com/forrestchang/andrej-karpathy-skills.git"
+
+[marketplaces.linus-torvalds-skills]
+last_updated = "2026-06-17T03:12:22Z"
+last_revision = "792d1625c776d4ebbd223fdb13e562973ab7d0bb"
+source_type = "git"
+source = "https://github.com/leopiney/linus-torvalds-skills.git"
+
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+DISCORD_GUILD_ID = "1181560951141584926"
+ENABLE_CLAUDEAI_MCP_SERVERS = "false"
+
+[plugins."code-simplifier@claude-plugins-official"]
+enabled = true
+
+[plugins."skill-creator@claude-plugins-official"]
+enabled = true
+
+[plugins."superpowers@claude-plugins-official"]
+enabled = true
+
+[plugins."impeccable@impeccable"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[desktop]
+conversationDetailMode = "STEPS_COMMANDS"
+ambient-suggestions-enabled = true
+
+[hooks.state]
+
+[hooks.state."superpowers@claude-plugins-official:hooks/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:62acbaff2b2f55f41971e21a164990aaa53c96919baa0a5eae2eb5db73b9e6e6"
+enabled = true
