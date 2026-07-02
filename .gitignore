@@ -34,6 +34,9 @@ claude/.claude/telemetry/
 # Local Codex runtime state
 codex/.codex/*
 !codex/.codex/config.toml
+!codex/.codex/skills/
+!codex/.codex/skills/excalidraw-skill/
+!codex/.codex/skills/excalidraw-skill/**
 
 # Nix build outputs
 result-pve

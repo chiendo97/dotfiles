@@ -6,7 +6,7 @@
       "version": "'cle/mcp'"
     },
     "cling.nvim": {
-      "rev": "51f18e0b67ef3298a5606850ff56e03629768642",
+      "rev": "3e7f61383a822b2eab6fcd3d953ad1cfbc970881",
       "src": "https://github.com/juniorsundar/cling.nvim"
     },
     "conform.nvim": {
@@ -22,7 +22,7 @@
       "src": "https://github.com/chiendo97/db-nbook.nvim"
     },
     "fidget.nvim": {
-      "rev": "82404b196e73a00b1727a91903beef5ddc319d22",
+      "rev": "6f793b2bcd2d35e201c09520f698bb763220908a",
       "src": "https://github.com/j-hui/fidget.nvim"
     },
     "filepaths_ls.nvim": {
@@ -39,7 +39,7 @@
       "src": "https://github.com/ruifm/gitlinker.nvim"
     },
     "gitsigns.nvim": {
-      "rev": "25050e4ed39e628282831d4cbecb1850454ce915",
+      "rev": "2038c666bd9d8a0b7349a0b6ee00dc83104b9ecf",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
     "gp.nvim": {
@@ -59,23 +59,23 @@
       "src": "https://github.com/folke/lazydev.nvim"
     },
     "live-preview.nvim": {
-      "rev": "c1fcf75c5f9c9c01dd392852de44204b60f1b5b1",
+      "rev": "5977060965161f7b3be3166467d03e09d10c68ea",
       "src": "https://github.com/brianhuster/live-preview.nvim"
     },
     "lspeek.nvim": {
-      "rev": "48999134df6e8076dde079094c81b07fb7b56559",
+      "rev": "5deb1a98fa6e2a4be9b2fb96abc8129607f50ef3",
       "src": "https://github.com/r4ppz/lspeek.nvim"
     },
     "markdown-plus.nvim": {
-      "rev": "1126b22be90c58e1375193cc0608e88d43621c48",
+      "rev": "a4352f08b4e849f54c6e94ad778f7bf2336f5af4",
       "src": "https://github.com/yousefhadder/markdown-plus.nvim"
     },
     "mason.nvim": {
-      "rev": "16ba83bfc8a25f52bb545134f5bee082b195c460",
+      "rev": "2a6940af80375532e5e9e7c1f2fc6319a1b7a69d",
       "src": "https://github.com/mason-org/mason.nvim"
     },
     "mini.nvim": {
-      "rev": "cbae4fa396bbf9c802b3d2dc2e9c5362e8fb9468",
+      "rev": "1345d191bb3da9c7b0e977f4387c5761f9bff68d",
       "src": "https://github.com/echasnovski/mini.nvim"
     },
     "minuet-ai.nvim": {
@@ -87,7 +87,7 @@
       "src": "https://github.com/jakewvincent/mkdnflow.nvim"
     },
     "morph.nvim": {
-      "rev": "9216ae0a8fa8dbc065d99089a36f577b680a2f47",
+      "rev": "95aa8884c0882121479f2667bf78b17cd76d098b",
       "src": "https://github.com/jrop/morph.nvim"
     },
     "nvim": {
@@ -121,11 +121,11 @@
       "src": "https://github.com/polacekpavel/prompt-yank.nvim"
     },
     "render-markdown.nvim": {
-      "rev": "5adf0895310c1904e5abfaad40a2baad7fe44a07",
+      "rev": "f422cb5c6855f150e2ddcfaf44e7157b98b34f6a",
       "src": "https://github.com/MeanderingProgrammer/render-markdown.nvim"
     },
     "schemastore.nvim": {
-      "rev": "fce1d90e76c59337b6d3778c272c1b972a658269",
+      "rev": "e034560c0266d5a99d811f595b04ce839ab868ff",
       "src": "https://github.com/b0o/schemastore.nvim"
     },
     "snacks.nvim": {

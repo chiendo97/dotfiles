@@ -82,3 +82,5 @@
 
 [includeIf "hasconfig:remote.*.url:git@git.urieljsc.com:*/**"]
     path = ~/.gitconfig-urieljsc
+[url "git@git.urieljsc.com:"]
+	insteadOf = https://git.urieljsc.com/

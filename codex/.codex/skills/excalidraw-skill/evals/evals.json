@@ -1,0 +1,23 @@
+{
+  "skill_name": "excalidraw-skill",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Using only curl against the local Excalidraw REST API, draw a CI/CD pipeline architecture diagram with these components: GitHub (source), GitHub Actions (CI), Docker Registry (artifact store), and Kubernetes Cluster (deployment target). Use arrows to show the flow from left to right. Make sure labels fit inside each box and nothing overlaps.",
+      "expected_output": "A curl-created diagram with 4 labeled boxes, left-to-right flow arrows connecting them, no overlapping elements, and all text fully visible inside shapes.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "Using only curl against the local Excalidraw REST API, convert this Mermaid flowchart to an Excalidraw diagram:\n```\ngraph TD\n  A[User] -->|HTTP Request| B[Load Balancer]\n  B --> C[Web Server 1]\n  B --> D[Web Server 2]\n  C --> E[(Database)]\n  D --> E\n```\nAfter converting, query the REST API for elements and request a PNG export if the browser canvas is open.",
+      "expected_output": "A REST-triggered Mermaid conversion with all nodes and arrows matching the Mermaid structure, followed by REST inspection and optional image export.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Using only curl against the local Excalidraw REST API, create two rectangles: 'Auth Service' and 'User DB', connected by an arrow labeled 'queries'. Then refine it with REST calls: add a third box 'Redis Cache' between the services, update the original arrow routing, and add a 'cache hit' arrow. Query the final REST state and request viewport fit if a browser canvas is open.",
+      "expected_output": "A REST-created and REST-refined diagram with Auth Service, Redis Cache, and User DB, clean arrows, visible labels, and final REST inspection.",
+      "files": []
+    }
+  ]
+}
