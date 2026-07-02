@@ -134,6 +134,24 @@ trust_level = "trusted"
 [projects."/home/cle/Source/urieljsc-dc"]
 trust_level = "trusted"
 
+[projects."/home/cle/Source/genbook-assistant-ui"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/zariel-deployments"]
+trust_level = "trusted"
+
+[projects."/tmp/kitclone3-mdterm"]
+trust_level = "trusted"
+
+[projects."/tmp/codex-onlymaps-eval"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/demo/mcp_excalidraw"]
+trust_level = "trusted"
+
+[projects."/tmp"]
+trust_level = "trusted"
+
 [notice]
 fast_default_opt_out = true
 
@@ -150,6 +168,8 @@ status_line = [
     "thread-title",
     "task-progress",
 ]
+theme = "gruvbox-dark"
+session_picker_view = "dense"
 
 [tui.keymap.editor]
 insert_newline = [
@@ -170,19 +190,19 @@ goals = true
 js_repl = false
 
 [marketplaces.impeccable]
-last_updated = "2026-06-27T16:27:52Z"
-last_revision = "3590bf9e37c84ecbc92f9c205ce1aebf2185a971"
+last_updated = "2026-07-02T04:26:41Z"
+last_revision = "44c27a72af98394c32691ba79358811bff86bde6"
 source_type = "git"
 source = "https://github.com/pbakaus/impeccable.git"
 
 [marketplaces.karpathy-skills]
-last_updated = "2026-06-17T03:12:19Z"
+last_updated = "2026-07-02T04:26:43Z"
 last_revision = "2c606141936f1eeef17fa3043a72095b4765b9c2"
 source_type = "git"
 source = "https://github.com/forrestchang/andrej-karpathy-skills.git"
 
 [marketplaces.linus-torvalds-skills]
-last_updated = "2026-06-17T03:12:22Z"
+last_updated = "2026-07-02T04:26:45Z"
 last_revision = "792d1625c776d4ebbd223fdb13e562973ab7d0bb"
 source_type = "git"
 source = "https://github.com/leopiney/linus-torvalds-skills.git"
