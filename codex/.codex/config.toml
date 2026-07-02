@@ -188,6 +188,7 @@ terminal_resize_reflow = true
 memories = true
 goals = true
 js_repl = false
+hooks = false
 
 [marketplaces.impeccable]
 last_updated = "2026-07-02T04:26:41Z"
@@ -213,7 +214,6 @@ inherit = "core"
 [shell_environment_policy.set]
 DISCORD_GUILD_ID = "1181560951141584926"
 ENABLE_CLAUDEAI_MCP_SERVERS = "false"
-IMPECCABLE_HOOK_DISABLED = "1"
 
 [plugins."impeccable@impeccable"]
 enabled = true
