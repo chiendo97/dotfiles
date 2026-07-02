@@ -62,8 +62,15 @@
       IdentitiesOnly = true;
     };
 
-    "vng-dev zariel-sv01" = {
+    "vng-dev" = {
       HostName = "10.100.20.11";
+      User = "chienle";
+      IdentityFile = "~/.ssh/id_ed25519_vng_dev";
+      IdentitiesOnly = true;
+    };
+
+    "zariel-sv01" = {
+      HostName = "100.64.0.98";
       User = "chienle";
       IdentityFile = "~/.ssh/id_ed25519_vng_dev";
       IdentitiesOnly = true;
