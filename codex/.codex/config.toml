@@ -213,15 +213,7 @@ inherit = "core"
 [shell_environment_policy.set]
 DISCORD_GUILD_ID = "1181560951141584926"
 ENABLE_CLAUDEAI_MCP_SERVERS = "false"
-
-[plugins."code-simplifier@claude-plugins-official"]
-enabled = true
-
-[plugins."skill-creator@claude-plugins-official"]
-enabled = true
-
-[plugins."superpowers@claude-plugins-official"]
-enabled = true
+IMPECCABLE_HOOK_DISABLED = "1"
 
 [plugins."impeccable@impeccable"]
 enabled = true
@@ -241,9 +233,3 @@ enabled = true
 [desktop]
 conversationDetailMode = "STEPS_COMMANDS"
 ambient-suggestions-enabled = true
-
-[hooks.state]
-
-[hooks.state."superpowers@claude-plugins-official:hooks/hooks.json:session_start:0:0"]
-trusted_hash = "sha256:62acbaff2b2f55f41971e21a164990aaa53c96919baa0a5eae2eb5db73b9e6e6"
-enabled = true
