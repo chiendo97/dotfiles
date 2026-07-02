@@ -1,7 +1,38 @@
 vim.schedule(function()
     vim.pack.add({
         { src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects", version = "main" },
-        { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
+        { src = "https://github.com/romus204/tree-sitter-manager.nvim" },
+    })
+
+    require("tree-sitter-manager").setup({
+        ensure_installed = {
+            "bash",
+            "cmake",
+            "css",
+            "go",
+            "gomod",
+            "gosum",
+            "hcl",
+            "hjson",
+            "html",
+            "javascript",
+            "json",
+            "json5",
+            "make",
+            "markdown",
+            "markdown_inline",
+            "mermaid",
+            "python",
+            "rust",
+            "sql",
+            "svelte",
+            "terraform",
+            "typescript",
+            "yaml",
+            "zsh",
+        },
+        auto_install = false,
+        highlight = false,
     })
 
     local ts_select = require("nvim-treesitter-textobjects.select")

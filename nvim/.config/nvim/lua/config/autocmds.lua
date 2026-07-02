@@ -114,11 +114,11 @@ end, { nargs = "+", complete = "shellcmd" })
 vim.api.nvim_create_autocmd("PackChanged", {
     callback = function(ev)
         local name, kind = ev.data.spec.name, ev.data.kind
-        if name == "nvim-treesitter" and kind == "update" then
+        if name == "tree-sitter-manager.nvim" and kind == "update" then
             if not ev.data.active then
-                vim.cmd.packadd("nvim-treesitter")
+                vim.cmd.packadd("tree-sitter-manager.nvim")
             end
-            vim.cmd("TSUpdate")
+            vim.cmd("TSUpdate!")
         end
     end,
 })
