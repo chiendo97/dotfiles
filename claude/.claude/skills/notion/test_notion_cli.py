@@ -371,5 +371,97 @@ class NotionCliUpdateTests(unittest.TestCase):
         patch_page.assert_not_called()
 
 
+class NotionCliReportTests(unittest.TestCase):
+    def test_report_groups_and_filters_by_due_date(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "genbook-global",
+            "projects": {
+                "genbook-global": {
+                    "database_id": "tickets-db",
+                    "date_property_type": "created_time",
+                }
+            },
+            "users": {"cle": "creator-user-id"},
+        })
+        page = {
+            "id": "ticket-page",
+            "url": "https://notion.so/ticket-page",
+            "properties": {
+                "Name": {"title": [{"plain_text": "Backfill AH by day"}]},
+                "Assignee": {"people": [{"name": "cle"}]},
+                "AH": {"number": 6},
+                "Due Date": {"type": "date", "date": {"start": "2026-07-01"}},
+                "Sort Date": {
+                    "formula": {
+                        "type": "date",
+                        "date": {"start": "2026-06-25"},
+                    }
+                },
+                "Created time": {"type": "created_time", "created_time": "2026-06-25T03:00:00Z"},
+            },
+        }
+        stdout = io.StringIO()
+
+        with (
+            patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_query_database", return_value=[page]) as query_database,
+            redirect_stdout(stdout),
+        ):
+            notion_cli.report(
+                period=notion_cli.Period.WEEKLY,
+                assignee="cle",
+                since=date(2026, 7, 1),
+                project="genbook-global",
+            )
+
+        query_database.assert_called_once_with(
+            "tickets-db",
+            {
+                "page_size": 100,
+                "sorts": [{"property": "Due Date", "direction": "descending"}],
+                "filter": {
+                    "and": [
+                        {"property": "Assignee", "people": {"contains": "creator-user-id"}},
+                        {"property": "Due Date", "date": {"on_or_after": "2026-07-01"}},
+                    ]
+                },
+            },
+        )
+        output = stdout.getvalue()
+        self.assertIn("AH Report (weekly)", output)
+        self.assertIn("2026-W27", output)
+        self.assertNotIn("2026-W26", output)
+
+    def test_report_skips_tickets_without_due_date(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "genbook-global",
+            "projects": {"genbook-global": {"database_id": "tickets-db"}},
+        })
+        page = {
+            "id": "ticket-page",
+            "url": "https://notion.so/ticket-page",
+            "properties": {
+                "Name": {"title": [{"plain_text": "Missing due date"}]},
+                "AH": {"number": 6},
+                "Sort Date": {
+                    "formula": {
+                        "type": "date",
+                        "date": {"start": "2026-06-25"},
+                    }
+                },
+            },
+        }
+        stdout = io.StringIO()
+
+        with (
+            patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_query_database", return_value=[page]),
+            redirect_stdout(stdout),
+        ):
+            notion_cli.report(period=notion_cli.Period.WEEKLY, project="genbook-global")
+
+        self.assertEqual(stdout.getvalue().strip(), "No tickets with AH found.")
+
+
 if __name__ == "__main__":
     unittest.main()

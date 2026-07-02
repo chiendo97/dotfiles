@@ -111,6 +111,7 @@ class Config(BaseModel):
 
 
 _EPOCH_PREFIX = "1970-01-01"
+REPORT_DATE_PROPERTY = "Due Date"
 
 
 class Ticket(BaseModel):
@@ -120,6 +121,7 @@ class Ticket(BaseModel):
     priority: str = ""
     assignee: str = ""
     ah: float | None = None
+    due_date: str = ""
     sort_date: str = ""
     created: str = ""
     edited: str = ""
@@ -139,6 +141,7 @@ class Ticket(BaseModel):
             priority=_read_select(props, "Priority"),
             assignee=_read_people(props),
             ah=_read_number(props, "AH"),
+            due_date=_read_date(props, REPORT_DATE_PROPERTY),
             sort_date=_read_formula_date(props, "Sort Date"),
             created=_read_timestamp(props, "Created time"),
             edited=_read_timestamp(props, "Last edited time"),
@@ -172,6 +175,13 @@ class Ticket(BaseModel):
         ct = self.created
         if ct and not ct.startswith(_EPOCH_PREFIX):
             return ct
+        return ""
+
+    def resolve_report_date(self) -> str:
+        """AH report date: due_date only."""
+        dd = self.due_date
+        if dd and not dd.startswith(_EPOCH_PREFIX):
+            return dd
         return ""
 
 
@@ -383,6 +393,18 @@ def _read_timestamp(props: dict[str, Any], key: str) -> str:
     raw = props.get(key, {})
     prop_type = raw.get("type", "")
     return raw.get(prop_type, "") or ""
+
+
+def _read_date(props: dict[str, Any], key: str) -> str:
+    """Read a Notion date property."""
+    raw_prop = props.get(key, {})
+    raw = cast(dict[str, Any], raw_prop) if isinstance(raw_prop, dict) else {}
+    date_value = raw.get("date")
+    if isinstance(date_value, dict):
+        date_dict = cast(dict[str, object], date_value)
+        start = date_dict.get("start")
+        return start if isinstance(start, str) else ""
+    return ""
 
 
 def _read_formula_date(props: dict[str, Any], key: str) -> str:
@@ -602,6 +624,8 @@ def _build_filter_body(
     query: str | None = None,
     since: date | None = None,
     proj: ProjectConfig | None = None,
+    date_property: str | None = None,
+    date_property_type: str | None = None,
 ) -> dict[str, Any]:
     """Build filter and sort body for ticket queries.
 
@@ -610,8 +634,8 @@ def _build_filter_body(
     ``formula`` but can be overridden per project via ``date_property_type``
     (e.g. ``created_time``).
     """
-    date_prop = proj.date_property if proj else "Sort Date"
-    date_type = proj.date_property_type if proj else "formula"
+    date_prop = date_property or (proj.date_property if proj else "Sort Date")
+    date_type = date_property_type or (proj.date_property_type if proj else "formula")
 
     filters: list[dict[str, Any]] = []
     if assignee:
@@ -657,6 +681,8 @@ def _build_ticket_queries(
     status: str | None = None,
     query: str | None = None,
     since: date | None = None,
+    date_property: str | None = None,
+    date_property_type: str | None = None,
 ) -> list[tuple[str, str, dict[str, Any]]]:
     """Build ticket queries across projects.
 
@@ -667,12 +693,30 @@ def _build_ticket_queries(
     """
     if project:
         proj = get_project_config(config, project)
-        body = _build_filter_body(config, assignee=assignee, status=status, query=query, since=since, proj=proj)
+        body = _build_filter_body(
+            config,
+            assignee=assignee,
+            status=status,
+            query=query,
+            since=since,
+            proj=proj,
+            date_property=date_property,
+            date_property_type=date_property_type,
+        )
         return [(project, proj.database_id, body)]
 
     result: list[tuple[str, str, dict[str, Any]]] = []
     for name, proj in config.projects.items():
-        body = _build_filter_body(config, assignee=assignee, status=status, query=query, since=since, proj=proj)
+        body = _build_filter_body(
+            config,
+            assignee=assignee,
+            status=status,
+            query=query,
+            since=since,
+            proj=proj,
+            date_property=date_property,
+            date_property_type=date_property_type,
+        )
         result.append((name, proj.database_id, body))
     return result
 
@@ -751,6 +795,7 @@ def _parse_since(value: str | None) -> date | None:
 
 
 SinceOption = Annotated[date | None, typer.Option(help="Filter by Sort Date >= YYYY-MM-DD", parser=_parse_since)]
+ReportSinceOption = Annotated[date | None, typer.Option(help="Filter by Due Date >= YYYY-MM-DD", parser=_parse_since)]
 
 
 @app.callback()
@@ -1063,12 +1108,19 @@ def epics(
 def report(
     period: Annotated[Period, typer.Option(help="Group by week or month")] = Period.WEEKLY,
     assignee: Annotated[str | None, typer.Option(help="Filter by assignee name")] = None,
-    since: SinceOption = None,
+    since: ReportSinceOption = None,
     project: Annotated[str | None, typer.Option(help="Project key")] = None,
 ) -> None:
-    """AH report grouped by week or month."""
+    """AH report grouped by week or month using Due Date."""
     config = get_config()
-    queries = _build_ticket_queries(config, project=project, assignee=assignee, since=since)
+    queries = _build_ticket_queries(
+        config,
+        project=project,
+        assignee=assignee,
+        since=since,
+        date_property=REPORT_DATE_PROPERTY,
+        date_property_type="date",
+    )
 
     results: list[dict[str, Any]] = []
     proj_names: list[str] = []
@@ -1084,7 +1136,7 @@ def report(
         t = Ticket.from_page(page)
         if t.ah is None or t.ah <= 0:
             continue
-        date_str = t.resolve_date()
+        date_str = t.resolve_report_date()
         if not date_str:
             continue
         try:

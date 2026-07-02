@@ -184,10 +184,10 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py report \
 **Options:**
 - `--period`: `weekly` (default) or `monthly`
 - `--assignee`: Filter by assignee name
-- `--since`: Filter by Sort Date >= YYYY-MM-DD
+- `--since`: Filter by Due Date >= YYYY-MM-DD
 - `--project`: Project key
 
-**Output:** Table showing ticket count, total AH, and average AH per period, sorted newest first, with a summary line.
+**Output:** Table showing ticket count, total AH, and average AH per Due Date period, sorted newest first, with a summary line.
 
 ### List epics
 
