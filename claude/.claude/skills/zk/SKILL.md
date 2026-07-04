@@ -1,8 +1,8 @@
 ---
 name: zk
 description: >
-  Manage Zettelkasten notes and todos via zk CLI and a todo helper script. Use this skill whenever
-  the user mentions notes, todos, journal entries, tags, backlinks, knowledge base, zettelkasten,
+  Manage Zettelkasten notes and todos via zk CLI and a note/todo helper script. Use this skill whenever
+  the user says /zk, mentions notes, todos, journal entries, tags, backlinks, knowledge base, zettelkasten,
   or wants to create/search/organize markdown notes. Even if the user doesn't mention "zk" by name —
   if they want to jot something down, check their open tasks, review what they worked on recently,
   add a todo, mark something done, or search their notes, use this skill.
@@ -125,8 +125,35 @@ genbook-api      3  - Review PR #331 — hoangi19
 Total: 23 open todos across 12 notes
 ```
 
+## Capture Notes (/zk)
+
+When the user triggers `/zk` or asks to record a note, update both today's journal and a related note.
+Use a short title plus full details.
+
+```bash
+uv run /home/cle/.claude/skills/zk/zk_cli.py capture \
+  --title "Fix backup warning" \
+  --related-note "home-server" \
+  --details "Investigate the failed snapshot and record the result."
+```
+
+Behavior:
+
+- Creates `journal/YYYY-MM-DD.md` if today's journal does not exist.
+- Creates the related note if it does not exist, slugging plain titles like `Home Assistant UI` to `home-assistant-ui.md`.
+- Appends under `## Notes` in both files.
+- Links journal entries to the related note and related-note entries back to the journal with `[[wiki-link]]` syntax.
+- Use `--date YYYY-MM-DD` only when the user explicitly refers to a different date.
+
+If the related note is unclear, search first:
+
+```bash
+zk list --match "query" --notebook-dir /srv/selfhost/zk
+```
+
 ## When to use which
 
 - **Creating/searching/browsing notes** — use `zk` CLI commands from the table above
 - **Anything involving todos** (list, add, mark done, summarize) — use `zk_cli.py`
+- **Capturing a note from `/zk`** — use `zk_cli.py capture`
 - **Reading or editing note content** — use Read/Edit tools directly on the markdown files in `/srv/selfhost/zk/`

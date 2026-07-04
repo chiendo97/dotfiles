@@ -1,9 +1,6 @@
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
-personality = "pragmatic"
 plan_mode_reasoning_effort = "xhigh"
-
-notify = ["/Users/chiendo97/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
 
 [projects."/Users/chiendo97/Source/demo/db-nbook.nvim"]
 trust_level = "trusted"
@@ -50,6 +47,15 @@ trust_level = "trusted"
 [projects."/home/cle"]
 trust_level = "trusted"
 
+[projects."/home/cle/Source"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/selfhost"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/selfhost/proxmox"]
+trust_level = "trusted"
+
 [projects."/home/cle/Source/terraform"]
 trust_level = "trusted"
 
@@ -90,9 +96,6 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/srv/selfhost/zk"]
-trust_level = "trusted"
-
-[projects."/home/cle/Source"]
 trust_level = "trusted"
 
 [projects."/home/cle/Source/office-dc"]
@@ -190,23 +193,25 @@ goals = true
 js_repl = false
 hooks = false
 
-[marketplaces.impeccable]
-last_updated = "2026-07-02T04:26:41Z"
-last_revision = "44c27a72af98394c32691ba79358811bff86bde6"
-source_type = "git"
-source = "https://github.com/pbakaus/impeccable.git"
-
 [marketplaces.karpathy-skills]
-last_updated = "2026-07-02T04:26:43Z"
-last_revision = "2c606141936f1eeef17fa3043a72095b4765b9c2"
-source_type = "git"
-source = "https://github.com/forrestchang/andrej-karpathy-skills.git"
+last_updated = "2026-04-29T09:30:21Z"
+source_type = "local"
+source = "/home/cle/Source/dotfiles/claude/.claude/plugins/marketplaces/karpathy-skills"
+
+[marketplaces.impeccable]
+last_updated = "2026-04-29T09:30:40Z"
+source_type = "local"
+source = "/home/cle/Source/dotfiles/claude/.claude/plugins/marketplaces/impeccable"
 
 [marketplaces.linus-torvalds-skills]
-last_updated = "2026-07-02T04:26:45Z"
-last_revision = "792d1625c776d4ebbd223fdb13e562973ab7d0bb"
-source_type = "git"
-source = "https://github.com/leopiney/linus-torvalds-skills.git"
+last_updated = "2026-04-29T09:30:40Z"
+source_type = "local"
+source = "/home/cle/Source/dotfiles/claude/.claude/plugins/marketplaces/linus-torvalds-skills"
+
+[marketplaces.claude-plugins-official]
+last_updated = "2026-04-29T09:30:40Z"
+source_type = "local"
+source = "/home/cle/Source/dotfiles/claude/.claude/plugins/marketplaces/claude-plugins-official"
 
 [shell_environment_policy]
 inherit = "core"

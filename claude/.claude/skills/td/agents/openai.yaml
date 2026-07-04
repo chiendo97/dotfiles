@@ -1,0 +1,4 @@
+interface:
+  display_name: "Todoist"
+  short_description: "Create Todoist tasks in the right project"
+  default_prompt: "Use $td to create a Todoist task with the right project, section, concise header, and full description."

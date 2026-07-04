@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 import sys
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -33,6 +33,9 @@ TODO_OPEN_RE = re.compile(r"^(\s*)-\s*\[ \]\s*(.*)")
 TODO_DONE_RE = re.compile(r"^(\s*)-\s*\[x\]\s*(.*)", re.IGNORECASE)
 ORG_CLOSED_RE = re.compile(r"\s+CLOSED:\s*\[[^\]]+\]\s*$")
 TASKS_HEADING_RE = re.compile(r"^##\s+Tasks\s*$")
+NOTES_HEADING_RE = re.compile(r"^##\s+Notes\s*$")
+ANY_HEADING_RE = re.compile(r"^#{1,6}\s+\S")
+SLUG_PART_RE = re.compile(r"[^a-z0-9]+")
 console = Console(highlight=False)
 error_console = Console(stderr=True, highlight=False)
 
@@ -46,6 +49,12 @@ class TodoItem(BaseModel):
     line: int
     text: str
     done: bool
+
+
+class CaptureResult:
+    def __init__(self, journal: Path, related: Path) -> None:
+        self.journal = journal
+        self.related = related
 
 
 # =============================================================================
@@ -207,6 +216,123 @@ def print_error(message: str) -> None:
     error_console.print(output)
 
 
+def slugify_note_name(name: str) -> str:
+    """Convert a note title into a stable markdown filename stem."""
+    slug = SLUG_PART_RE.sub("-", name.strip().casefold()).strip("-")
+    if not slug:
+        print_error("related note cannot be empty.")
+        raise typer.Exit(1)
+    return slug
+
+
+def note_title_from_stem(stem: str) -> str:
+    return " ".join(part for part in stem.replace("_", "-").split("-") if part).title()
+
+
+def resolve_capture_note_path(notebook_dir: Path, related_note: str) -> tuple[Path, str]:
+    """Resolve a related note argument, slugging plain titles when needed."""
+    raw = related_note.strip()
+    if not raw:
+        print_error("related note cannot be empty.")
+        raise typer.Exit(1)
+
+    if "/" in raw or raw.endswith(".md"):
+        path = notebook_dir / raw
+        if not path.suffix:
+            path = path.with_suffix(".md")
+        title = note_title_from_stem(path.stem)
+    else:
+        path = notebook_dir / f"{slugify_note_name(raw)}.md"
+        title = raw if " " in raw else note_title_from_stem(path.stem)
+
+    return path, title
+
+
+def wiki_link_for(notebook_dir: Path, path: Path) -> str:
+    return path.relative_to(notebook_dir).with_suffix("").as_posix()
+
+
+def ensure_journal_note(notebook_dir: Path, capture_date: str) -> Path:
+    journal = notebook_dir / "journal" / f"{capture_date}.md"
+    if not journal.exists():
+        journal.parent.mkdir(parents=True, exist_ok=True)
+        journal.write_text(f"# {capture_date}\n\n## Tasks\n\n## Notes\n")
+    return journal
+
+
+def ensure_related_note(path: Path, title: str) -> Path:
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"# {title}\n\n## Notes\n")
+    return path
+
+
+def find_notes_section_end(lines: list[str]) -> int | None:
+    notes_start: int | None = None
+    for i, line in enumerate(lines):
+        if NOTES_HEADING_RE.match(line):
+            notes_start = i
+            break
+
+    if notes_start is None:
+        return None
+
+    insert_at = notes_start + 1
+    for i in range(notes_start + 1, len(lines)):
+        stripped = lines[i].strip()
+        if ANY_HEADING_RE.match(stripped):
+            break
+        if stripped:
+            insert_at = i + 1
+
+    return insert_at
+
+
+def format_capture_entry(link: str, title: str, details: str) -> list[str]:
+    lines = [f"- [[{link}]] {title.strip()}"]
+    for detail_line in details.strip().splitlines():
+        if detail_line.strip():
+            lines.append(f"  {detail_line.strip()}")
+    return lines
+
+
+def append_to_notes_section(path: Path, entry_lines: list[str]) -> None:
+    lines = path.read_text().splitlines()
+    insert_at = find_notes_section_end(lines)
+    if insert_at is None:
+        if lines and lines[-1].strip():
+            lines.append("")
+        lines.append("## Notes")
+        insert_at = len(lines)
+
+    for offset, line in enumerate(entry_lines):
+        lines.insert(insert_at + offset, line)
+
+    path.write_text("\n".join(lines) + "\n")
+
+
+def capture_note(
+    *,
+    notebook_dir: Path,
+    title: str,
+    details: str,
+    related_note: str,
+    capture_date: str | None = None,
+) -> CaptureResult:
+    """Append a note capture to today's journal and a related note."""
+    actual_date = capture_date or date.today().isoformat()
+    journal = ensure_journal_note(notebook_dir, actual_date)
+    related, related_title = resolve_capture_note_path(notebook_dir, related_note)
+    ensure_related_note(related, related_title)
+
+    journal_link = wiki_link_for(notebook_dir, journal)
+    related_link = wiki_link_for(notebook_dir, related)
+    append_to_notes_section(journal, format_capture_entry(related_link, title, details))
+    append_to_notes_section(related, format_capture_entry(journal_link, title, details))
+
+    return CaptureResult(journal=journal, related=related)
+
+
 # =============================================================================
 # CLI
 # =============================================================================
@@ -328,6 +454,43 @@ def summary(
         groups.setdefault(todo.file, []).append(todo)
 
     render_summary_table(groups, notebook_dir)
+
+
+@app.command()
+def capture(
+    title: Annotated[str, typer.Option("--title", "-t", help="Short note header.")],
+    related_note: Annotated[
+        str,
+        typer.Option("--related-note", "-r", help="Related note title, slug, or path."),
+    ],
+    details: Annotated[
+        str,
+        typer.Option("--details", help="Full note details to append under the header."),
+    ] = "",
+    details_file: Annotated[
+        Path | None,
+        typer.Option("--details-file", help="Read full note details from a file."),
+    ] = None,
+    capture_date: Annotated[
+        str | None,
+        typer.Option("--date", help="Journal date in YYYY-MM-DD format. Defaults to today."),
+    ] = None,
+    notebook_dir: NotebookDirOpt = DEFAULT_NOTEBOOK_DIR,
+) -> None:
+    """Capture a note in today's journal and a related note."""
+    detail_parts = [details.strip()] if details.strip() else []
+    if details_file is not None:
+        detail_parts.append(details_file.read_text().strip())
+
+    result = capture_note(
+        notebook_dir=notebook_dir,
+        title=title,
+        details="\n\n".join(part for part in detail_parts if part),
+        related_note=related_note,
+        capture_date=capture_date,
+    )
+    typer.echo(f"Updated journal: {result.journal.relative_to(notebook_dir)}")
+    typer.echo(f"Updated related: {result.related.relative_to(notebook_dir)}")
 
 
 if __name__ == "__main__":
