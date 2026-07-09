@@ -155,6 +155,15 @@ trust_level = "trusted"
 [projects."/tmp"]
 trust_level = "trusted"
 
+[projects."/home/cle/Source/infra-reports"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/monitor"]
+trust_level = "trusted"
+
+[projects."/home/cle/Source/demo/tmux-buffer"]
+trust_level = "trusted"
+
 [notice]
 fast_default_opt_out = true
 
