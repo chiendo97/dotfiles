@@ -84,3 +84,9 @@
     path = ~/.gitconfig-urieljsc
 [url "git@git.urieljsc.com:"]
 	insteadOf = https://git.urieljsc.com/
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential
