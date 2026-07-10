@@ -204,8 +204,8 @@
           src = pkgs.fetchFromGitHub {
             owner = "chiendo97";
             repo = "tmux-buffer";
-            rev = "d5d82274203a8bc5b36b3065ae8d6db713a7b543";
-            sha256 = "sha256-fpocaxq32+Ls6qnny32kAZdRtWXb/tFx1pMMdnQF2Hk=";
+            rev = "da48632a66ae1200d16cd28a32ec8d6d294a0dbc";
+            sha256 = "sha256-uhbrm1D7+08a5k+XCFQX7NrqUeGpNxEcA98qbt2F5Zk=";
           };
         };
       }
