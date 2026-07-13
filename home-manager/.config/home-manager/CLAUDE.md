@@ -34,7 +34,7 @@ sudo nixos-rebuild switch --flake .#nixos-cle
 
 `flake.nix` defines a `mkHomeConfiguration` helper that builds Home Manager configs from three parameters: `system`, `username`, and optional `extraModules` for host-specific overrides. It also defines NixOS system configurations under `nixosConfigurations`.
 
-**Flake inputs:** nixpkgs (unstable), home-manager, neovim-nightly-overlay, claude-code-nix, agenix. All inputs follow nixpkgs to avoid duplicate evaluations.
+**Flake inputs:** nixpkgs (unstable), home-manager, neovim-nightly-overlay, agenix, nixos-generators. Inputs that consume nixpkgs follow the top-level nixpkgs input to avoid duplicate evaluations.
 
 ### Directory Layout
 

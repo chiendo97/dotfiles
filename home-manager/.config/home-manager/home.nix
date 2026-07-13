@@ -52,7 +52,6 @@
     (import ./packages/database.nix { inherit pkgs; }) ++
     (import ./packages/containers.nix { inherit pkgs; }) ++
     (import ./packages/cloud.nix { inherit pkgs; }) ++
-    (import ./packages/ai.nix { inherit pkgs; }) ++
     (import ./packages/security.nix { inherit pkgs; }) ++
     # Pin to 1.27.1 — 1.27.0 had a bug where user@host renders as black (#706)
     [ (pkgs.pure-prompt.overrideAttrs (old: rec {
@@ -396,9 +395,6 @@
       vendor = "go mod vendor";
       tidy = "go mod tidy";
 
-      # Claude
-      _claude = "claude --dangerously-skip-permissions";
-
       # History backup/restore
       history-backup = "age -r \"$(cat ~/.ssh/id_ed25519_agenix.pub)\" -o ~/.config/home-manager/secrets/zsh_history.age ~/.zsh_history && echo 'History backed up'";
       history-restore = "age -d -i ~/.ssh/id_ed25519_agenix ~/.config/home-manager/secrets/zsh_history.age > ~/.zsh_history && echo 'History restored'";
@@ -524,7 +520,6 @@
     EDITOR = "nvim";
     LC_CTYPE = "en_US.UTF-8";
     ZK_NOTEBOOK_DIR = "/srv/selfhost/zk";
-    CLAUDE_CODE_NO_FLICKER = "1";
   } // lib.optionalAttrs pkgs.stdenv.isLinux {
     SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
     DOCKER_HOST = "unix:///run/user/1000/podman/podman.sock";

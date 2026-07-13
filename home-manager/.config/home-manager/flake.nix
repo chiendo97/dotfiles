@@ -20,12 +20,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Claude Code CLI package (third-party flake)
-    claude-code = {
-      url = "github:sadjow/claude-code-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Age-encrypted secrets management for NixOS / Home Manager
     agenix = {
       url = "github:ryantm/agenix";
@@ -42,7 +36,7 @@
   # --- Flake Outputs ---
   # Destructure all inputs so they can be referenced below.
   outputs =
-    { nixpkgs, home-manager, neovim-nightly-overlay, claude-code, agenix, nixos-generators, ... }:
+    { nixpkgs, home-manager, neovim-nightly-overlay, agenix, nixos-generators, ... }:
     let
       # Helper function to build a Home Manager configuration.
       # Arguments:
@@ -52,12 +46,11 @@
       mkHomeConfiguration = { system, username, extraModules ? [] }:
         let
           # Instantiate nixpkgs for the target system with unfree packages
-          # and overlays for third-party packages (claude-code, neovim-nightly).
+          # and the Neovim nightly overlay.
           pkgs = import nixpkgs {
             inherit system;
             config.allowUnfree = true;
             overlays = [
-              claude-code.overlays.default
               neovim-nightly-overlay.overlays.default
             ];
           };
