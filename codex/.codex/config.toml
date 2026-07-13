@@ -1,5 +1,5 @@
-model = "gpt-5.5"
-model_reasoning_effort = "xhigh"
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "xhigh"
 
 [projects."/Users/chiendo97/Source/demo/db-nbook.nvim"]
@@ -171,17 +171,10 @@ fast_default_opt_out = true
 "gpt-5.1-codex-max" = "gpt-5.4"
 
 [tui]
-status_line = [
-    "current-dir",
-    "project-name",
-    "git-branch",
-    "run-state",
-    "context-used",
-    "thread-title",
-    "task-progress",
-]
+status_line = ["model-with-reasoning", "current-dir", "project-name", "git-branch", "run-state", "context-used", "task-progress"]
 theme = "gruvbox-dark"
 session_picker_view = "dense"
+status_line_use_colors = true
 
 [tui.keymap.editor]
 insert_newline = [
@@ -194,8 +187,10 @@ insert_newline = [
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
+"gpt-5.6-sol" = 4
 
 [features]
+apps = false
 terminal_resize_reflow = true
 memories = true
 goals = true
@@ -247,3 +242,6 @@ enabled = true
 [desktop]
 conversationDetailMode = "STEPS_COMMANDS"
 ambient-suggestions-enabled = true
+
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
