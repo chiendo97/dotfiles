@@ -101,6 +101,8 @@
   programs.zsh.initContent = ''
     # Uriel API Keys - managed by agenix
     source ~/.secrets/uriel-api-keys 2>/dev/null
+    export UV_INDEX_URIEL_USERNAME="${config.home.username}"
+    export UV_INDEX_URIEL_PASSWORD="$GITLAB_TOKEN"
     unset GITHUB_TOKEN
     unset ANTHROPIC_API_KEY
   '';
