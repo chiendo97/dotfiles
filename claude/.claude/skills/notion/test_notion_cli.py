@@ -39,6 +39,18 @@ class NotionCliCreateTests(unittest.TestCase):
 
         self.assertEqual(config.default_creator_alias, "owner")
 
+    def test_skill_config_routes_data_platform_to_live_sources(self) -> None:
+        skill_dir = Path(notion_cli.__file__).resolve().parent
+        config = notion_cli.load_config(str(skill_dir / "notion.yaml"))
+        proj = config.projects["data-platform"]
+
+        self.assertEqual(proj.database_id, "fee2cfcc-3b9d-4f93-aed4-f98348053a65")
+        self.assertEqual(proj.tickets_data_source_id, "b2c239bb-c390-4c01-8905-d9e5be564829")
+        self.assertEqual(proj.sprints_data_source_id, "fc6d86d6-1383-4673-a33d-ed2a46dc9abc")
+        self.assertEqual(proj.epics_database_id, "31fd67a3-7e1d-81c4-821f-e921aa006bf6")
+        self.assertEqual(proj.ticket_status_type, "select")
+        self.assertEqual(proj.status_name_overrides, {"In progress": "In Progress"})
+
     def test_default_config_paths_use_skill_local_config_not_claude_boy(self) -> None:
         skill_dir = Path(notion_cli.__file__).resolve().parent
 
@@ -189,6 +201,52 @@ class NotionCliCreateTests(unittest.TestCase):
         self.assertEqual(payload["properties"]["priority-prop"], {"select": {"name": "Medium"}})
         self.assertEqual(payload["properties"]["status-prop"], {"status": {"name": "Backlog"}})
 
+    def test_create_uses_project_status_type_and_name_override(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "data-platform",
+            "default_creator_alias": "owner",
+            "projects": {
+                "data-platform": {
+                    "database_id": "tickets-db",
+                    "tickets_data_source_id": "tickets-ds",
+                    "epics_database_id": "epics-db",
+                    "sprints_data_source_id": "sprints-ds",
+                    "prop_title_id": "title",
+                    "prop_assignee_id": "assignee-prop",
+                    "prop_sprint_id": "sprint-prop",
+                    "prop_epic_id": "epics-prop",
+                    "prop_priority_id": "priority-prop",
+                    "prop_status_id": "status-prop",
+                    "ticket_status_type": "select",
+                    "status_name_overrides": {"In progress": "In Progress"},
+                }
+            },
+            "users": {"owner": "creator-user-id"},
+        })
+
+        with (
+            patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_find_epic_id", return_value="epic-page"),
+            patch.object(notion_cli, "_find_current_sprint_id", return_value="sprint-page"),
+            patch.object(
+                notion_cli,
+                "_post",
+                return_value={"id": "ticket-page", "url": "https://notion.so/ticket-page", "properties": {}},
+            ) as post,
+            redirect_stdout(io.StringIO()),
+        ):
+            notion_cli.create(
+                title="Fix auth bug",
+                epic="Build Entity Registry",
+                status=notion_cli.Status.IN_PROGRESS,
+            )
+
+        _, payload, _notion_version = post.call_args.args
+        self.assertEqual(
+            payload["properties"]["status-prop"],
+            {"select": {"name": "In Progress"}},
+        )
+
     def test_create_requires_configured_property_ids_for_data_source_projects(self) -> None:
         config = notion_cli.Config.model_validate({
             "default_project": "genbooks",
@@ -321,6 +379,34 @@ class NotionCliCreateTests(unittest.TestCase):
 
 
 class NotionCliUpdateTests(unittest.TestCase):
+    def test_update_uses_project_status_type_and_name_override(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "genbook-global",
+            "projects": {
+                "data-platform": {
+                    "database_id": "tickets-db",
+                    "ticket_status_type": "select",
+                    "status_name_overrides": {"In progress": "In Progress"},
+                }
+            },
+        })
+
+        with (
+            patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_patch", return_value={"url": "https://notion.so/ticket"}) as patch_page,
+            redirect_stdout(io.StringIO()),
+        ):
+            notion_cli.update(
+                page_id="ticket-page",
+                status=notion_cli.Status.IN_PROGRESS,
+                project="data-platform",
+            )
+
+        patch_page.assert_called_once_with(
+            "/pages/ticket-page",
+            {"properties": {"Status": {"select": {"name": "In Progress"}}}},
+        )
+
     def test_update_epic_resolves_project_epic_and_patches_relation_property(self) -> None:
         config = notion_cli.Config.model_validate({
             "default_project": "genbook-global",
@@ -372,6 +458,21 @@ class NotionCliUpdateTests(unittest.TestCase):
 
 
 class NotionCliReportTests(unittest.TestCase):
+    def test_filter_uses_project_status_type_and_name_override(self) -> None:
+        config = notion_cli.Config.model_validate({})
+        proj = notion_cli.ProjectConfig.model_validate({
+            "database_id": "tickets-db",
+            "ticket_status_type": "select",
+            "status_name_overrides": {"In progress": "In Progress"},
+        })
+
+        body = notion_cli._build_filter_body(config, status="In progress", proj=proj)
+
+        self.assertEqual(
+            body["filter"],
+            {"property": "Status", "select": {"equals": "In Progress"}},
+        )
+
     def test_report_groups_and_filters_by_due_date(self) -> None:
         config = notion_cli.Config.model_validate({
             "default_project": "genbook-global",

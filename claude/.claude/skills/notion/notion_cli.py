@@ -96,6 +96,8 @@ class ProjectConfig(BaseModel):
     prop_assignee_id: str = ""
     prop_priority_id: str = ""
     prop_status_id: str = ""
+    ticket_status_type: Literal["select", "status"] = "status"
+    status_name_overrides: dict[str, str] = {}
     epic_status_type: Literal["select", "status"] = "select"
     date_property: str = "Sort Date"
     date_property_type: str = "formula"
@@ -253,6 +255,12 @@ def get_project_config(config: Config, project: str | None = None) -> ProjectCon
 def resolve_user_id(config: Config, name: str) -> str | None:
     """Look up user ID by name (case-insensitive)."""
     return config.users.get(name.lower())
+
+
+def _ticket_status_name(proj: ProjectConfig, status: Status | str) -> str:
+    """Resolve a CLI status to the selected project's Notion option name."""
+    name = status.value if isinstance(status, Status) else status
+    return proj.status_name_overrides.get(name, name)
 
 
 # =============================================================================
@@ -646,7 +654,9 @@ def _build_filter_body(
             sys.exit(1)
         filters.append({"property": "Assignee", "people": {"contains": user_id}})
     if status:
-        filters.append({"property": "Status", "status": {"equals": status}})
+        status_type = proj.ticket_status_type if proj else "status"
+        status_name = _ticket_status_name(proj, status) if proj else status
+        filters.append({"property": "Status", status_type: {"equals": status_name}})
     if query:
         filters.append({"property": "Name", "title": {"contains": query}})
     if since:
@@ -869,7 +879,9 @@ def create(
     properties[priority_key] = {"select": {"name": priority.value}}
 
     if status is not None:
-        properties[status_key] = {"status": {"name": status.value}}
+        properties[status_key] = {
+            proj.ticket_status_type: {"name": _ticket_status_name(proj, status)}
+        }
 
     children = _markdown_to_blocks(description) if description else []
 
@@ -940,7 +952,10 @@ def update(
     if title:
         properties["Name"] = {"title": [{"text": {"content": title}}]}
     if status is not None:
-        properties["Status"] = {"status": {"name": status.value}}
+        status_proj = get_project_config(config, project) if project or config.default_project in config.projects else None
+        status_type = status_proj.ticket_status_type if status_proj else "status"
+        status_name = _ticket_status_name(status_proj, status) if status_proj else status.value
+        properties["Status"] = {status_type: {"name": status_name}}
     if priority is not None:
         properties["Priority"] = {"select": {"name": priority.value}}
     if ah is not None:

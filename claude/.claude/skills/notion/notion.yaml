@@ -38,6 +38,26 @@ projects:
     prop_status_id: AUxd
     prop_project: ''
     epic_status_type: status
+  data-platform:
+    project_id: 1b88755e-3f30-4b76-a1cf-7eb3324732a2
+    database_id: fee2cfcc-3b9d-4f93-aed4-f98348053a65
+    tickets_data_source_id: b2c239bb-c390-4c01-8905-d9e5be564829
+    sprints_data_source_id: fc6d86d6-1383-4673-a33d-ed2a46dc9abc
+    epics_data_source_id: 31fd67a3-7e1d-81b0-a675-000b06bb2bc2
+    epics_database_id: 31fd67a3-7e1d-81c4-821f-e921aa006bf6
+    prop_epic: Epic
+    prop_epic_id: "o%3CsH"
+    prop_sprint: Sprint
+    prop_sprint_id: "%5EFhL"
+    prop_sprint_date: Start Date
+    prop_title_id: title
+    prop_assignee_id: rXXT
+    prop_priority_id: "27O%24"
+    prop_status_id: cV2h
+    ticket_status_type: select
+    status_name_overrides:
+      In progress: In Progress
+    epic_status_type: select
 users:
   nguyễn đức huy: 17e2e325-d86d-4578-ab3e-86a31726af15
   huy: 17e2e325-d86d-4578-ab3e-86a31726af15

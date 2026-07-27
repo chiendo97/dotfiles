@@ -41,6 +41,8 @@ projects:
     prop_assignee_id: "..."     # required for data-source-backed create payloads
     prop_priority_id: "..."     # required for data-source-backed create payloads
     prop_status_id: "..."       # required for data-source-backed create payloads
+    ticket_status_type: status  # or "select"
+    status_name_overrides: {}   # CLI status -> project-specific Notion option
     epic_status_type: "select"  # or "status"
 users:
   cle: "user-id-here"
@@ -48,6 +50,13 @@ users:
 ```
 
 ## Commands
+
+### Project routing
+
+- Use `--project data-platform` for Data Platform work, including every Entity Registry ticket.
+- Use an epic from `Data Platform | Epics` whose `Service` is `Entity Registry` for Entity Registry tickets.
+- Continue using `--project genbook-global` for Genbook Global tickets.
+- Always pass `--project` explicitly when creating a ticket so topic-based routing is unambiguous.
 
 ### Create a ticket
 
@@ -61,12 +70,12 @@ users:
 
 ```bash
 uv run /home/cle/.claude/skills/notion/notion_cli.py create \
-  --title "Fix auth bug" \
-  --description "Login fails on mobile devices" \
+  --title "Add Entity Registry health check" \
+  --description "Expose and verify the registry health endpoint" \
   --priority High \
   --assignee cle \
-  --epic "Sprint Planning v2" \
-  --project genbooks
+  --epic "Build Entity Registry" \
+  --project data-platform
 ```
 
 **Options:**
