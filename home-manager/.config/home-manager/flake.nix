@@ -82,6 +82,13 @@
       # --- Home Manager Configurations ---
       # Each key is a profile name used with: home-manager switch --flake .#<name>
       homeConfigurations = {
+        # Hermes Agent gateway host — no encrypted personal/work secrets.
+        "hermes" = mkHomeConfiguration {
+          system = "aarch64-linux";
+          username = "hermes";
+          extraModules = [ ./profiles/hermes-gateway.nix ];
+        };
+
         # Linux (x86_64) - username: cle
         "cle" = mkHomeConfiguration {
           system = "x86_64-linux";

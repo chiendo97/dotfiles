@@ -4,6 +4,7 @@ with pkgs; [
   curl
   fd
   ffmpeg
+  git
   hledger
   htop
   jq
