@@ -79,8 +79,20 @@
   };
 
   home.activation.glabConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    install -Dm600 /dev/null "${config.xdg.configHome}/glab-cli/config.yml"
-    cat > "${config.xdg.configHome}/glab-cli/config.yml" << 'GLABEOF'
+    glab_config="${config.xdg.configHome}/glab-cli/config.yml"
+    glab_token=""
+    if [ -f "$glab_config" ]; then
+      glab_token="$(${pkgs.gawk}/bin/awk '
+        /^[[:space:]]*token:[[:space:]]*/ {
+          sub(/^[[:space:]]*token:[[:space:]]*/, "")
+          print
+          exit
+        }
+      ' "$glab_config")"
+    fi
+
+    install -Dm600 /dev/null "$glab_config"
+    cat > "$glab_config" << 'GLABEOF'
     git_protocol: ssh
     glamour_style: dark
     check_update: false
@@ -94,7 +106,11 @@
         user: cle
         ssh_host: git.urieljsc.com
     GLABEOF
-    chmod 600 "${config.xdg.configHome}/glab-cli/config.yml"
+    if [ -n "$glab_token" ]; then
+      printf '    token: %s\n' "$glab_token" >> "$glab_config"
+    fi
+    chmod 600 "$glab_config"
+    unset glab_token
   '';
 
   # ============================================================================
