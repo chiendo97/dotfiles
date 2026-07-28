@@ -31,6 +31,7 @@ git remote show origin | grep 'HEAD branch'
 ```
 
 Extract:
+
 - **current_branch**: the branch you're on
 - **has_changes**: whether there are staged, unstaged, or untracked changes
 - **remote_url**: to derive the forge type and repo path (see Step 1b)
@@ -46,6 +47,7 @@ Parse the remote URL to determine GitHub vs GitLab:
 | Anything else (e.g. `git.urieljsc.com`, self-hosted GitLab) | GitLab | `glab` |
 
 Extract `owner` and `repo` from the URL:
+
 - SSH: `git@<host>:<owner>/<repo>.git` -> owner, repo
 - HTTPS: `https://<host>/<owner>/<repo>.git` -> owner, repo
 
@@ -85,6 +87,7 @@ The user is working directly on the default branch. Create a new branch in an is
 3. **Construct the branch name**: `$USER/<type>/<description>` (e.g. `cle/fix/sales-v2-filter-by`)
 
 4. **Create worktree with the changes**:
+
    ```bash
    git stash --include-untracked
    mkdir -p .worktrees
@@ -108,11 +111,10 @@ Skip if working tree is clean (no changes to commit).
    - Focus on the "why", not the "what"
    - Keep the first line under 72 characters
 4. Commit:
+
    ```bash
    git commit -m "$(cat <<'EOF'
    type: concise description of changes
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
    EOF
    )"
    ```
@@ -146,6 +148,7 @@ uv run ~/.claude/skills/notion/notion_cli.py search \
 ```
 
 Scan the results for a ticket whose title relates to the changes being committed. Consider:
+
 - Keywords from the branch name or commit message
 - The domain area being changed (e.g., "sales", "orders", "pipeline")
 
@@ -176,7 +179,8 @@ uv run ~/.claude/skills/notion/notion_cli.py create \
 ### Get the ticket ID
 
 The `create` command outputs:
-```
+
+```text
 Created: <title>
 Ticket: GGA-167
 ID: <uuid>
@@ -190,11 +194,13 @@ Extract the ticket ID (e.g. `GGA-167`) and the full Notion URL for Step 6.
 ### Check for existing PR/MR
 
 **GitHub:**
+
 ```bash
 gh pr list --head <branch-name> --json number,url --jq '.[0]'
 ```
 
 **GitLab:**
+
 ```bash
 glab mr list --source-branch <branch-name>
 ```
@@ -204,6 +210,7 @@ glab mr list --source-branch <branch-name>
 Push any new commits, then update the title and description to include the ticket:
 
 **GitLab:**
+
 ```bash
 git push
 glab mr update <mr-number> \
@@ -226,6 +233,7 @@ EOF
 ```
 
 **GitHub:**
+
 ```bash
 git push
 gh pr edit <pr-number> \
@@ -252,6 +260,7 @@ Return the PR/MR URL to the user. Done.
 ### If no PR/MR exists -- create one
 
 Push first:
+
 ```bash
 git push -u origin <branch-name>
 ```
@@ -259,6 +268,7 @@ git push -u origin <branch-name>
 Then create:
 
 **GitLab:**
+
 ```bash
 glab mr create --fill \
   --title "[<ticket-id>] type: short description" \
@@ -280,6 +290,7 @@ EOF
 ```
 
 **GitHub:**
+
 ```bash
 gh pr create --base <default_branch> \
   --title "[<ticket-id>] type: short description" \
