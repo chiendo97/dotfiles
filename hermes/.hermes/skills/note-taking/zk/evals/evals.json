@@ -1,0 +1,20 @@
+{
+  "skill_name": "zk",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "what are my open todos for genbook?",
+      "expected_output": "Grouped summary of open todos from genbook*.md files using zk_cli.py summary --filter genbook"
+    },
+    {
+      "id": 2,
+      "prompt": "add a todo to genbook-api to review the new auth middleware",
+      "expected_output": "Uses zk_cli.py add genbook-api 'Review the new auth middleware' and confirms the todo was added"
+    },
+    {
+      "id": 3,
+      "prompt": "show me notes I created this week",
+      "expected_output": "Uses zk list --sort created- --created-after 'last week' to show recent notes"
+    }
+  ]
+}

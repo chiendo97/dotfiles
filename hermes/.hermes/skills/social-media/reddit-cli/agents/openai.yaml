@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reddit CLI"
+  short_description: "Search and summarize Reddit with reddit-cli"
+  default_prompt: "Use $reddit-cli to fetch and summarize a Reddit post."

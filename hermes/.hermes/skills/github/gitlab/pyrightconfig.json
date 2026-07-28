@@ -1,0 +1,11 @@
+{
+  "include": ["gitlab_cli.py"],
+  "reportExplicitAny": false,
+  "reportAny": false,
+  "reportMissingImports": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUntypedBaseClass": false,
+  "reportUntypedFunctionDecorator": false,
+  "reportUnknownArgumentType": false
+}
