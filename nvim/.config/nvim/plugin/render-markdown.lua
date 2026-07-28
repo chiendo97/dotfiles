@@ -6,26 +6,27 @@ vim.api.nvim_create_autocmd("FileType", {
         require("render-markdown").setup({
             render_modes = { "n", "no", "c", "t", "i", "ic" },
             bullet = {
+                icons = { "•", "◦", "▪", "▫" },
                 ordered_icons = function(ctx)
                     return ("%d."):format(ctx.index)
                 end,
             },
             checkbox = {
-                enable = true,
-                position = "inline",
+                enabled = true,
             },
             code = {
                 sign = false,
                 border = "thin",
-                position = "right",
+                position = "left",
                 width = "block",
-                above = "▁",
-                below = "▔",
-                language_left = "█",
-                language_right = "█",
-                language_border = "▁",
-                left_pad = 0,
-                right_pad = 0,
+                above = "─",
+                below = "─",
+                language_left = "╭─ ",
+                language_right = " ─",
+                language_border = "─",
+                left_pad = 2,
+                right_pad = 2,
+                highlight_border = "RenderMarkdownCode",
             },
             heading = {
                 width = "block",
@@ -43,7 +44,19 @@ vim.api.nvim_create_autocmd("FileType", {
                 position = "right",
                 icons = { "", "", "", "", "", "" },
             },
-            pipe_table = { style = "normal" },
+            dash = {
+                icon = "─",
+                width = "full",
+            },
+            quote = {
+                icon = "┃",
+            },
+            pipe_table = {
+                preset = "round",
+                cell = "trimmed",
+                alignment_indicator = "─",
+                style = "full",
+            },
         })
     end,
 })
