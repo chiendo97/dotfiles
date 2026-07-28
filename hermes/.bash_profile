@@ -1,6 +1,6 @@
 # Bootstrap the Home Manager Zsh environment for interactive login shells.
 # Non-interactive SSH commands, SCP, and SFTP remain under the account shell.
-if [[ $- == *i* ]] && [[ -x "$HOME/.nix-profile/bin/zsh" ]] && [[ -z "${ZSH_VERSION:-}" ]]; then
+if [[ $- == *i* ]] && [[ -z "${BASH_EXECUTION_STRING:-}" ]] && [[ -x "$HOME/.nix-profile/bin/zsh" ]] && [[ -z "${ZSH_VERSION:-}" ]]; then
   export SHELL="$HOME/.nix-profile/bin/zsh"
   exec "$SHELL" -l
 fi
