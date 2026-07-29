@@ -1,0 +1,6 @@
+init: |
+  \pset pager off
+  \pset expanded auto
+  \set SYNTAX_HL true
+  \set SYNTAX_HL_FORMAT terminal256
+  \set SYNTAX_HL_STYLE hr_high_contrast

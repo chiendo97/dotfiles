@@ -1,4 +1,4 @@
-STOW_PACKAGES := alacritty claude git hermes home-manager nvim zellij
+STOW_PACKAGES := alacritty claude git hermes home-manager nvim usql zellij
 PACKAGES := $(STOW_PACKAGES) codex
 
 .PHONY: all stow unstow restow codex-clean pve-build pve-upload pve-image $(PACKAGES)
