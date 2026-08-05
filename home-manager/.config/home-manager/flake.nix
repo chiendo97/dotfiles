@@ -82,11 +82,14 @@
       # --- Home Manager Configurations ---
       # Each key is a profile name used with: home-manager switch --flake .#<name>
       homeConfigurations = {
-        # Hermes Agent gateway host — no encrypted personal/work secrets.
+        # Hermes Agent gateway host — Gemini secret only; no personal/work bundles.
         "hermes" = mkHomeConfiguration {
           system = "aarch64-linux";
           username = "hermes";
-          extraModules = [ ./profiles/hermes-gateway.nix ];
+          extraModules = [
+            ./modules/gemini-secret.nix
+            ./profiles/hermes-gateway.nix
+          ];
         };
 
         # Linux (x86_64) - username: cle
@@ -96,17 +99,7 @@
           extraModules = [
             ./modules/personal-secrets.nix
             ./modules/uriel-secrets.nix
-          ];
-        };
-
-        # Linux (x86_64) with extra genbook-specific modules
-        "genbook" = mkHomeConfiguration {
-          system = "x86_64-linux";
-          username = "cle";
-          extraModules = [
-            ./modules/personal-secrets.nix
-            ./modules/uriel-secrets.nix
-            ./profiles/genbook.nix
+            ./modules/gemini-secret.nix
           ];
         };
 
@@ -125,6 +118,7 @@
           extraModules = [
             ./modules/personal-secrets.nix
             ./profiles/selfhost-pve.nix
+            ./modules/gemini-secret.nix
           ];
         };
 
@@ -135,6 +129,7 @@
           extraModules = [
             ./modules/personal-secrets.nix
             ./modules/uriel-secrets.nix
+            ./modules/gemini-secret.nix
           ];
         };
       };
