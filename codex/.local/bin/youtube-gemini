@@ -1,0 +1,2 @@
+#!/bin/sh
+exec uv run "${CODEX_HOME:-$HOME/.codex}/skills/youtube-gemini/scripts/youtube_gemini.py" "$@"
