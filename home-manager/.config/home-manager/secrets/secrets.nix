@@ -17,6 +17,7 @@ in
 {
   # === Personal secrets (cle key only) ===
   "api-keys.age".publicKeys = [ cle ];
+  "gemini-api-key.age".publicKeys = [ cle ];
   "zsh_history.age".publicKeys = [ cle ];
 
   # === Personal SSH keys (cle key only) ===
@@ -38,9 +39,6 @@ in
 
   # === Uriel/work API keys (cle + uriel-dev keys) ===
   "uriel-api-keys.age".publicKeys = [ cle uriel-dev ];
-
-  # === Genbook profile-only API keys (cle key only; wired only by profiles/genbook.nix) ===
-  "genbook-minuet-env.age".publicKeys = [ cle ];
 
   # === Uriel/work secrets (cle + uriel-dev keys) ===
   "rclone.age".publicKeys = [ cle uriel-dev ];

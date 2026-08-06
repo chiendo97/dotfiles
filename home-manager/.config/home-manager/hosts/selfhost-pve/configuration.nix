@@ -104,7 +104,7 @@
   services.rpcbind.enable = true;
 
   systemd.tmpfiles.rules = [
-    "d /srv/selfhost 0755 root root -"
+    "d /srv/selfhost 0755 cle users -"
     "d /srv/selfhost/zk 0755 cle users -"
     "d /mnt/user 0755 root root -"
     "d /mnt/user/media 0755 root root -"
