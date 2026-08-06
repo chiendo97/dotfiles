@@ -6,7 +6,7 @@ Guidance for coding agents working in this Home Manager + NixOS flake configurat
 
 - Build the active Home Manager config: `home-manager build --flake .`
 - Apply the current host profile: `home-manager switch --flake .#cle`
-- Validate the selfhost profile derivation: `nix eval .#homeConfigurations.cle.activationPackage.drvPath`
+- Validate the selfhost profile derivation: `nix eval .#homeConfigurations.selfhost-pve.activationPackage.drvPath`
 - Validate formatting hazards before committing: `git diff --check`
 
 ## Editing Rules

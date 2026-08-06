@@ -2,20 +2,19 @@
 
 The `hermes/` GNU Stow package contains public, reproducible customizations for the `hermes` gateway account:
 
-- `.bash_profile`: enters Home Manager Zsh for interactive login shells while preserving non-interactive SSH/SCP/SFTP behavior.
-- `.config/systemd/user/hermes-gateway.service.d/path.conf`: puts Home Manager packages first in the gateway service `PATH`.
+- `.bash_profile`: enters Zsh from the user Nix profile when available while preserving non-interactive SSH/SCP/SFTP behavior.
+- `.config/systemd/user/hermes-gateway.service.d/path.conf`: puts user-profile packages first in the gateway service `PATH`.
 - `.hermes/skills/`: selected Claude/Codex skills adapted to Hermes paths and conventions.
 - `.hermes/config-templates/rocky-personality.yaml`: secret-free Rocky personality fragment for restoring `agent.personalities.rocky` and `agent.system_prompt`.
 
 The Rocky file is a template, not the live config. Merge its `agent` keys into `~/.hermes/config.yaml`, then restart the gateway and create a fresh session with `/new`. Keeping the live `config.yaml` outside Git prevents credentials and host-specific settings from leaking.
 
-The ARM64 Home Manager profile is `home-manager/.config/home-manager/profiles/hermes-gateway.nix` and is exposed as `homeConfigurations.hermes` in the flake. Git is supplied by Home Manager so settings such as `merge.conflictStyle=zdiff3` work during Neovim `vim.pack` checkouts.
+The Hermes account is not managed by this repository's Home Manager flake. Install and maintain its user-profile packages on the host; this repository only deploys the public Stow configuration described above.
 
 Deploy with:
 
 ```sh
 make hermes
-home-manager switch --flake ~/.config/home-manager#hermes
 systemctl --user daemon-reload
 systemctl --user restart hermes-gateway.service
 ```

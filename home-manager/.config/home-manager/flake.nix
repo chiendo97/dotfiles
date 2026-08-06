@@ -82,55 +82,35 @@
       # --- Home Manager Configurations ---
       # Each key is a profile name used with: home-manager switch --flake .#<name>
       homeConfigurations = {
-        # Hermes Agent gateway host — Gemini secret only; no personal/work bundles.
-        "hermes" = mkHomeConfiguration {
-          system = "aarch64-linux";
-          username = "hermes";
-          extraModules = [
-            ./modules/gemini-secret.nix
-            ./profiles/hermes-gateway.nix
-          ];
-        };
-
-        # Linux (x86_64) - username: cle
+        # Personal Linux workstation with rootless Podman.
         "cle" = mkHomeConfiguration {
           system = "x86_64-linux";
           username = "cle";
-          extraModules = [
-            ./modules/personal-secrets.nix
-            ./modules/uriel-secrets.nix
-            ./modules/gemini-secret.nix
-          ];
+          extraModules = [ ./modules/personal-secrets.nix ];
         };
 
-        # Linux (x86_64) - uriel dev machine (work secrets only, no personal secrets)
+        # Uriel development machine with work secrets and rootless Podman.
         "uriel-dev" = mkHomeConfiguration {
           system = "x86_64-linux";
           username = "cle";
           extraModules = [ ./modules/uriel-secrets.nix ];
         };
 
-        # Selfhost Proxmox VM — personal shell config, but use the system Docker
-        # daemon instead of the default rootless Podman socket.
+        # Selfhost Proxmox VM with personal secrets and the system Docker daemon.
         "selfhost-pve" = mkHomeConfiguration {
           system = "x86_64-linux";
           username = "cle";
           extraModules = [
             ./modules/personal-secrets.nix
             ./profiles/selfhost-pve.nix
-            ./modules/gemini-secret.nix
           ];
         };
 
-        # macOS (Apple Silicon) - username: chiendo97
+        # Personal macOS workstation with a Podman machine.
         "chiendo97" = mkHomeConfiguration {
           system = "aarch64-darwin";
           username = "chiendo97";
-          extraModules = [
-            ./modules/personal-secrets.nix
-            ./modules/uriel-secrets.nix
-            ./modules/gemini-secret.nix
-          ];
+          extraModules = [ ./modules/personal-secrets.nix ];
         };
       };
 

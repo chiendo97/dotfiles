@@ -1,6 +1,6 @@
 .PHONY: switch build dry-run check update nixos-cle homelab-pve selfhost-pve
 
-# Optional Home Manager profile, e.g. `make switch PROFILE=genbook`
+# Optional Home Manager profile, e.g. `make switch PROFILE=uriel-dev`
 PROFILE ?=
 FLAKE := .$(if $(PROFILE),#$(PROFILE),)
 
