@@ -1,3 +1,8 @@
+local openai_api_key = vim.env.OPENAI_API_KEY
+if not openai_api_key or openai_api_key == "" then
+    return
+end
+
 local minuet_filetypes = { "python", "lua", "rust", "go", "markdown" }
 
 vim.pack.add({ "https://github.com/milanglacier/minuet-ai.nvim" })
