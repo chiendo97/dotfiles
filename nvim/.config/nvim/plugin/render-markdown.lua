@@ -2,7 +2,10 @@ vim.api.nvim_create_autocmd("FileType", {
     pattern = { "markdown", "codecompanion", "AgenticChat" },
     once = true,
     callback = function()
-        vim.pack.add({ "https://github.com/MeanderingProgrammer/render-markdown.nvim" })
+        vim.pack.add({
+            "https://github.com/MeanderingProgrammer/render-markdown.nvim",
+            "https://github.com/ice345/markdown-table-wrap.nvim",
+        })
         require("render-markdown").setup({
             render_modes = { "n", "no", "c", "t", "i", "ic" },
             bullet = {
@@ -57,6 +60,25 @@ vim.api.nvim_create_autocmd("FileType", {
                 alignment_indicator = "─",
                 style = "full",
             },
+        })
+        require("markdown-table-wrap").setup({
+            auto_preview = false,
+            highlight_preset = "default",
+            inline_viewport_scrolling = false,
+            preview_mode = "inline",
+        })
+    end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "markdown",
+    callback = function(args)
+        if vim.b[args.buf].markdown_table_wrap_reader then
+            return
+        end
+        vim.keymap.set("n", "<localleader>tp", "<cmd>MarkdownTableFloatPreview<cr>", {
+            buffer = args.buf,
+            desc = "Preview Markdown table",
         })
     end,
 })

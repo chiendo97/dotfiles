@@ -70,6 +70,10 @@
       "rev": "a4352f08b4e849f54c6e94ad778f7bf2336f5af4",
       "src": "https://github.com/yousefhadder/markdown-plus.nvim"
     },
+    "markdown-table-wrap.nvim": {
+      "rev": "ae74fb9a74a52d62966611d2cfb3e25f17a583ee",
+      "src": "https://github.com/ice345/markdown-table-wrap.nvim"
+    },
     "mason.nvim": {
       "rev": "2a6940af80375532e5e9e7c1f2fc6319a1b7a69d",
       "src": "https://github.com/mason-org/mason.nvim"
