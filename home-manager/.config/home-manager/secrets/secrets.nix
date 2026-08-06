@@ -39,6 +39,7 @@ in
 
   # === Uriel/work API keys (cle + uriel-dev keys) ===
   "uriel-api-keys.age".publicKeys = [ cle uriel-dev ];
+  "genbook-minuet-env.age".publicKeys = [ cle uriel-dev ];
 
   # === Uriel/work secrets (cle + uriel-dev keys) ===
   "rclone.age".publicKeys = [ cle uriel-dev ];

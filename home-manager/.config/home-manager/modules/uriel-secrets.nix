@@ -1,9 +1,16 @@
 { config, lib, ... }:
 
 {
+  home.sessionVariables.OPENAI_BASE_URL = "http://100.64.0.98:8080/v1";
+
   age.identityPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519_uriel_dev" ];
 
   age.secrets = {
+    genbook-minuet-env = {
+      file = ../secrets/genbook-minuet-env.age;
+      path = "${config.home.homeDirectory}/.secrets/genbook-minuet-env";
+      mode = "600";
+    };
     uriel-api-keys = {
       file = ../secrets/uriel-api-keys.age;
       path = "${config.home.homeDirectory}/.secrets/uriel-api-keys";
@@ -101,6 +108,9 @@
   programs.zsh.initContent = ''
     # Uriel API Keys - managed by agenix
     source ~/.secrets/uriel-api-keys 2>/dev/null
+    # Minuet/vLLM endpoint - managed by agenix
+    source ~/.secrets/genbook-minuet-env 2>/dev/null
+    export OPENAI_BASE_URL="http://100.64.0.98:8080/v1"
     export UV_INDEX_URIEL_USERNAME="${config.home.username}"
     export UV_INDEX_URIEL_PASSWORD="$GITLAB_TOKEN"
     unset GITHUB_TOKEN
