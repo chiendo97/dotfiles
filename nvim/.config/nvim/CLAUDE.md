@@ -79,3 +79,12 @@ nvim --headless -c "checkhealth" -c "qa"
 - `<leader>e` is **search & replace** (global keymaps) but **rename symbol** (LSP buffer-local override) — the LSP keymap takes precedence when an LSP is attached
 - PackChanged hook in `lua/config/autocmds.lua` auto-runs `:TSUpdate!` when `tree-sitter-manager.nvim` is updated
 - `plugin/dev.lua` loads local development plugins from `~/Source/demo`
+
+## Live Preview Test
+
+```mermaid
+flowchart LR
+    A[Edit Markdown] --> B[Neovim]
+    B --> C[live-preview.nvim]
+    C --> D[Browser]
+```
