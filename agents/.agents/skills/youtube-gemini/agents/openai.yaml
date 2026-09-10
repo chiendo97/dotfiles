@@ -1,0 +1,4 @@
+interface:
+  display_name: "YouTube Gemini"
+  short_description: "Summarize YouTube videos with Gemini"
+  default_prompt: "Use $youtube-gemini to summarize this YouTube video with timestamps."

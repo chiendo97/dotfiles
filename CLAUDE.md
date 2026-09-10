@@ -23,6 +23,7 @@ alacritty/.config/alacritty/  →  ~/.config/alacritty
 | `home-manager/` | Nix flakes + Home Manager for declarative system config | Yes |
 | `alacritty/` | Terminal emulator (Gruvbox theme, Liga SFMono font) | No |
 | `zellij/` | Terminal multiplexer alternative (KDL config) | No |
+| `agents/` | Shared local skills for agent runtimes | No |
 
 ### Root Configuration Files (not managed by stow)
 
@@ -40,6 +41,7 @@ make stow      # Symlink all packages
 make unstow    # Remove all symlinks
 make restow    # Re-symlink all (after changes)
 make nvim      # Stow individual package
+make agents    # Stow shared agent skills
 ```
 
 ## Key Integration Points
