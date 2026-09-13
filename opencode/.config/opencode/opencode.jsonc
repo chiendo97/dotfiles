@@ -6,8 +6,7 @@
       "model": "zariel/vllm-model"
     },
     "plan": {
-      "model": "openai/gpt-5.6-sol",
-      "variant": "xhigh"
+      "model": "openai/gpt-6-astra"
     }
   },
   "permission": "allow",
