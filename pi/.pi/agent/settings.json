@@ -1,0 +1,25 @@
+{
+  "lastChangelogVersion": "0.85.1",
+  "defaultProvider": "zariel",
+  "defaultModel": "vllm/vllm-model",
+  "defaultThinkingLevel": "off",
+  "modelThinkingLevels": {
+    "zariel/vllm/vllm-model": "low"
+  },
+  "theme": "dark",
+  "tuiMode": "fullscreen",
+  "packages": [
+    "npm:@narumitw/pi-btw@0.58.1"
+  ],
+  "enabledModels": [
+    "openai-codex/gpt-5.6-sol",
+    "openai-codex/gpt-6-astra",
+    "openai-codex/gpt-5.6-luna",
+    "openai-codex/gpt-5.6-terra",
+    "zariel/vllm/vllm-model"
+  ],
+  "hideThinkingBlock": true,
+  "commandPalette": {
+    "shortcut": "ctrl+o"
+  }
+}

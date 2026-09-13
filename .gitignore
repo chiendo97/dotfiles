@@ -38,5 +38,12 @@ codex/.codex/*
 !codex/.codex/skills/excalidraw-skill/
 !codex/.codex/skills/excalidraw-skill/**
 
+# Local Pi runtime state
+pi/.pi/agent/auth.json
+pi/.pi/agent/models-store.json
+pi/.pi/agent/npm/
+pi/.pi/agent/sessions/
+pi/.pi/agent/tmp/
+
 # Nix build outputs
 result-pve

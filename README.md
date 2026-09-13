@@ -12,6 +12,7 @@ dotfiles/
 ├── zellij/          # Terminal multiplexer alternative
 ├── claude/          # Claude Code settings, hooks, rules, and skills
 ├── codex/           # Codex local skills bridge
+├── pi/              # Pi config (models, settings, keybindings, AGENTS.md)
 ├── agents/          # Shared agent skills for runtimes using ~/.agents/skills
 └── Makefile         # Stow commands
 ```
@@ -102,7 +103,16 @@ make restow    # Re-symlink all (after changes)
 make nvim      # Stow individual package
 make codex     # Stow tracked Codex config and local skills
 make agents    # Stow shared agent skills
+make pi        # Stow Pi config
 ```
+
+### Pi
+
+`make pi` stows the Pi agent config: `pi/.pi/agent/` -> `~/.pi/agent/`.
+
+Tracked files: `AGENTS.md`, `settings.json`, `keybindings.json`, `models.json`.
+Runtime state (`auth.json`, `models-store.json`, `sessions/`, `tmp/`, `npm/`)
+is gitignored and kept local.
 
 ### Codex
 

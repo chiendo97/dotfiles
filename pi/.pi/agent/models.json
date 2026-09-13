@@ -1,0 +1,30 @@
+{
+  "providers": {
+    "zariel": {
+      "name": "Zariel Bifrost",
+      "baseUrl": "http://100.64.0.98:8080/v1",
+      "api": "openai-completions",
+      "apiKey": "$OPENAI_API_KEY",
+      "models": [
+        {
+          "id": "vllm/vllm-model",
+          "name": "vLLM Model",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": null,
+            "max": null
+          },
+          "compat": {
+            "supportsReasoningEffort": true
+          },
+          "input": ["text"],
+          "contextWindow": 128000,
+          "maxTokens": 16384
+        }
+      ]
+    }
+  }
+}

@@ -24,6 +24,7 @@ alacritty/.config/alacritty/  →  ~/.config/alacritty
 | `alacritty/` | Terminal emulator (Gruvbox theme, Liga SFMono font) | No |
 | `zellij/` | Terminal multiplexer alternative (KDL config) | No |
 | `agents/` | Shared local skills for agent runtimes | No |
+| `pi/` | Pi agent config (settings, models, keybindings, AGENTS.md) | No |
 
 ### Root Configuration Files (not managed by stow)
 

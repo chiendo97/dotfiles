@@ -1,0 +1,17 @@
+{
+  "tui.editor.historyPrevious": "ctrl+p",
+  "tui.editor.historyNext": "ctrl+n",
+  "tui.select.up": ["up", "ctrl+p"],
+  "tui.select.down": ["down", "ctrl+n"],
+  "tui.input.newLine": ["shift+enter", "ctrl+j", "alt+enter"],
+  "app.message.followUp": ["ctrl+enter"],
+  "tui.altScreen.pageUp": ["pageUp", "ctrl+u"],
+  "tui.altScreen.pageDown": ["pageDown", "ctrl+d"],
+  "tui.editor.deleteToLineStart": [],
+  "tui.editor.deleteCharForward": "delete",
+  "app.exit": "ctrl+c",
+  "app.models.save": "f10",
+  "app.thinking.save": "f10",
+  "app.models.toggleProvider": "f9",
+  "app.tools.expand": "ctrl+o"
+}
