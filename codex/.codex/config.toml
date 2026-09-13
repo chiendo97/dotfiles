@@ -1,5 +1,5 @@
-model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
+model = "gpt-6-astra"
+model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "xhigh"
 
 [projects."/Users/chiendo97/Source/demo/db-nbook.nvim"]
@@ -167,8 +167,12 @@ trust_level = "trusted"
 [projects."/private/tmp"]
 trust_level = "trusted"
 
+[projects."/home/cle/Source/demo/nvim_native"]
+trust_level = "trusted"
+
 [notice]
 fast_default_opt_out = true
+hide_rate_limit_model_nudge = true
 
 [notice.model_migrations]
 "gpt-5.1-codex-max" = "gpt-5.4"
@@ -191,6 +195,7 @@ insert_newline = [
 [tui.model_availability_nux]
 "gpt-5.5" = 4
 "gpt-5.6-sol" = 4
+gpt-6-astra = 4
 
 [features]
 apps = false
@@ -200,35 +205,12 @@ goals = true
 js_repl = false
 hooks = false
 
-[marketplaces.karpathy-skills]
-last_updated = "2026-04-29T09:30:21Z"
-source_type = "local"
-source = "/home/cle/Source/dotfiles/claude/.claude/plugins/marketplaces/karpathy-skills"
-
-[marketplaces.impeccable]
-last_updated = "2026-04-29T09:30:40Z"
-source_type = "local"
-source = "/home/cle/Source/dotfiles/claude/.claude/plugins/marketplaces/impeccable"
-
-[marketplaces.linus-torvalds-skills]
-last_updated = "2026-04-29T09:30:40Z"
-source_type = "local"
-source = "/home/cle/Source/dotfiles/claude/.claude/plugins/marketplaces/linus-torvalds-skills"
-
-[marketplaces.claude-plugins-official]
-last_updated = "2026-04-29T09:30:40Z"
-source_type = "local"
-source = "/home/cle/Source/dotfiles/claude/.claude/plugins/marketplaces/claude-plugins-official"
-
 [shell_environment_policy]
 inherit = "core"
 
 [shell_environment_policy.set]
 DISCORD_GUILD_ID = "1181560951141584926"
 ENABLE_CLAUDEAI_MCP_SERVERS = "false"
-
-[plugins."impeccable@impeccable"]
-enabled = true
 
 [plugins."browser@openai-bundled"]
 enabled = true
