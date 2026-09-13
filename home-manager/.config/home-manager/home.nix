@@ -198,6 +198,8 @@
       # baseIndex only sets base-index, not pane-base-index
       set -g pane-base-index 1
       set -as terminal-features ',tmux-256color:RGB:clipboard'
+      set -g extended-keys on
+      set -g extended-keys-format csi-u
       set -g renumber-windows on
       set -g set-titles on
       set -g set-titles-string "#{session_name}"
