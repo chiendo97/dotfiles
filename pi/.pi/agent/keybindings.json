@@ -7,6 +7,8 @@
   "app.message.followUp": ["ctrl+enter"],
   "tui.altScreen.halfPageUp": "ctrl+u",
   "tui.altScreen.halfPageDown": "ctrl+d",
+  "tui.altScreen.lineUp": ["shift+up", "ctrl+shift+k"],
+  "tui.altScreen.lineDown": ["shift+down", "ctrl+shift+j"],
   "tui.editor.deleteToLineStart": [],
   "tui.editor.deleteCharForward": "delete",
   "app.exit": "ctrl+c",
