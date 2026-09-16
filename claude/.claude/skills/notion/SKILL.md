@@ -82,7 +82,7 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py create \
 - `--title` (required): Ticket title
 - `--description`: Ticket description (added as page content)
 - `--priority`: Low | Medium | High | Critical (default: Medium)
-- `--status`: Not started | In progress | Done | Backlog
+- `--status`: Not started | In progress | Done | Backlog | Closed
 - `--assignee`: User name from config. Optional only when `default_creator_alias` is configured; use the creator alias.
 - `--epic` (required): Existing epic name for the selected project. The CLI fails before ticket creation if it is omitted, the project has no epic database, or the name cannot be found.
 - `--project`: Project key from config
@@ -106,7 +106,7 @@ Omit sections that don't apply (e.g., a simple bug fix might skip Acceptance Cri
 
 ```bash
 uv run /home/cle/.claude/skills/notion/notion_cli.py update \
-  --page-id "abc123-def456" \
+  --page-id "GB-319" \
   --status "In progress" \
   --priority High \
   --assignee huy \
@@ -115,15 +115,31 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py update \
 ```
 
 **Options:**
-- `--page-id` (required): Notion page ID to update
+- `--page-id` (required): Ticket ID (e.g. `GB-319`) or Notion page UUID to update
 - `--title`: New title
-- `--status`: Not started | In progress | Done | Backlog
+- `--status`: Not started | In progress | Done | Backlog | Closed
 - `--priority`: Low | Medium | High | Critical
 - `--ah`: Actual working hours (number)
 - `--assignee`: New assignee name
 - `--epic`: Existing epic name to link. Uses the selected project's configured epic database and relation property.
 - `--description`: New description (replaces existing page content)
 - `--project`: Project key from config
+
+### Bulk update many tickets
+
+```bash
+uv run /home/cle/.claude/skills/notion/notion_cli.py bulk SN-199 SN-200 SN-201 \
+  --priority High \
+  --status "In progress" \
+  --project data-platform
+```
+
+**Arguments:**
+- `tickets` (required, one or more): Ticket IDs or page UUIDs
+
+**Options:** same fields as `update` (`--title`, `--status`, `--priority`, `--assignee`, `--epic`, `--ah`, `--project`). At least one field is required. `--description` is not supported in bulk.
+
+**Output:** One `OK`/`FAIL` line per ticket, then a summary. Exits non-zero if any ticket failed. Unresolvable tickets are reported as `FAIL …: not found` and skipped.
 
 ### Search tickets
 
@@ -144,10 +160,11 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py search \
 - `--since`: Filter by Sort Date >= YYYY-MM-DD
 - `--limit`: Max results to display (default: 50, 0 for all)
 - `--project`: Project key
+- `--json`: Print a machine-readable JSON array instead of the human table
 
 All filters combine with AND logic.
 
-**Output:** Lists tickets sorted by Sort Date (newest first) with ID, name, status, priority, assignee, AH, MR (if present), dates (Sort/Created/Updated with relative times), and URL.
+**Output:** Lists tickets sorted by Sort Date (newest first) with ID, name, status, priority, assignee, AH, MR (if present), dates (Sort/Created/Updated with relative times), and URL. With `--json`, prints a JSON array of flat objects (`id`, `name`, `status`, `priority`, `assignee`, `ah`, `due_date`, `sort_date`, `created`, `edited`, `gitlab_mr`, `url`, `page_id`, `type`).
 
 ### Get ticket details
 
@@ -156,10 +173,10 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py get-ticket GB-319
 uv run /home/cle/.claude/skills/notion/notion_cli.py get-ticket 3db52639-55bd-4228-90f7-298586ddaa98
 ```
 
-Accepts either a human-readable ticket ID (e.g. `GB-319`) or a Notion page ID. Shows full ticket detail including the complete description.
+Accepts either a human-readable ticket ID (e.g. `GB-319`) or a Notion page UUID. Shows full ticket detail, the page UUID on an `ID:` line, and the complete description.
 
 **Options:**
-- `ticket` (required, positional): Ticket ID or page ID
+- `ticket` (required, positional): Ticket ID or page UUID
 - `--project`: Project key
 
 ### List stale tickets
@@ -231,6 +248,7 @@ URL: https://www.notion.so/...
 
 ## Error Handling
 
+- The integration cannot delete or archive pages (`delete_content` / `archive_content` not granted) — close tickets by setting Status to `Closed` instead; hard deletion must be done in the Notion UI
 - Missing `NOTION_TOKEN`: exits with error message
 - Unknown assignee: shows available user names from config
 - Missing or unknown epic on create: exits before creating a ticket

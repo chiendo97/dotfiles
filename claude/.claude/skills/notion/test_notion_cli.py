@@ -393,6 +393,7 @@ class NotionCliUpdateTests(unittest.TestCase):
 
         with (
             patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_resolve_page", return_value={"id": "ticket-page"}),
             patch.object(notion_cli, "_patch", return_value={"url": "https://notion.so/ticket"}) as patch_page,
             redirect_stdout(io.StringIO()),
         ):
@@ -421,6 +422,7 @@ class NotionCliUpdateTests(unittest.TestCase):
 
         with (
             patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_resolve_page", return_value={"id": "ticket-page"}),
             patch.object(notion_cli, "_find_epic_id", return_value="epic-page") as find_epic,
             patch.object(notion_cli, "_patch", return_value={"url": "https://notion.so/ticket"}) as patch_page,
             redirect_stdout(io.StringIO()),
@@ -447,6 +449,7 @@ class NotionCliUpdateTests(unittest.TestCase):
 
         with (
             patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_resolve_page", return_value={"id": "ticket-page"}),
             patch.object(notion_cli, "_find_epic_id", return_value=None),
             patch.object(notion_cli, "_patch") as patch_page,
             redirect_stderr(io.StringIO()),
@@ -455,6 +458,85 @@ class NotionCliUpdateTests(unittest.TestCase):
             notion_cli.update(page_id="ticket-page", epic="Missing Epic", project="genbook-global")
 
         patch_page.assert_not_called()
+
+    def test_update_accepts_ticket_id_and_resolves_page(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "genbook-global",
+            "projects": {"genbook-global": {"database_id": "tickets-db"}},
+        })
+        with (
+            patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(
+                notion_cli,
+                "_resolve_page",
+                return_value={"id": "real-uuid", "url": "https://notion.so/x"},
+            ) as resolve_page,
+            patch.object(notion_cli, "_patch", return_value={"id": "real-uuid", "url": "https://notion.so/x"}) as patch_page,
+            redirect_stdout(io.StringIO()),
+        ):
+            notion_cli.update(page_id="GB-319", title="New title", project="genbook-global")
+
+        resolve_page.assert_called_once_with("GB-319", config, "genbook-global")
+        patch_page.assert_called_once_with(
+            "/pages/real-uuid",
+            {"properties": {"Name": {"title": [{"text": {"content": "New title"}}]}}},
+        )
+
+    def test_resolve_page_fetched_directly_for_uuid(self) -> None:
+        config = notion_cli.Config.model_validate({})
+        page = {"id": "real-uuid"}
+        with (
+            patch.object(notion_cli, "_get", return_value=page) as get_page,
+        ):
+            result = notion_cli._resolve_page("real-uuid", config)
+
+        get_page.assert_called_once_with("/pages/real-uuid")
+        self.assertEqual(result, page)
+
+    def test_resolve_page_errors_when_ticket_id_not_found(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "genbook-global",
+            "projects": {"genbook-global": {"database_id": "tickets-db"}},
+        })
+        with patch.object(notion_cli, "_query_database", return_value=[]):
+            result = notion_cli._resolve_page("GB-999", config, "genbook-global")
+
+        self.assertIsNone(result)
+
+    def test_bulk_updates_each_resolved_ticket(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "genbook-global",
+            "projects": {"genbook-global": {"database_id": "tickets-db"}},
+        })
+        pages = {"GB-1": {"id": "uuid-1"}, "GB-2": {"id": "uuid-2"}}
+
+        def fake_resolve(ticket, cfg, project=None):
+            return pages.get(ticket)
+
+        with (
+            patch.object(notion_cli, "get_config", return_value=config),
+            patch.object(notion_cli, "_resolve_page", side_effect=fake_resolve) as resolve_page,
+            patch.object(notion_cli, "_patch", return_value={}) as patch_page,
+            redirect_stdout(io.StringIO()),
+        ):
+            with self.assertRaises(typer.Exit):
+                notion_cli.bulk(["GB-1", "GB-9"], priority=notion_cli.Priority.HIGH, project="genbook-global")
+
+        resolve_page.assert_any_call("GB-1", config, "genbook-global")
+        self.assertEqual(patch_page.call_count, 1)
+        patch_page.assert_called_once_with(
+            "/pages/uuid-1",
+            {"properties": {"Priority": {"select": {"name": "High"}}}},
+        )
+
+    def test_bulk_requires_at_least_one_field(self) -> None:
+        config = notion_cli.Config.model_validate({})
+        with (
+            patch.object(notion_cli, "get_config", return_value=config),
+            redirect_stderr(io.StringIO()),
+            self.assertRaises(typer.Exit),
+        ):
+            notion_cli.bulk(["GB-1"])
 
 
 class NotionCliReportTests(unittest.TestCase):

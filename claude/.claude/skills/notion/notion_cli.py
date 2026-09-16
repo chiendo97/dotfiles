@@ -68,6 +68,7 @@ class Status(str, Enum):
     IN_PROGRESS = "In progress"
     DONE = "Done"
     BACKLOG = "Backlog"
+    CLOSED = "Closed"
 
 
 class Period(str, Enum):
@@ -152,6 +153,25 @@ class Ticket(BaseModel):
             page_id=page.get("id", ""),
             type_=_read_select(props, "Type"),
         )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Flat dict for machine-readable output."""
+        return {
+            "id": self.ticket_id,
+            "name": self.name,
+            "status": self.status,
+            "priority": self.priority,
+            "assignee": self.assignee,
+            "ah": self.ah,
+            "due_date": self.due_date or None,
+            "sort_date": self.sort_date or None,
+            "created": self.created or None,
+            "edited": self.edited or None,
+            "gitlab_mr": self.gitlab_mr or None,
+            "url": self.url,
+            "page_id": self.page_id,
+            "type": self.type_ or None,
+        }
 
     def display(self, indent: str = "  ", reason: str = "", show_type: bool = False) -> str:
         """Formatted terminal output."""
@@ -908,6 +928,37 @@ def create(
     print(f"URL: {url}")
 
 
+def _resolve_page(ticket: str, config: Config, project: str | None = None) -> dict[str, Any] | None:
+    """Resolve a ticket ID (e.g. 'SN-319') or a page UUID to a page dict.
+
+    Ticket IDs are looked up via the unique_id property across the selected
+    project (or all projects when --project is omitted). A UUID is fetched
+    directly. Returns None when a ticket ID matches nothing; callers decide
+    how to report the miss.
+    """
+    match = re.match(r"^([A-Za-z]+)-(\d+)$", ticket)
+    if not match:
+        return _get(f"/pages/{ticket}")
+
+    number = int(match.group(2))
+    body: dict[str, Any] = {
+        "filter": {"property": "ID", "unique_id": {"equals": number}},
+    }
+    if project:
+        search_projects = [get_project_config(config, project)]
+    else:
+        search_projects = list(config.projects.values())
+
+    for proj in search_projects:
+        results = _query_database(proj.database_id, body)
+        if results:
+            found = Ticket.from_page(results[0])
+            if found.ticket_id and found.ticket_id.upper() == ticket.upper():
+                return results[0]
+
+    return None
+
+
 def _find_epic_id(epics_db: str, epic_name: str) -> str | None:
     """Search epics database for an epic by name using a title filter."""
     schema_props = _get_database_properties(epics_db)
@@ -935,7 +986,7 @@ def _find_epic_id(epics_db: str, epic_name: str) -> str | None:
 
 @app.command()
 def update(
-    page_id: Annotated[str, typer.Option(help="Notion page ID")],
+    page_id: Annotated[str, typer.Option(help="Ticket ID (e.g. GB-319) or Notion page UUID")],
     title: Annotated[str | None, typer.Option(help="New title")] = None,
     status: Annotated[Status | None, typer.Option(help="New status")] = None,
     priority: Annotated[Priority | None, typer.Option(help="New priority")] = None,
@@ -947,8 +998,46 @@ def update(
 ) -> None:
     """Update a ticket."""
     config = get_config()
-    properties: dict[str, Any] = {}
+    resolved = _resolve_page(page_id, config, project)
+    if resolved is None:
+        print(f"No ticket found matching '{page_id}'.", file=sys.stderr)
+        raise typer.Exit(1)
+    page_id = resolved["id"]
+    properties = _build_update_properties(config, project, title, status, priority, assignee, epic, ah)
 
+    if not properties and not description:
+        print("Error: nothing to update. Provide at least one field.", file=sys.stderr)
+        raise typer.Exit(1)
+
+    if properties:
+        page = _patch(f"/pages/{page_id}", {"properties": properties})
+    else:
+        page = _get(f"/pages/{page_id}")
+
+    if description:
+        _replace_page_blocks(page_id, _markdown_to_blocks(description))
+
+    props = page.get("properties", {})
+    ticket_id = _read_unique_id(props)
+    title = _read_title(props)
+    url = page.get("url", "")
+    print(f"Updated: {ticket_id or title}")
+    print(f"ID: {page.get('id', '')}")
+    print(f"URL: {url}")
+
+
+def _build_update_properties(
+    config: Config,
+    project: str | None,
+    title: str | None,
+    status: Status | None,
+    priority: Priority | None,
+    assignee: str | None,
+    epic: str | None,
+    ah: float | None,
+) -> dict[str, Any]:
+    """Build a Notion properties payload from bulk/update field options."""
+    properties: dict[str, Any] = {}
     if title:
         properties["Name"] = {"title": [{"text": {"content": title}}]}
     if status is not None:
@@ -978,22 +1067,42 @@ def update(
             print(f"Error: epic '{epic}' not found; run the epics command and pass an existing epic", file=sys.stderr)
             raise typer.Exit(1)
         properties[proj.prop_epic] = {"relation": [{"id": epic_id}]}
+    return properties
 
-    if not properties and not description:
-        print("Error: nothing to update. Provide at least one field.", file=sys.stderr)
+
+@app.command()
+def bulk(
+    tickets: Annotated[list[str], typer.Argument(help="Ticket IDs (e.g. SN-199 SN-200) or page UUIDs")],
+    title: Annotated[str | None, typer.Option(help="New title (applied to every ticket)")] = None,
+    status: Annotated[Status | None, typer.Option(help="New status")] = None,
+    priority: Annotated[Priority | None, typer.Option(help="New priority")] = None,
+    assignee: Annotated[str | None, typer.Option(help="New assignee name")] = None,
+    epic: Annotated[str | None, typer.Option(help="Epic name to link")] = None,
+    ah: Annotated[float | None, typer.Option(help="Actual working hours")] = None,
+    project: Annotated[str | None, typer.Option(help="Project key")] = None,
+) -> None:
+    """Apply the same update to many tickets at once."""
+    config = get_config()
+    properties = _build_update_properties(config, project, title, status, priority, assignee, epic, ah)
+    if not properties:
+        print("Error: nothing to set. Provide at least one field.", file=sys.stderr)
         raise typer.Exit(1)
 
-    if properties:
-        page = _patch(f"/pages/{page_id}", {"properties": properties})
-    else:
-        page = _get(f"/pages/{page_id}")
+    failed = 0
+    for ticket in tickets:
+        resolved = _resolve_page(ticket, config, project)
+        if resolved is None:
+            print(f"FAIL {ticket}: not found")
+            failed += 1
+            continue
+        _patch(f"/pages/{resolved['id']}", {"properties": properties})
+        tid = _read_unique_id(resolved.get("properties", {}))
+        print(f"OK   {tid or ticket}")
 
-    if description:
-        _replace_page_blocks(page_id, _markdown_to_blocks(description))
-
-    url = page.get("url", "")
-    print(f"Updated: {page_id}")
-    print(f"URL: {url}")
+    total = len(tickets)
+    print(f"\nUpdated {total - failed} of {total} ticket(s).")
+    if failed:
+        raise typer.Exit(1)
 
 
 @app.command()
@@ -1004,6 +1113,7 @@ def search(
     since: SinceOption = None,
     limit: Annotated[int, typer.Option(help="Max results to display (0 for all)")] = 50,
     project: Annotated[str | None, typer.Option(help="Project key")] = None,
+    json_out: Annotated[bool, typer.Option("--json", help="Print machine-readable JSON array")] = False,
 ) -> None:
     """Search tickets."""
     config = get_config()
@@ -1014,11 +1124,16 @@ def search(
         for page in _query_database(database_id, body):
             tickets.append(Ticket.from_page(page))
 
+    tickets.sort(key=lambda t: t.resolve_date(), reverse=True)
+
+    if json_out:
+        display_tickets = tickets if limit == 0 else tickets[:limit]
+        print(json.dumps([t.to_dict() for t in display_tickets], indent=2, ensure_ascii=False))
+        return
+
     if not tickets:
         print("No tickets found.")
         return
-
-    tickets.sort(key=lambda t: t.resolve_date(), reverse=True)
 
     total = len(tickets)
     display_tickets = tickets if limit == 0 else tickets[:limit]
@@ -1197,43 +1312,14 @@ def get_ticket(
 ) -> None:
     """Get full detail for a single ticket by ID or page-id."""
     config = get_config()
-
-    match = re.match(r"^([A-Za-z]+)-(\d+)$", ticket)
-
-    if match:
-        # Human-readable ticket ID like GB-319
-        number = int(match.group(2))
-        body: dict[str, Any] = {
-            "filter": {
-                "property": "ID",
-                "unique_id": {"equals": number},
-            },
-        }
-
-        # Determine which projects to search
-        if project:
-            search_projects = [get_project_config(config, project)]
-        else:
-            search_projects = list(config.projects.values())
-
-        page: dict[str, Any] | None = None
-        for proj in search_projects:
-            results = _query_database(proj.database_id, body)
-            if results:
-                # Verify prefix matches the ticket ID
-                found_ticket = Ticket.from_page(results[0])
-                if found_ticket.ticket_id and found_ticket.ticket_id.upper() == ticket.upper():
-                    page = results[0]
-                    break
-        if not page:
-            print(f"No ticket found matching '{ticket}'.", file=sys.stderr)
-            raise typer.Exit(1)
-    else:
-        # Treat as page-id
-        page = _get(f"/pages/{ticket}")
+    page = _resolve_page(ticket, config, project)
+    if page is None:
+        print(f"No ticket found matching '{ticket}'.", file=sys.stderr)
+        raise typer.Exit(1)
 
     t = Ticket.from_page(page)
     print(t.display(show_type=True))
+    print(f"    ID: {t.page_id}")
 
     # Read page content (children blocks) as description
     content = _read_page_content(t.page_id)
