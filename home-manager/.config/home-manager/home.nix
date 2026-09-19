@@ -356,7 +356,6 @@
       # General
       l = "eza";
       t = "tree --gitignore";
-      kb = "kanban-md --dir /srv/selfhost/zk/kanban";
       c = "clear";
       v = "vim";
       n = "nvim";
