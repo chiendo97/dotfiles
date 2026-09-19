@@ -9,7 +9,9 @@
   "theme": "dark",
   "tuiMode": "fullscreen",
   "packages": [
-    "npm:@narumitw/pi-btw@0.58.1"
+    "npm:@narumitw/pi-btw@0.58.1",
+    "npm:pi-subagents@0.69.0",
+    "npm:pi-gpt-search@1.1.0"
   ],
   "enabledModels": [
     "openai-codex/gpt-5.6-sol",
@@ -18,7 +20,7 @@
     "openai-codex/gpt-5.6-terra",
     "zariel/vllm/vllm-model"
   ],
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "commandPalette": {
     "shortcut": "ctrl+o"
   }
