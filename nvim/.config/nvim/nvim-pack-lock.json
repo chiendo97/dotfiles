@@ -70,6 +70,10 @@
       "rev": "1f8659bac2e615d7e8d3bee6ad42fef888b4c170",
       "src": "https://github.com/yousefhadder/markdown-plus.nvim"
     },
+    "markdown-preview.nvim": {
+      "rev": "8bbc9704d3f3cfab0aec0a03926f02f610efd9d9",
+      "src": "https://github.com/sammaji/markdown-preview.nvim"
+    },
     "markdown-table-wrap.nvim": {
       "rev": "ae74fb9a74a52d62966611d2cfb3e25f17a583ee",
       "src": "https://github.com/ice345/markdown-table-wrap.nvim"
