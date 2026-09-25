@@ -36,13 +36,13 @@ This CLI covers what `glab` cannot do — inline (diff) comments, structured dis
 All commands follow this pattern:
 
 ```bash
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py <command> [options]
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py <command> [options]
 ```
 
 ### Post an Inline Comment
 
 ```bash
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py inline-comment \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py inline-comment \
   --mr 20 --path src/service.py --line 42 \
   "This method should handle the None case"
 ```
@@ -54,7 +54,7 @@ The CLI auto-fetches the MR's `diff_refs` (base/head/start SHAs) so you only nee
 Post multiple comments in one call. Pass a JSON array as the argument:
 
 ```bash
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py batch-inline --mr 20 \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py batch-inline --mr 20 \
   '[{"path": "src/auth.py", "line": 15, "body": "Missing validation"}, {"path": "src/db.py", "line": 88, "body": "Connection leak"}]'
 ```
 
@@ -62,19 +62,19 @@ uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py batch-inline --mr 20 \
 
 ```bash
 # All discussions
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py discussions --mr 20
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py discussions --mr 20
 
 # Only inline (diff) discussions
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py discussions --mr 20 --inline-only
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py discussions --mr 20 --inline-only
 
 # Only unresolved
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py discussions --mr 20 --unresolved
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py discussions --mr 20 --unresolved
 ```
 
 ### List Open MRs Across Repos
 
 ```bash
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py mrs
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py mrs
 ```
 
 Reads `repos.yaml` (next to the script) for the list of repos to scan. Edit that file to add or remove repos.
@@ -82,7 +82,7 @@ Reads `repos.yaml` (next to the script) for the list of repos to scan. Edit that
 ### Reply to a Discussion
 
 ```bash
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py reply \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py reply \
   --mr 20 --discussion-id abc123def456 \
   "Fixed in the latest commit"
 ```

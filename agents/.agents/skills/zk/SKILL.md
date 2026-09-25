@@ -53,26 +53,26 @@ adding to the right section, and toggling checkboxes unambiguously.
 
 **Base command:**
 ```bash
-uv run /home/cle/.claude/skills/zk/zk_cli.py <command> [options]
+uv run /home/cle/.agents/skills/zk/zk_cli.py <command> [options]
 ```
 
 ### List todos
 
 ```bash
 # All open todos
-uv run /home/cle/.claude/skills/zk/zk_cli.py list
+uv run /home/cle/.agents/skills/zk/zk_cli.py list
 
 # Filter by filename prefix (e.g. all genbook notes)
-uv run /home/cle/.claude/skills/zk/zk_cli.py list --filter genbook
+uv run /home/cle/.agents/skills/zk/zk_cli.py list --filter genbook
 
 # Specific note
-uv run /home/cle/.claude/skills/zk/zk_cli.py list --filter genbook-api
+uv run /home/cle/.agents/skills/zk/zk_cli.py list --filter genbook-api
 
 # Show completed todos
-uv run /home/cle/.claude/skills/zk/zk_cli.py list --done
+uv run /home/cle/.agents/skills/zk/zk_cli.py list --done
 
 # Show both open and done
-uv run /home/cle/.claude/skills/zk/zk_cli.py list --all
+uv run /home/cle/.agents/skills/zk/zk_cli.py list --all
 ```
 
 Output is a Rich table with file path and line number for each todo:
@@ -86,17 +86,17 @@ genbook-api.md    13  open    Check Axios dependency
 
 ```bash
 # Add to a specific note (under ## Tasks if present, else end of file)
-uv run /home/cle/.claude/skills/zk/zk_cli.py add genbook-api "Review PR #332"
+uv run /home/cle/.agents/skills/zk/zk_cli.py add genbook-api "Review PR #332"
 
 # .md extension is optional
-uv run /home/cle/.claude/skills/zk/zk_cli.py add journal/2026-04-04 "Write summary"
+uv run /home/cle/.agents/skills/zk/zk_cli.py add journal/2026-04-04 "Write summary"
 ```
 
 ### Mark a todo done
 
 ```bash
 # By file and line number (from list output)
-uv run /home/cle/.claude/skills/zk/zk_cli.py done genbook-api.md 12
+uv run /home/cle/.agents/skills/zk/zk_cli.py done genbook-api.md 12
 ```
 
 Done items keep org-mode-style completion evidence on the same Markdown line:
@@ -109,10 +109,10 @@ Done items keep org-mode-style completion evidence on the same Markdown line:
 
 ```bash
 # All notes
-uv run /home/cle/.claude/skills/zk/zk_cli.py summary
+uv run /home/cle/.agents/skills/zk/zk_cli.py summary
 
 # Filtered
-uv run /home/cle/.claude/skills/zk/zk_cli.py summary --filter genbook
+uv run /home/cle/.agents/skills/zk/zk_cli.py summary --filter genbook
 ```
 
 Output is a Rich table grouped by note with counts:
@@ -131,7 +131,7 @@ When the user triggers `/zk` or asks to record a note, update both today's journ
 Use a short title plus full details.
 
 ```bash
-uv run /home/cle/.claude/skills/zk/zk_cli.py capture \
+uv run /home/cle/.agents/skills/zk/zk_cli.py capture \
   --title "Fix backup warning" \
   --related-note "home-server" \
   --details "Investigate the failed snapshot and record the result."

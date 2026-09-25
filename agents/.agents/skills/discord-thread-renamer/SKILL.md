@@ -9,7 +9,7 @@ Rename Discord threads so anyone can understand what a thread is about without o
 
 ## Dependencies
 
-This skill uses the Discord CLI at `/home/cle/.claude/skills/discord/discord_cli.py`. Invoke it via the `discord` skill for command reference.
+This skill uses the Discord CLI at `/home/cle/.agents/skills/discord/discord_cli.py`. Invoke it via the `discord` skill for command reference.
 
 ## Naming Convention
 
@@ -61,7 +61,7 @@ When a thread doesn't fit existing categories, invent a short descriptive one. T
 List active threads, optionally filtered by channel:
 
 ```bash
-uv run /home/cle/.claude/skills/discord/discord_cli.py threads --channel-id <channel-id>
+uv run /home/cle/.agents/skills/discord/discord_cli.py threads --channel-id <channel-id>
 ```
 
 If the user doesn't specify a channel, list all threads and ask which channel to focus on.
@@ -82,7 +82,7 @@ Skip threads that already follow `[category] — topic` format. All other thread
 For each thread needing rename, read messages to understand context:
 
 ```bash
-uv run /home/cle/.claude/skills/discord/discord_cli.py get --channel-id <thread-id> --limit 10
+uv run /home/cle/.agents/skills/discord/discord_cli.py get --channel-id <thread-id> --limit 10
 ```
 
 The `get` command auto-fetches the thread starter message from the parent channel. This is critical because many threads are created from a channel message, and the starter often contains the full context (PR links, descriptions) while the thread replies may only have "approved" or reactions.
@@ -113,7 +113,7 @@ Wait for user approval before renaming. The user may want to adjust names or ski
 After approval, rename all threads in parallel:
 
 ```bash
-uv run /home/cle/.claude/skills/discord/discord_cli.py rename --thread-id <id> --name "<new name>"
+uv run /home/cle/.agents/skills/discord/discord_cli.py rename --thread-id <id> --name "<new name>"
 ```
 
 ## Guidelines

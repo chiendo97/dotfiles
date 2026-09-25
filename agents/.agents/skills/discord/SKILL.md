@@ -43,7 +43,7 @@ Run it with `uv` — no virtualenv needed.
 All commands are run via:
 
 ```bash
-uv run /home/cle/.claude/skills/discord/discord_cli.py <command> [options]
+uv run /home/cle/.agents/skills/discord/discord_cli.py <command> [options]
 ```
 
 ---
@@ -54,16 +54,16 @@ Send to a channel, thread, or user DM. Optionally reply to an existing message.
 
 ```bash
 # Send to a channel
-uv run /home/cle/.claude/skills/discord/discord_cli.py send --channel-id 123456 "Hello, world!"
+uv run /home/cle/.agents/skills/discord/discord_cli.py send --channel-id 123456 "Hello, world!"
 
 # Send a DM to a user
-uv run /home/cle/.claude/skills/discord/discord_cli.py send --user-id 789012 "Hey there!"
+uv run /home/cle/.agents/skills/discord/discord_cli.py send --user-id 789012 "Hey there!"
 
 # Send to a thread
-uv run /home/cle/.claude/skills/discord/discord_cli.py send --thread-id 345678 "Thread reply"
+uv run /home/cle/.agents/skills/discord/discord_cli.py send --thread-id 345678 "Thread reply"
 
 # Reply to a specific message
-uv run /home/cle/.claude/skills/discord/discord_cli.py send --channel-id 123456 --reply-to 999888 "Replying to you"
+uv run /home/cle/.agents/skills/discord/discord_cli.py send --channel-id 123456 --reply-to 999888 "Replying to you"
 ```
 
 | Parameter | Required | Description |
@@ -79,7 +79,7 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py send --channel-id 123456 
 ### edit — Edit a message
 
 ```bash
-uv run /home/cle/.claude/skills/discord/discord_cli.py edit --channel-id 123456 --message-id 999888 "Updated content"
+uv run /home/cle/.agents/skills/discord/discord_cli.py edit --channel-id 123456 --message-id 999888 "Updated content"
 ```
 
 | Parameter | Required | Description |
@@ -98,13 +98,13 @@ Displays text content, embeds (title, description, fields), and attachments.
 
 ```bash
 # Get last 20 messages (default)
-uv run /home/cle/.claude/skills/discord/discord_cli.py get --channel-id 123456
+uv run /home/cle/.agents/skills/discord/discord_cli.py get --channel-id 123456
 
 # Get last 50 messages
-uv run /home/cle/.claude/skills/discord/discord_cli.py get --channel-id 123456 --limit 50
+uv run /home/cle/.agents/skills/discord/discord_cli.py get --channel-id 123456 --limit 50
 
 # Get messages from a thread (use thread ID as channel-id)
-uv run /home/cle/.claude/skills/discord/discord_cli.py get --channel-id 1488803431698272387 --limit 20
+uv run /home/cle/.agents/skills/discord/discord_cli.py get --channel-id 1488803431698272387 --limit 20
 ```
 
 | Parameter | Required | Description |
@@ -122,10 +122,10 @@ scan of all channels/threads).
 
 ```bash
 # With known channel ID (fast)
-uv run /home/cle/.claude/skills/discord/discord_cli.py get-message --message-id 1490020244155138158 --channel-id 1181560952123035729
+uv run /home/cle/.agents/skills/discord/discord_cli.py get-message --message-id 1490020244155138158 --channel-id 1181560952123035729
 
 # Auto-resolve channel (slower — searches guild)
-uv run /home/cle/.claude/skills/discord/discord_cli.py get-message --message-id 1490020244155138158
+uv run /home/cle/.agents/skills/discord/discord_cli.py get-message --message-id 1490020244155138158
 ```
 
 | Parameter | Required | Description |
@@ -142,16 +142,16 @@ if `--channel-id` is omitted. Downloads all attachments by default.
 
 ```bash
 # Download all attachments to current directory
-uv run /home/cle/.claude/skills/discord/discord_cli.py download --message-id 1490020244155138158
+uv run /home/cle/.agents/skills/discord/discord_cli.py download --message-id 1490020244155138158
 
 # Download to a specific path
-uv run /home/cle/.claude/skills/discord/discord_cli.py download --message-id 1490020244155138158 --output ./downloads/
+uv run /home/cle/.agents/skills/discord/discord_cli.py download --message-id 1490020244155138158 --output ./downloads/
 
 # Download only the first attachment with a custom filename
-uv run /home/cle/.claude/skills/discord/discord_cli.py download --message-id 1490020244155138158 --index 0 --output ./my-file.md
+uv run /home/cle/.agents/skills/discord/discord_cli.py download --message-id 1490020244155138158 --index 0 --output ./my-file.md
 
 # With known channel ID (skips search)
-uv run /home/cle/.claude/skills/discord/discord_cli.py download --message-id 1490020244155138158 --channel-id 1181560952123035729
+uv run /home/cle/.agents/skills/discord/discord_cli.py download --message-id 1490020244155138158 --channel-id 1181560952123035729
 ```
 
 | Parameter | Required | Description |
@@ -169,10 +169,10 @@ Lists all channels grouped by category.
 
 ```bash
 # Use default guild from DISCORD_GUILD_ID
-uv run /home/cle/.claude/skills/discord/discord_cli.py channels
+uv run /home/cle/.agents/skills/discord/discord_cli.py channels
 
 # Specify a guild
-uv run /home/cle/.claude/skills/discord/discord_cli.py channels --guild-id 111222333
+uv run /home/cle/.agents/skills/discord/discord_cli.py channels --guild-id 111222333
 ```
 
 | Parameter | Required | Description |
@@ -189,10 +189,10 @@ output can be passed to `get --channel-id` to read thread messages.
 
 ```bash
 # List all active threads in the guild
-uv run /home/cle/.claude/skills/discord/discord_cli.py threads
+uv run /home/cle/.agents/skills/discord/discord_cli.py threads
 
 # List threads under a specific channel
-uv run /home/cle/.claude/skills/discord/discord_cli.py threads --channel-id 1417919945538273372
+uv run /home/cle/.agents/skills/discord/discord_cli.py threads --channel-id 1417919945538273372
 ```
 
 | Parameter | Required | Description |
@@ -222,13 +222,13 @@ Create a standalone thread or a thread from an existing message. Thread type can
 
 ```bash
 # Standalone public thread in a channel
-uv run /home/cle/.claude/skills/discord/discord_cli.py thread --channel-id 123456 --name "Discussion Topic"
+uv run /home/cle/.agents/skills/discord/discord_cli.py thread --channel-id 123456 --name "Discussion Topic"
 
 # Private thread
-uv run /home/cle/.claude/skills/discord/discord_cli.py thread --channel-id 123456 --name "Private Talk" --type PRIVATE
+uv run /home/cle/.agents/skills/discord/discord_cli.py thread --channel-id 123456 --name "Private Talk" --type PRIVATE
 
 # Thread from a message
-uv run /home/cle/.claude/skills/discord/discord_cli.py thread --channel-id 123456 --name "Follow-up" --message-id 999888
+uv run /home/cle/.agents/skills/discord/discord_cli.py thread --channel-id 123456 --name "Follow-up" --message-id 999888
 ```
 
 | Parameter | Required | Description |
@@ -243,7 +243,7 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py thread --channel-id 12345
 ### rename — Rename a thread
 
 ```bash
-uv run /home/cle/.claude/skills/discord/discord_cli.py rename --thread-id 345678 --name "New Thread Name"
+uv run /home/cle/.agents/skills/discord/discord_cli.py rename --thread-id 345678 --name "New Thread Name"
 ```
 
 | Parameter | Required | Description |
@@ -256,7 +256,7 @@ uv run /home/cle/.claude/skills/discord/discord_cli.py rename --thread-id 345678
 ### react — React to a message
 
 ```bash
-uv run /home/cle/.claude/skills/discord/discord_cli.py react --channel-id 123456 --message-id 999888 --emoji thumbsup
+uv run /home/cle/.agents/skills/discord/discord_cli.py react --channel-id 123456 --message-id 999888 --emoji thumbsup
 ```
 
 | Parameter | Required | Description |
@@ -273,16 +273,16 @@ Send a file to a channel, thread, or DM with an optional message.
 
 ```bash
 # File to a channel
-uv run /home/cle/.claude/skills/discord/discord_cli.py send-file --channel-id 123456 --file ./report.pdf
+uv run /home/cle/.agents/skills/discord/discord_cli.py send-file --channel-id 123456 --file ./report.pdf
 
 # File with a message
-uv run /home/cle/.claude/skills/discord/discord_cli.py send-file --channel-id 123456 --file ./image.png --message "Check this out"
+uv run /home/cle/.agents/skills/discord/discord_cli.py send-file --channel-id 123456 --file ./image.png --message "Check this out"
 
 # File to a DM
-uv run /home/cle/.claude/skills/discord/discord_cli.py send-file --user-id 789012 --file ./data.csv
+uv run /home/cle/.agents/skills/discord/discord_cli.py send-file --user-id 789012 --file ./data.csv
 
 # File to a thread
-uv run /home/cle/.claude/skills/discord/discord_cli.py send-file --thread-id 345678 --file ./log.txt
+uv run /home/cle/.agents/skills/discord/discord_cli.py send-file --thread-id 345678 --file ./log.txt
 ```
 
 | Parameter | Required | Description |

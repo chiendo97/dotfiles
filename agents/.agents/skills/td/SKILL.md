@@ -12,7 +12,7 @@ Create Todoist tasks with a short task header and complete description, routed t
 Use the bundled helper:
 
 ```bash
-uv run /home/cle/.claude/skills/td/scripts/td_cli.py <command>
+uv run /home/cle/.agents/skills/td/scripts/td_cli.py <command>
 ```
 
 The helper reads `TODOIST_API_TOKEN` or `TODOIST_API_KEY`. Never print token values.
@@ -33,19 +33,19 @@ The helper reads `TODOIST_API_TOKEN` or `TODOIST_API_KEY`. Never print token val
 List projects:
 
 ```bash
-uv run /home/cle/.claude/skills/td/scripts/td_cli.py list-projects
+uv run /home/cle/.agents/skills/td/scripts/td_cli.py list-projects
 ```
 
 List sections, optionally scoped to a project:
 
 ```bash
-uv run /home/cle/.claude/skills/td/scripts/td_cli.py list-sections --project "Area"
+uv run /home/cle/.agents/skills/td/scripts/td_cli.py list-sections --project "Area"
 ```
 
 Create a task:
 
 ```bash
-uv run /home/cle/.claude/skills/td/scripts/td_cli.py add \
+uv run /home/cle/.agents/skills/td/scripts/td_cli.py add \
   --project "Area" \
   --section "Home" \
   --header "Fix backup warning" \

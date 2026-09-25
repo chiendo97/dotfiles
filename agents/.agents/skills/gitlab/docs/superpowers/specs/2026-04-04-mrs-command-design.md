@@ -6,7 +6,7 @@ Add a `mrs` command to `gitlab_cli.py` that reads a YAML config of important rep
 
 ## Config
 
-`repos.yaml` lives next to `gitlab_cli.py` at `/home/cle/.claude/skills/gitlab/repos.yaml`.
+`repos.yaml` lives next to `gitlab_cli.py` at `/home/cle/.agents/skills/gitlab/repos.yaml`.
 
 ```yaml
 repos:

@@ -69,7 +69,7 @@ users:
 - If the creator, current active sprint, configured epic source, named epic, or required create property IDs cannot be resolved, stop and report the missing mapping/source instead of creating an incomplete ticket.
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py create \
+uv run /home/cle/.agents/skills/notion/notion_cli.py create \
   --title "Add Entity Registry health check" \
   --description "Expose and verify the registry health endpoint" \
   --priority High \
@@ -105,7 +105,7 @@ Omit sections that don't apply (e.g., a simple bug fix might skip Acceptance Cri
 ### Update a ticket
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py update \
+uv run /home/cle/.agents/skills/notion/notion_cli.py update \
   --page-id "GB-319" \
   --status "In progress" \
   --priority High \
@@ -128,7 +128,7 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py update \
 ### Bulk update many tickets
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py bulk SN-199 SN-200 SN-201 \
+uv run /home/cle/.agents/skills/notion/notion_cli.py bulk SN-199 SN-200 SN-201 \
   --priority High \
   --status "In progress" \
   --project data-platform
@@ -144,7 +144,7 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py bulk SN-199 SN-200 SN-201 \
 ### Search tickets
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py search \
+uv run /home/cle/.agents/skills/notion/notion_cli.py search \
   --assignee cle \
   --status "In progress" \
   --query "auth" \
@@ -169,8 +169,8 @@ All filters combine with AND logic.
 ### Get ticket details
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py get-ticket GB-319
-uv run /home/cle/.claude/skills/notion/notion_cli.py get-ticket 3db52639-55bd-4228-90f7-298586ddaa98
+uv run /home/cle/.agents/skills/notion/notion_cli.py get-ticket GB-319
+uv run /home/cle/.agents/skills/notion/notion_cli.py get-ticket 3db52639-55bd-4228-90f7-298586ddaa98
 ```
 
 Accepts either a human-readable ticket ID (e.g. `GB-319`) or a Notion page UUID. Shows full ticket detail, the page UUID on an `ID:` line, and the complete description.
@@ -182,7 +182,7 @@ Accepts either a human-readable ticket ID (e.g. `GB-319`) or a Notion page UUID.
 ### List stale tickets
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py stale \
+uv run /home/cle/.agents/skills/notion/notion_cli.py stale \
   --assignee cle \
   --since 2026-03-01 \
   --limit 20 \
@@ -200,7 +200,7 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py stale \
 ### AH report
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py report \
+uv run /home/cle/.agents/skills/notion/notion_cli.py report \
   --period weekly \
   --assignee cle \
   --since 2026-03-01 \
@@ -218,15 +218,15 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py report \
 ### AH week reconciliation
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py ah-week                 # pull
-uv run /home/cle/.claude/skills/notion/notion_cli.py ah-week --diff          # show edits vs baseline
-uv run /home/cle/.claude/skills/notion/notion_cli.py ah-week --report        # AH totals from CSV
-uv run /home/cle/.claude/skills/notion/notion_cli.py ah-week --apply         # push to Notion
+uv run /home/cle/.agents/skills/notion/notion_cli.py ah-week                 # pull
+uv run /home/cle/.agents/skills/notion/notion_cli.py ah-week --diff          # show edits vs baseline
+uv run /home/cle/.agents/skills/notion/notion_cli.py ah-week --report        # AH totals from CSV
+uv run /home/cle/.agents/skills/notion/notion_cli.py ah-week --apply         # push to Notion
 ```
 
 Weekly ticket/AH reconciliation through a local CSV. The default (no flags) pulls the current Mon–Sun week's tickets for `default_creator_alias` (or `--assignee`) across all configured projects, filters by Sort Date client-side, and writes `ah-week-<year>-W<week>.csv` (override with `--out`) with columns `id,name,status,priority,ah,mr,sort_date,notion_url`, plus a hidden `<csv>.baseline` snapshot.
 
-**MR column**: when `GITLAB_TOKEN` is set, scans every repo listed in `/home/cle/.claude/skills/gitlab/repos.yaml` (all MR states, ticket ids matched in MR titles; merged > opened, most recent wins). Falls back to the Notion Gitlab MR property; prints a warning when scanning is skipped.
+**MR column**: when `GITLAB_TOKEN` is set, scans every repo listed in `/home/cle/.agents/skills/gitlab/repos.yaml` (all MR states, ticket ids matched in MR titles; merged > opened, most recent wins). Falls back to the Notion Gitlab MR property; prints a warning when scanning is skipped.
 
 **Workflow**: pull → edit the CSV (status, priority, ah, mr) → `--diff` to review → `--apply` to push. `--apply` pushes only Notion-updatable changed fields (status, priority, ah) with the correct project per ticket; changed `mr` values are listed as local-only (the Notion API has no MR update from this CLI). On full success the baseline is refreshed; on any FAIL the baseline is left untouched and the exit code is non-zero. Re-pulling keeps user-edited cells and only refreshes unedited fields.
 
@@ -241,7 +241,7 @@ Weekly ticket/AH reconciliation through a local CSV. The default (no flags) pull
 ### List epics
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py epics \
+uv run /home/cle/.agents/skills/notion/notion_cli.py epics \
   --status "In progress" \
   --project genbooks
 ```
@@ -253,7 +253,7 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py epics \
 ### Discover users
 
 ```bash
-uv run /home/cle/.claude/skills/notion/notion_cli.py users
+uv run /home/cle/.agents/skills/notion/notion_cli.py users
 ```
 
 Lists all workspace users (type=person) with their IDs. Shows which users are already in config.

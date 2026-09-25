@@ -11,7 +11,7 @@ generated note data.
 - Prefer `zk_cli.py capture` for `/zk` captures:
 
 ```bash
-uv run /home/cle/.claude/skills/zk/zk_cli.py capture \
+uv run /home/cle/.agents/skills/zk/zk_cli.py capture \
   --title "Short header" \
   --related-note "topic-note" \
   --details "Full details"
@@ -48,8 +48,8 @@ zk list --match "query" --notebook-dir /srv/selfhost/zk
 Run these after changes:
 
 ```bash
-uv run --with pytest --with typer --with pydantic pytest /home/cle/.claude/skills/zk/test_zk_cli.py
-python3 /home/cle/.codex/skills/.system/skill-creator/scripts/quick_validate.py /home/cle/.claude/skills/zk
-python3 -m py_compile /home/cle/.claude/skills/zk/zk_cli.py
-git -C /home/cle/Source/dotfiles diff --check -- claude/.claude/skills/zk
+uv run --with pytest --with typer --with pydantic pytest /home/cle/.agents/skills/zk/test_zk_cli.py
+python3 /home/cle/.codex/skills/.system/skill-creator/scripts/quick_validate.py /home/cle/.agents/skills/zk
+python3 -m py_compile /home/cle/.agents/skills/zk/zk_cli.py
+git -C /home/cle/Source/dotfiles diff --check -- agents/.agents/skills/zk
 ```

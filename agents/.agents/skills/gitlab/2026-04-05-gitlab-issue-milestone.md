@@ -1050,72 +1050,72 @@ Config lookup order: `--config-path` flag > `./config/gitlab.yaml` > `~/Source/c
 All commands:
 
 ```bash
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py <command> [options]
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py <command> [options]
 ```
 
 ### Issues
 
 ```bash
 # Create an issue
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py issue-create \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py issue-create \
   --title "[feat] Add auth endpoint" \
   --labels "feature,priority::high" \
   --milestone "v0.1.0" \
   --due-date "2026-05-01"
 
 # Get issue details
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py issue-get 1
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py issue-get 1
 
 # Update an issue
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py issue-update 1 \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py issue-update 1 \
   --labels "feature,in-progress" --assignee cle
 
 # List issues (single project)
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py issue-list --state opened
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py issue-list --state opened
 
 # List issues (all configured projects)
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py issue-list --all-projects --milestone "v0.1.0"
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py issue-list --all-projects --milestone "v0.1.0"
 
 # Close / reopen
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py issue-close 1
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py issue-reopen 1
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py issue-close 1
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py issue-reopen 1
 ```
 
 ### Milestones
 
 ```bash
 # Create a milestone
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py milestone-create \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py milestone-create \
   --title "v0.2.0" --due-date "2026-05-30"
 
 # Update a milestone
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py milestone-update 1 \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py milestone-update 1 \
   --due-date "2026-06-15"
 
 # List milestones (all projects)
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py milestone-list --all-projects
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py milestone-list --all-projects
 
 # Aggregated report
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py milestone-report "v0.1.0"
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py milestone-report "v0.1.0"
 ```
 
 ### MR Inline Comments (existing)
 
 ```bash
 # Post inline comment
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py inline-comment \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py inline-comment \
   --mr 20 --path src/service.py --line 42 \
   "This method should handle the None case"
 
 # Batch inline comments
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py batch-inline --mr 20 \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py batch-inline --mr 20 \
   '[{"path": "src/auth.py", "line": 15, "body": "Missing validation"}]'
 
 # List discussions
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py discussions --mr 20 --unresolved
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py discussions --mr 20 --unresolved
 
 # Reply to a discussion
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py reply \
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py reply \
   --mr 20 --discussion-id abc123 "Fixed in latest commit"
 ```
 

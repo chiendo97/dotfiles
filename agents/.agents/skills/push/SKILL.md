@@ -135,13 +135,13 @@ Do not proceed to Step 5 until `make lint` passes.
 
 Find or create a Notion ticket in the **genbook-global** project so the PR/MR has a ticket reference.
 
-The Notion CLI lives at: `~/.claude/skills/notion/notion_cli.py`
+The Notion CLI lives at: `~/.agents/skills/notion/notion_cli.py`
 Run it with: `uv run <path>/notion_cli.py <command> [options]`
 
 ### Search first
 
 ```bash
-uv run ~/.claude/skills/notion/notion_cli.py search \
+uv run ~/.agents/skills/notion/notion_cli.py search \
   --project genbook-global \
   --assignee $USER \
   --status "In Progress"
@@ -158,7 +158,7 @@ Scan the results for a ticket whose title relates to the changes being committed
 - **If no match or user declines**: Create a new ticket. New tickets must always be linked to an epic. Determine the existing epic from the user's request, the branch/repo domain, or the project convention. If no suitable epic is obvious, list active epics and ask before creating:
 
 ```bash
-uv run ~/.claude/skills/notion/notion_cli.py epics \
+uv run ~/.agents/skills/notion/notion_cli.py epics \
   --project genbook-global \
   --status "In progress"
 ```
@@ -166,7 +166,7 @@ uv run ~/.claude/skills/notion/notion_cli.py epics \
 Do not create a ticket with a missing, placeholder, or guessed epic. The Notion CLI treats `--epic` as a hard requirement and fails before ticket creation when the epic is missing or cannot be resolved.
 
 ```bash
-uv run ~/.claude/skills/notion/notion_cli.py create \
+uv run ~/.agents/skills/notion/notion_cli.py create \
   --project genbook-global \
   --title "Short description matching the PR/MR" \
   --description "Summary of the changes" \
@@ -322,5 +322,5 @@ Return the PR/MR URL to the user.
 - **Worktree path already exists**: If `.worktrees/<description>` already exists, append a suffix or ask the user for a different name.
 - **Push rejected**: If push fails (e.g. remote has newer commits), run `git pull --rebase` first, then retry the push.
 - **Multiple remotes**: Default to `origin`. If `origin` doesn't exist, list remotes and ask the user.
-- **Notion CLI not found**: If `~/.claude/skills/notion/notion_cli.py` doesn't exist, skip the Notion step and warn the user.
+- **Notion CLI not found**: If `~/.agents/skills/notion/notion_cli.py` doesn't exist, skip the Notion step and warn the user.
 - **User only wants ticket + MR update**: If the tree is clean and MR exists, skip commit/lint/push and go straight to Notion ticket + MR update.

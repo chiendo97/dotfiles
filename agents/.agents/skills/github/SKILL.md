@@ -37,7 +37,7 @@ Manage GitHub pull requests using `github_cli.py` via `uv run`.
 All commands follow this pattern:
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py <command> [options]
+uv run /home/cle/.agents/skills/github/github_cli.py <command> [options]
 ```
 
 Use `--help` on any command to see full option details and enum choices.
@@ -45,7 +45,7 @@ Use `--help` on any command to see full option details and enum choices.
 ### Create a Pull Request
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py create-pr \
+uv run /home/cle/.agents/skills/github/github_cli.py create-pr \
   --owner myorg --repo myrepo \
   --title "feat: add auth" \
   --head feature-auth --base main \
@@ -56,7 +56,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py create-pr \
 ### Update a Pull Request
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py update-pr \
+uv run /home/cle/.agents/skills/github/github_cli.py update-pr \
   --owner myorg --repo myrepo --number 42 \
   --title "feat: updated title" \
   --state closed
@@ -65,7 +65,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py update-pr \
 ### List Pull Requests
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py list-prs \
+uv run /home/cle/.agents/skills/github/github_cli.py list-prs \
   --owner myorg --repo myrepo \
   --state open --sort updated --direction desc \
   --base main --page 1 --page-size 10
@@ -76,7 +76,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py list-prs \
 Returns PR metadata and list of changed files with additions/deletions.
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py get-pr \
+uv run /home/cle/.agents/skills/github/github_cli.py get-pr \
   --owner myorg --repo myrepo --number 42
 ```
 
@@ -85,7 +85,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py get-pr \
 Fetches both general issue comments and inline review comments.
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py comments \
+uv run /home/cle/.agents/skills/github/github_cli.py comments \
   --owner myorg --repo myrepo --number 42
 ```
 
@@ -94,7 +94,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py comments \
 General comment:
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py comment \
+uv run /home/cle/.agents/skills/github/github_cli.py comment \
   --owner myorg --repo myrepo --number 42 \
   "Looks good, just one nit"
 ```
@@ -102,7 +102,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py comment \
 Inline comment on a file/line:
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py comment \
+uv run /home/cle/.agents/skills/github/github_cli.py comment \
   --owner myorg --repo myrepo --number 42 \
   "Consider using a constant here" \
   --path src/auth.py --line 15
@@ -111,7 +111,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py comment \
 ### Submit a Review
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py review \
+uv run /home/cle/.agents/skills/github/github_cli.py review \
   --owner myorg --repo myrepo --number 42 \
   --event APPROVE --body "LGTM!"
 ```
@@ -121,7 +121,7 @@ Events: `APPROVE`, `REQUEST_CHANGES`, `COMMENT`
 ### Create Inline Review Comment
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py review-comment \
+uv run /home/cle/.agents/skills/github/github_cli.py review-comment \
   --owner myorg --repo myrepo --number 42 \
   --path src/auth.py --line 25 \
   "This should handle the None case" \
@@ -131,7 +131,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py review-comment \
 ### Reply to a Review Comment
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py reply \
+uv run /home/cle/.agents/skills/github/github_cli.py reply \
   --owner myorg --repo myrepo --number 42 \
   --comment-id 123456 \
   "Fixed in the latest commit"
@@ -142,7 +142,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py reply \
 Resolve:
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py resolve \
+uv run /home/cle/.agents/skills/github/github_cli.py resolve \
   --owner myorg --repo myrepo --number 42 \
   --comment-id 123456
 ```
@@ -150,7 +150,7 @@ uv run /home/cle/.claude/skills/github/github_cli.py resolve \
 Unresolve:
 
 ```bash
-uv run /home/cle/.claude/skills/github/github_cli.py resolve \
+uv run /home/cle/.agents/skills/github/github_cli.py resolve \
   --owner myorg --repo myrepo --number 42 \
   --comment-id 123456 --unresolve
 ```

@@ -63,7 +63,7 @@ DEFAULT_CONFIG_PATHS = [
 ]
 
 GITLAB_API_URL = "https://git.urieljsc.com/api/v4"
-GITLAB_REPOS_PATH = Path.home() / ".claude" / "skills" / "gitlab" / "repos.yaml"
+GITLAB_REPOS_PATH = Path.home() / ".agents" / "skills" / "gitlab" / "repos.yaml"
 
 AH_WEEK_CSV_COLUMNS = ["id", "name", "status", "priority", "ah", "mr", "sort_date", "notion_url"]
 AH_WEEK_EDITABLE_FIELDS = ("status", "priority", "ah", "mr")

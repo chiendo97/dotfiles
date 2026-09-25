@@ -12,16 +12,16 @@
 
 ### File Map
 
-- Modify: `/home/cle/.claude/skills/gitlab/gitlab_cli.py` — add dependency, models, and command
-- Create: `/home/cle/.claude/skills/gitlab/repos.yaml` — repo list config
-- Modify: `/home/cle/.claude/skills/gitlab/SKILL.md` — document new command
+- Modify: `/home/cle/.agents/skills/gitlab/gitlab_cli.py` — add dependency, models, and command
+- Create: `/home/cle/.agents/skills/gitlab/repos.yaml` — repo list config
+- Modify: `/home/cle/.agents/skills/gitlab/SKILL.md` — document new command
 
 ---
 
 ### Task 1: Create `repos.yaml` config file
 
 **Files:**
-- Create: `/home/cle/.claude/skills/gitlab/repos.yaml`
+- Create: `/home/cle/.agents/skills/gitlab/repos.yaml`
 
 - [ ] **Step 1: Write the config file**
 
@@ -40,8 +40,8 @@ repos:
 - [ ] **Step 2: Commit**
 
 ```bash
-git -C /home/cle/.claude/skills/gitlab add repos.yaml
-git -C /home/cle/.claude/skills/gitlab commit -m "feat: add repos.yaml config for mrs command"
+git -C /home/cle/.agents/skills/gitlab add repos.yaml
+git -C /home/cle/.agents/skills/gitlab commit -m "feat: add repos.yaml config for mrs command"
 ```
 
 ---
@@ -49,8 +49,8 @@ git -C /home/cle/.claude/skills/gitlab commit -m "feat: add repos.yaml config fo
 ### Task 2: Add `pyyaml` dependency and `ReposConfig` model
 
 **Files:**
-- Modify: `/home/cle/.claude/skills/gitlab/gitlab_cli.py:1-5` (script metadata)
-- Modify: `/home/cle/.claude/skills/gitlab/gitlab_cli.py` (add model after `MRInfo` class, ~line 153)
+- Modify: `/home/cle/.agents/skills/gitlab/gitlab_cli.py:1-5` (script metadata)
+- Modify: `/home/cle/.agents/skills/gitlab/gitlab_cli.py` (add model after `MRInfo` class, ~line 153)
 
 - [ ] **Step 1: Add pyyaml to inline script dependencies**
 
@@ -88,14 +88,14 @@ class ReposConfig(BaseModel):
 
 - [ ] **Step 4: Verify syntax**
 
-Run: `uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py --help`
+Run: `uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py --help`
 Expected: Help output showing all commands (no import errors)
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git -C /home/cle/.claude/skills/gitlab add gitlab_cli.py
-git -C /home/cle/.claude/skills/gitlab commit -m "feat: add pyyaml dep and ReposConfig model"
+git -C /home/cle/.agents/skills/gitlab add gitlab_cli.py
+git -C /home/cle/.agents/skills/gitlab commit -m "feat: add pyyaml dep and ReposConfig model"
 ```
 
 ---
@@ -103,7 +103,7 @@ git -C /home/cle/.claude/skills/gitlab commit -m "feat: add pyyaml dep and Repos
 ### Task 3: Add `MRSummary` model
 
 **Files:**
-- Modify: `/home/cle/.claude/skills/gitlab/gitlab_cli.py` (add after `ReposConfig`)
+- Modify: `/home/cle/.agents/skills/gitlab/gitlab_cli.py` (add after `ReposConfig`)
 
 - [ ] **Step 1: Add `MRSummary` model**
 
@@ -131,14 +131,14 @@ class MRSummary(BaseModel):
 
 - [ ] **Step 2: Verify syntax**
 
-Run: `uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py --help`
+Run: `uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py --help`
 Expected: Help output, no errors
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git -C /home/cle/.claude/skills/gitlab add gitlab_cli.py
-git -C /home/cle/.claude/skills/gitlab commit -m "feat: add MRSummary model"
+git -C /home/cle/.agents/skills/gitlab add gitlab_cli.py
+git -C /home/cle/.agents/skills/gitlab commit -m "feat: add MRSummary model"
 ```
 
 ---
@@ -146,7 +146,7 @@ git -C /home/cle/.claude/skills/gitlab commit -m "feat: add MRSummary model"
 ### Task 4: Implement the `mrs` command
 
 **Files:**
-- Modify: `/home/cle/.claude/skills/gitlab/gitlab_cli.py` (add command after `batch_inline`)
+- Modify: `/home/cle/.agents/skills/gitlab/gitlab_cli.py` (add command after `batch_inline`)
 
 - [ ] **Step 1: Add the `mrs` command**
 
@@ -199,19 +199,19 @@ def mrs() -> None:
 
 - [ ] **Step 2: Verify the command appears in help**
 
-Run: `uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py --help`
+Run: `uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py --help`
 Expected: `mrs` listed among the commands
 
 - [ ] **Step 3: Test the command live**
 
-Run: `uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py mrs`
+Run: `uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py mrs`
 Expected: Grouped output showing open MRs for each configured repo, with a total count at the end.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git -C /home/cle/.claude/skills/gitlab add gitlab_cli.py
-git -C /home/cle/.claude/skills/gitlab commit -m "feat: add mrs command to list open MRs across repos"
+git -C /home/cle/.agents/skills/gitlab add gitlab_cli.py
+git -C /home/cle/.agents/skills/gitlab commit -m "feat: add mrs command to list open MRs across repos"
 ```
 
 ---
@@ -219,7 +219,7 @@ git -C /home/cle/.claude/skills/gitlab commit -m "feat: add mrs command to list 
 ### Task 5: Update SKILL.md documentation
 
 **Files:**
-- Modify: `/home/cle/.claude/skills/gitlab/SKILL.md`
+- Modify: `/home/cle/.agents/skills/gitlab/SKILL.md`
 
 - [ ] **Step 1: Add `mrs` to the quick reference table**
 
@@ -237,7 +237,7 @@ Add after the "List Discussions" section:
 ### List Open MRs Across Repos
 
 ```bash
-uv run /home/cle/.claude/skills/gitlab/gitlab_cli.py mrs
+uv run /home/cle/.agents/skills/gitlab/gitlab_cli.py mrs
 ```
 
 Reads `repos.yaml` (next to the script) for the list of repos to scan. Edit that file to add or remove repos.
@@ -254,6 +254,6 @@ Add a row:
 - [ ] **Step 4: Commit**
 
 ```bash
-git -C /home/cle/.claude/skills/gitlab add SKILL.md
-git -C /home/cle/.claude/skills/gitlab commit -m "docs: add mrs command to SKILL.md"
+git -C /home/cle/.agents/skills/gitlab add SKILL.md
+git -C /home/cle/.agents/skills/gitlab commit -m "docs: add mrs command to SKILL.md"
 ```
