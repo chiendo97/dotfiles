@@ -4,6 +4,5 @@ repos:
   - uriel/imagination
   - uriel/uriel2
   - zariel/claude-boy
-  - zariel/imagination
   - devops/headscale
   - devops/ansible
