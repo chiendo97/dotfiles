@@ -1,0 +1,32 @@
+onboarding = false
+
+[ui]
+status_indicators = "symbols"
+pane_borders = "always"
+
+[theme]
+name = "gruvbox"
+auto_switch = false
+
+[keys]
+prefix = "ctrl+space"
+split_vertical = "prefix+="
+split_horizontal = "prefix+minus"
+previous_tab = "prefix+p"
+next_tab = "prefix+n"
+workspace_picker = "prefix+w"
+new_workspace = "prefix+shift+n"
+rename_workspace = "prefix+shift+w"
+new_tab = "prefix+c"
+
+[[keys.command]]
+key = "prefix+t"
+type = "plugin_action"
+command = "herdr-navigator.open"
+description = "jump to anything"
+
+[[keys.command]]
+key = "prefix+shift+m"
+type = "plugin_action"
+command = "ray.plugin-manager.open"
+description = "open plugin manager"
