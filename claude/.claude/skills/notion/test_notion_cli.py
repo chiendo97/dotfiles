@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import csv
 import io
+import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import date
@@ -537,6 +539,221 @@ class NotionCliUpdateTests(unittest.TestCase):
             self.assertRaises(typer.Exit),
         ):
             notion_cli.bulk(["GB-1"])
+
+
+class NotionCliAhWeekTests(unittest.TestCase):
+    def test_week_range_defaults_to_monday_through_sunday(self) -> None:
+        # 2026-09-18 is a Friday
+        start, end = notion_cli._ah_week_range(None, None, today=date(2026, 9, 18))
+
+        self.assertEqual((start, end), (date(2026, 9, 14), date(2026, 9, 20)))
+
+    def test_week_range_uses_explicit_since_and_until(self) -> None:
+        start, end = notion_cli._ah_week_range(date(2026, 9, 1), date(2026, 9, 19), today=date(2026, 9, 18))
+
+        self.assertEqual((start, end), (date(2026, 9, 1), date(2026, 9, 19)))
+
+    def test_week_range_rejects_until_before_since(self) -> None:
+        with redirect_stderr(io.StringIO()), self.assertRaises(typer.Exit):
+            notion_cli._ah_week_range(date(2026, 9, 19), date(2026, 9, 1), today=date(2026, 9, 18))
+
+    def test_mr_index_prefers_merged_and_most_recent(self) -> None:
+        mrs = [
+            {"title": "[SN-1] fix thing", "state": "opened", "web_url": "https://git/mrs/1", "updated_at": "2026-09-18T10:00:00Z"},
+            {"title": "[SN-1] fix thing v2", "state": "merged", "web_url": "https://git/mrs/2", "updated_at": "2026-09-15T10:00:00Z"},
+            {"title": "[SN-2] other", "state": "opened", "web_url": "https://git/mrs/3", "updated_at": "2026-09-10T10:00:00Z"},
+            {"title": "[SN-2] other v2", "state": "opened", "web_url": "https://git/mrs/4", "updated_at": "2026-09-19T10:00:00Z"},
+        ]
+
+        index = notion_cli._build_mr_index(mrs)
+
+        self.assertEqual(index["SN-1"], "https://git/mrs/2")
+        self.assertEqual(index["SN-2"], "https://git/mrs/4")
+
+    def test_ah_week_changes_detects_edited_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "ah.csv"
+            base_path = notion_cli._ah_baseline_path(csv_path)
+            notion_cli._write_csv(csv_path, [{"id": "SN-1", "status": "Review", "priority": "High", "ah": "1.0", "mr": "", "name": "x", "sort_date": "2026-09-14", "notion_url": ""}], notion_cli.AH_WEEK_CSV_COLUMNS)
+            notion_cli._write_csv(base_path, [{"id": "SN-1", "status": "In progress", "priority": "High", "ah": "", "mr": "", "name": "x", "sort_date": "2026-09-14", "notion_url": ""}], notion_cli.AH_WEEK_CSV_COLUMNS + ["project"])
+
+            changes = notion_cli._ah_week_changes(csv_path, base_path)
+
+        self.assertEqual(changes, {"SN-1": {"status": ("In progress", "Review"), "ah": ("", "1.0")}})
+
+    def test_ah_week_merge_keeps_user_edits_and_refreshes_blanks(self) -> None:
+        pulled = [
+            {"id": "SN-1", "name": "x", "status": "Done", "priority": "High", "ah": "", "mr": "https://git/mrs/9", "sort_date": "2026-09-14", "notion_url": "u", "project": "data-platform"},
+            {"id": "SN-2", "name": "new", "status": "", "priority": "Medium", "ah": "", "mr": "", "sort_date": "2026-09-15", "notion_url": "u2", "project": "data-platform"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "ah.csv"
+            base_path = notion_cli._ah_baseline_path(csv_path)
+            # User edited SN-1 status (Done -> Review) and mr
+            notion_cli._write_csv(csv_path, [{"id": "SN-1", "status": "Review", "priority": "High", "ah": "", "mr": "https://git/mrs/9", "name": "x", "sort_date": "2026-09-14", "notion_url": "u"}], notion_cli.AH_WEEK_CSV_COLUMNS)
+            notion_cli._write_csv(base_path, [{"id": "SN-1", "status": "Done", "priority": "High", "ah": "", "mr": "https://git/mrs/9", "name": "x", "sort_date": "2026-09-14", "notion_url": "u", "project": "data-platform"}], notion_cli.AH_WEEK_CSV_COLUMNS + ["project"])
+
+            csv_rows, base_rows = notion_cli._ah_week_merge(pulled, csv_path, base_path)
+
+        by_id = {r["id"]: r for r in csv_rows}
+        self.assertEqual(by_id["SN-1"]["status"], "Review")  # user edit kept
+        self.assertEqual(by_id["SN-2"]["mr"], "")  # new row
+        base_by_id = {r["id"]: r for r in base_rows}
+        self.assertEqual(base_by_id["SN-1"]["status"], "Done")  # baseline keeps pulled value
+        self.assertEqual(base_by_id["SN-2"]["project"], "data-platform")
+
+    def test_ah_week_merge_keeps_mr_when_scan_skipped(self) -> None:
+        pulled = [
+            {"id": "SN-1", "name": "x", "status": "Done", "priority": "High", "ah": "", "mr": "", "sort_date": "2026-09-14", "notion_url": "u", "project": "data-platform"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "ah.csv"
+            base_path = notion_cli._ah_baseline_path(csv_path)
+            notion_cli._write_csv(csv_path, [{"id": "SN-1", "status": "Done", "priority": "High", "ah": "", "mr": "https://git/mrs/9", "name": "x", "sort_date": "2026-09-14", "notion_url": "u"}], notion_cli.AH_WEEK_CSV_COLUMNS)
+            notion_cli._write_csv(base_path, [{"id": "SN-1", "status": "Done", "priority": "High", "ah": "", "mr": "https://git/mrs/9", "name": "x", "sort_date": "2026-09-14", "notion_url": "u", "project": "data-platform"}], notion_cli.AH_WEEK_CSV_COLUMNS + ["project"])
+
+            csv_rows, _ = notion_cli._ah_week_merge(pulled, csv_path, base_path, scan_skipped=True)
+
+        self.assertEqual({r["id"]: r["mr"] for r in csv_rows}["SN-1"], "https://git/mrs/9")
+
+    def test_ah_week_merge_refreshes_non_editable_column(self) -> None:
+        pulled = [
+            {"id": "SN-1", "name": "renamed", "status": "Done", "priority": "High", "ah": "", "mr": "", "sort_date": "2026-09-16", "notion_url": "u2", "project": "data-platform"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "ah.csv"
+            base_path = notion_cli._ah_baseline_path(csv_path)
+            notion_cli._write_csv(csv_path, [{"id": "SN-1", "status": "Done", "priority": "High", "ah": "", "mr": "", "name": "edited", "sort_date": "2026-09-99", "notion_url": "old"}], notion_cli.AH_WEEK_CSV_COLUMNS)
+            notion_cli._write_csv(base_path, [{"id": "SN-1", "status": "Done", "priority": "High", "ah": "", "mr": "", "name": "original", "sort_date": "2026-09-14", "notion_url": "u", "project": "data-platform"}], notion_cli.AH_WEEK_CSV_COLUMNS + ["project"])
+
+            csv_rows, _ = notion_cli._ah_week_merge(pulled, csv_path, base_path)
+
+        row = {r["id"]: r for r in csv_rows}["SN-1"]
+        self.assertEqual(row["name"], "renamed")  # non-editable refreshed from pull
+        self.assertEqual(row["sort_date"], "2026-09-16")
+
+    def test_ah_week_added_and_removed_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "ah.csv"
+            base_path = notion_cli._ah_baseline_path(csv_path)
+            notion_cli._write_csv(csv_path, [{"id": "SN-1", "name": "x", "status": "", "priority": "", "ah": "", "mr": "", "sort_date": "", "notion_url": ""}, {"id": "SN-3", "name": "x", "status": "", "priority": "", "ah": "", "mr": "", "sort_date": "", "notion_url": ""}], notion_cli.AH_WEEK_CSV_COLUMNS)
+            notion_cli._write_csv(base_path, [{"id": "SN-1", "name": "x", "status": "", "priority": "", "ah": "", "mr": "", "sort_date": "", "notion_url": "", "project": "p"}, {"id": "SN-2", "name": "x", "status": "", "priority": "", "ah": "", "mr": "", "sort_date": "", "notion_url": "", "project": "p"}], notion_cli.AH_WEEK_CSV_COLUMNS + ["project"])
+
+            self.assertEqual(notion_cli._ah_week_added_ids(csv_path, base_path), ["SN-3"])
+            self.assertEqual(notion_cli._ah_week_removed_ids(csv_path, base_path), ["SN-2"])
+
+    def test_read_csv_rows_skips_missing_and_duplicate_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ah.csv"
+            with open(path, "w", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=notion_cli.AH_WEEK_CSV_COLUMNS)
+                writer.writeheader()
+                writer.writerow({"id": "SN-1", "name": "a", "status": "", "priority": "", "ah": "", "mr": "", "sort_date": "", "notion_url": ""})
+                writer.writerow({"id": "SN-1", "name": "dup", "status": "", "priority": "", "ah": "", "mr": "", "sort_date": "", "notion_url": ""})
+                writer.writerow({"id": "", "name": "no-id", "status": "", "priority": "", "ah": "", "mr": "", "sort_date": "", "notion_url": ""})
+
+            rows = notion_cli._read_csv_rows(path)
+
+        self.assertEqual([r["id"] for r in rows], ["SN-1"])
+        self.assertEqual(rows[0]["name"], "a")
+
+    def test_write_and_read_round_trip_preserves_commas_and_quotes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ah.csv"
+            notion_cli._write_csv(path, [{"id": "SN-1", "name": "fix: a, b \"quoted\"", "status": "Done", "priority": "High", "ah": "1.5", "mr": "", "sort_date": "2026-09-14", "notion_url": "u"}], notion_cli.AH_WEEK_CSV_COLUMNS)
+
+            rows = notion_cli._read_csv_rows(path)
+
+        self.assertEqual(rows[0]["name"], 'fix: a, b "quoted"')
+        self.assertEqual(rows[0]["ah"], "1.5")
+
+    def test_apply_patches_fields_and_refreshes_baseline_on_success(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "data-platform",
+            "projects": {"data-platform": {"database_id": "tickets-db", "ticket_status_type": "select", "status_name_overrides": {"In progress": "In Progress"}}},
+        })
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "ah.csv"
+            base_path = notion_cli._ah_baseline_path(csv_path)
+            base = {"id": "SN-1", "name": "x", "status": "In progress", "priority": "High", "ah": "", "mr": "", "sort_date": "2026-09-14", "notion_url": "u", "project": "data-platform"}
+            edited = dict(base)
+            edited["status"] = "Done"
+            edited["ah"] = "2.0"
+            notion_cli._write_csv(csv_path, [edited], notion_cli.AH_WEEK_CSV_COLUMNS)
+            notion_cli._write_csv(base_path, [base], notion_cli.AH_WEEK_CSV_COLUMNS + ["project"])
+
+            with (
+                patch.object(notion_cli, "get_config", return_value=config),
+                patch.object(notion_cli, "_resolve_page", return_value={"id": "uuid-1"}),
+                patch.object(notion_cli, "_patch", return_value={}) as patch_page,
+                redirect_stdout(io.StringIO()),
+            ):
+                notion_cli.ah_week(apply=True, out=str(csv_path))
+
+            patch_page.assert_called_once_with(
+                "/pages/uuid-1",
+                {"properties": {"Status": {"select": {"name": "Done"}}, "AH": {"number": 2.0}}},
+            )
+            # Baseline refreshed to equal the edited CSV.
+            self.assertEqual(notion_cli._ah_week_changes(csv_path, base_path), {})
+
+    def test_apply_failure_does_not_refresh_baseline(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "data-platform",
+            "projects": {"data-platform": {"database_id": "tickets-db"}},
+        })
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "ah.csv"
+            base_path = notion_cli._ah_baseline_path(csv_path)
+            base = {"id": "SN-1", "name": "x", "status": "Done", "priority": "", "ah": "", "mr": "", "sort_date": "2026-09-14", "notion_url": "u", "project": "data-platform"}
+            edited = dict(base)
+            edited["priority"] = "Bogus"
+            notion_cli._write_csv(csv_path, [edited], notion_cli.AH_WEEK_CSV_COLUMNS)
+            notion_cli._write_csv(base_path, [base], notion_cli.AH_WEEK_CSV_COLUMNS + ["project"])
+
+            with (
+                patch.object(notion_cli, "get_config", return_value=config),
+                patch.object(notion_cli, "_resolve_page", return_value={"id": "uuid-1"}),
+                patch.object(notion_cli, "_patch") as patch_page,
+                redirect_stdout(io.StringIO()),
+                self.assertRaises(typer.Exit),
+            ):
+                notion_cli.ah_week(apply=True, out=str(csv_path))
+
+            patch_page.assert_not_called()
+            # Baseline untouched, so the diff survives for a retry.
+            self.assertEqual(
+                notion_cli._ah_week_changes(csv_path, base_path),
+                {"SN-1": {"priority": ("", "Bogus")}},
+            )
+
+    def test_apply_mr_only_change_is_local_only(self) -> None:
+        config = notion_cli.Config.model_validate({
+            "default_project": "data-platform",
+            "projects": {"data-platform": {"database_id": "tickets-db"}},
+        })
+        out = io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "ah.csv"
+            base_path = notion_cli._ah_baseline_path(csv_path)
+            base = {"id": "SN-1", "name": "x", "status": "Done", "priority": "High", "ah": "", "mr": "", "sort_date": "2026-09-14", "notion_url": "u", "project": "data-platform"}
+            edited = dict(base)
+            edited["mr"] = "https://git/mrs/1"
+            notion_cli._write_csv(csv_path, [edited], notion_cli.AH_WEEK_CSV_COLUMNS)
+            notion_cli._write_csv(base_path, [base], notion_cli.AH_WEEK_CSV_COLUMNS + ["project"])
+
+            with (
+                patch.object(notion_cli, "get_config", return_value=config),
+                patch.object(notion_cli, "_resolve_page") as resolve_page,
+                patch.object(notion_cli, "_patch") as patch_page,
+                redirect_stdout(out),
+            ):
+                notion_cli.ah_week(apply=True, out=str(csv_path))
+
+            resolve_page.assert_not_called()
+            patch_page.assert_not_called()
+            self.assertIn("local-only 1", out.getvalue())
+            self.assertIn("kept in CSV/baseline only", out.getvalue())
 
 
 class NotionCliReportTests(unittest.TestCase):

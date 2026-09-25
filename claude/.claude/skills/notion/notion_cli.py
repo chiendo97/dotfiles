@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["typer", "pydantic", "pyyaml", "certifi"]
+# dependencies = ["typer", "pydantic", "pyyaml", "certifi", "rich"]
 # ///
 """Notion CLI for ticket and epic management.
 
@@ -19,14 +19,18 @@ Config:
 
 from __future__ import annotations
 
+import contextlib
+import csv
 import json
 import os
 import re
 import ssl
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
-from datetime import date, datetime, timezone
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import date, datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Annotated, Any, Literal, cast
@@ -35,6 +39,14 @@ import certifi
 import typer
 import yaml
 from pydantic import BaseModel, ConfigDict
+from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeElapsedColumn,
+)
 
 # =============================================================================
 # Constants
@@ -49,6 +61,12 @@ DEFAULT_CONFIG_PATHS = [
     Path(__file__).resolve().parent / "notion.yaml",
     Path("./config/notion.yaml"),
 ]
+
+GITLAB_API_URL = "https://git.urieljsc.com/api/v4"
+GITLAB_REPOS_PATH = Path.home() / ".claude" / "skills" / "gitlab" / "repos.yaml"
+
+AH_WEEK_CSV_COLUMNS = ["id", "name", "status", "priority", "ah", "mr", "sort_date", "notion_url"]
+AH_WEEK_EDITABLE_FIELDS = ("status", "priority", "ah", "mr")
 
 
 # =============================================================================
@@ -805,6 +823,251 @@ def _format_relative(iso_str: str) -> str:
 
 
 # =============================================================================
+# AH week helpers (weekly CSV reconciliation)
+# =============================================================================
+
+
+def _ah_week_progress(enabled: bool) -> Progress | contextlib.nullcontext:
+    """Transient stderr progress bar for interactive terminals; no-op otherwise."""
+    if not enabled:
+        return contextlib.nullcontext()
+    return Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        TimeElapsedColumn(),
+        console=Console(stderr=True),
+        transient=True,
+    )
+
+
+def _ah_week_range(since: date | None, until: date | None, today: date | None = None) -> tuple[date, date]:
+    """Resolve the week window: Mon-Sun containing today, or explicit since/until."""
+    # Wall-clock default is intentional: the week window follows the local week.
+    day = today or date.today()  # noqa: DTZ011
+    if since is None and until is None:
+        monday = day - timedelta(days=day.weekday())
+        return monday, monday + timedelta(days=6)
+    start = since or day
+    end = until or day
+    if end < start:
+        print("Error: --until is before --since", file=sys.stderr)
+        raise typer.Exit(1)
+    return start, end
+
+
+def _build_mr_index(mrs: list[dict[str, Any]]) -> dict[str, str]:
+    """Map ticket ids found in MR titles to the best MR web_url.
+
+    Prefers state merged > opened > other; on ties the most recent updated_at wins.
+    """
+    best: dict[str, tuple[int, str, str]] = {}
+    for mr in mrs:
+        url = mr.get("web_url", "")
+        if not url:
+            continue
+        rank = {"merged": 2, "opened": 1}.get(mr.get("state", ""), 0)
+        updated = mr.get("updated_at", "")
+        for tid in re.findall(r"\b([A-Za-z]+-\d+)\b", mr.get("title", "")):
+            cur = best.get(tid)
+            if cur is None or rank > cur[0] or (rank == cur[0] and updated > cur[2]):
+                best[tid] = (rank, url, updated)
+    return {tid: url for tid, (_rank, url, _updated) in best.items()}
+
+
+def _gitlab_repos() -> list[str]:
+    """Read the GitLab repo list from the gitlab skill's repos.yaml."""
+    try:
+        raw = yaml.safe_load(GITLAB_REPOS_PATH.read_text()) or {}
+    except (OSError, yaml.YAMLError):
+        return []
+    repos = raw.get("repos")
+    return [str(r) for r in repos] if isinstance(repos, list) else []
+
+
+def _gitlab_get_json(path: str, token: str) -> Any:
+    req = urllib.request.Request(f"{GITLAB_API_URL}{path}", headers={"PRIVATE-TOKEN": token})
+    with urllib.request.urlopen(req, context=SSL_CTX, timeout=30) as resp:
+        return json.loads(resp.read())
+
+
+def _ah_week_fetch_project(
+    name: str, proj: ProjectConfig, body: dict[str, Any], start_str: str, end_str: str
+) -> tuple[str, list[dict[str, str]]]:
+    """Fetch one project's tickets (full pagination) and filter to the week, client-side."""
+    rows: list[dict[str, str]] = []
+    for page in _query_database(proj.database_id, body):
+        t = Ticket.from_page(page)
+        sd = (t.sort_date or "")[:10]
+        if not sd or sd.startswith(_EPOCH_PREFIX) or not (start_str <= sd <= end_str):
+            continue
+        rows.append(
+            {
+                "id": t.ticket_id or t.page_id[:8],
+                "name": t.name,
+                "status": t.status,
+                "priority": t.priority,
+                "ah": str(t.ah) if t.ah is not None else "",
+                "mr": t.gitlab_mr,
+                "sort_date": sd,
+                "notion_url": t.url,
+                "project": name,
+            }
+        )
+    return name, rows
+
+
+def _ah_week_fetch_repo_mrs(repo: str, token: str) -> tuple[str, list[dict[str, Any]]]:
+    """Fetch all MRs (every state) from one repo. Errors skip the repo with a warning."""
+    mrs: list[dict[str, Any]] = []
+    page_no = 1
+    while True:
+        encoded = urllib.parse.quote(repo, safe="")
+        path = f"/projects/{encoded}/merge_requests?state=all&per_page=100&order_by=updated_at&page={page_no}"
+        try:
+            batch = _gitlab_get_json(path, token)
+        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+            print(f"Warning: GitLab fetch failed for {repo}: {e}", file=sys.stderr)
+            break
+        if not isinstance(batch, list) or not batch:
+            break
+        mrs.extend(batch)
+        if len(batch) < 100:
+            break
+        page_no += 1
+    return repo, mrs
+
+
+def _fetch_gitlab_mrs(repos: list[str], token: str, max_workers: int = 8) -> list[dict[str, Any]]:
+    """Fetch all MRs concurrently from the configured repos. Errors skip a repo."""
+    mrs: list[dict[str, Any]] = []
+    if not repos:
+        return mrs
+    with ThreadPoolExecutor(max_workers=min(max_workers, len(repos))) as pool:
+        futures = [pool.submit(_ah_week_fetch_repo_mrs, repo, token) for repo in repos]
+        for future in as_completed(futures):
+            _repo, repo_mrs = future.result()
+            mrs.extend(repo_mrs)
+    return mrs
+
+
+def _ah_baseline_path(csv_path: Path) -> Path:
+    return Path(str(csv_path) + ".baseline")
+
+
+def _read_csv_rows(path: Path) -> list[dict[str, str]]:
+    with open(path, newline="") as f:
+        rows: list[dict[str, str]] = []
+        for row in csv.DictReader(f):
+            clean = {k: (v or "") for k, v in row.items() if k is not None}
+            tid = clean.get("id", "")
+            if not tid:
+                print(f"Warning: {path.name}: skipping row without an id", file=sys.stderr)
+                continue
+            if any(r["id"] == tid for r in rows):
+                print(f"Warning: {path.name}: duplicate id {tid}; keeping the first row", file=sys.stderr)
+                continue
+            rows.append(clean)
+    return rows
+
+
+def _write_csv(path: Path, rows: list[dict[str, str]], columns: list[str]) -> None:
+    with open(path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=columns, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _ah_week_merge(
+    pulled: list[dict[str, str]], csv_path: Path, baseline_path: Path, scan_skipped: bool = False
+) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    """Merge freshly pulled rows with an existing edited CSV.
+
+    The baseline rows carry an extra `project` column used by --apply.
+    Only the editable fields count as user edits (other columns always
+    refresh from the pull). Keeps rows the pull no longer returned.
+    When scan_skipped is set, an empty pulled MR does not overwrite an
+    existing non-empty MR (the GitLab scan may simply not have run).
+    Returns (csv_rows, baseline_rows), both sorted by id.
+    """
+    pulled_by_id = {r["id"]: r for r in pulled}
+    existing: dict[str, dict[str, str]] = {}
+    old_base: dict[str, dict[str, str]] = {}
+    if csv_path.exists() and baseline_path.exists():
+        existing = {r["id"]: r for r in _read_csv_rows(csv_path)}
+        old_base = {r["id"]: r for r in _read_csv_rows(baseline_path)}
+
+    csv_rows: list[dict[str, str]] = []
+    base_rows: list[dict[str, str]] = []
+    for tid in sorted(set(pulled_by_id) | set(existing)):
+        p = pulled_by_id.get(tid)
+        cur = existing.get(tid)
+        base = old_base.get(tid)
+        if p is not None and cur is not None and base is not None:
+            merged: dict[str, str] = {}
+            for f in AH_WEEK_CSV_COLUMNS:
+                if f in AH_WEEK_EDITABLE_FIELDS and cur.get(f, "") != base.get(f, ""):
+                    merged[f] = cur[f]
+                else:
+                    merged[f] = p.get(f, "")
+            if scan_skipped and not merged["mr"] and cur.get("mr"):
+                merged["mr"] = cur["mr"]
+            # Baseline: pulled values for refreshed fields, but the old baseline value
+            # where the user edited, so --diff still shows the pending edit.
+            base_row = {
+                f: (base[f] if f in AH_WEEK_EDITABLE_FIELDS and cur.get(f, "") != base.get(f, "") else p.get(f, ""))
+                for f in AH_WEEK_CSV_COLUMNS
+            }
+            base_row["mr"] = merged["mr"]
+            base_row["project"] = p.get("project", "")
+            csv_rows.append(merged)
+            base_rows.append(base_row)
+        elif p is not None:
+            # New ticket row: pulled values everywhere.
+            row = {f: p.get(f, "") for f in AH_WEEK_CSV_COLUMNS}
+            csv_rows.append(row)
+            base_rows.append(dict(row) | {"project": p.get("project", "")})
+        else:
+            # Pull no longer returned this row: keep user data untouched.
+            if cur is not None:
+                csv_rows.append({f: cur.get(f, "") for f in AH_WEEK_CSV_COLUMNS})
+            if base is not None:
+                base_rows.append({f: base.get(f, "") for f in AH_WEEK_CSV_COLUMNS} | {"project": base.get("project", "")})
+    return csv_rows, base_rows
+
+
+def _ah_week_changes(csv_path: Path, baseline_path: Path) -> dict[str, dict[str, tuple[str, str]]]:
+    """Diff the edited CSV against its baseline on the editable fields."""
+    csv_rows = {r["id"]: r for r in _read_csv_rows(csv_path)}
+    base_rows = {r["id"]: r for r in _read_csv_rows(baseline_path)}
+    changes: dict[str, dict[str, tuple[str, str]]] = {}
+    for tid in sorted(set(csv_rows) | set(base_rows)):
+        cur = csv_rows.get(tid)
+        old = base_rows.get(tid)
+        if cur is None or old is None:
+            continue
+        fields: dict[str, tuple[str, str]] = {}
+        for f in AH_WEEK_EDITABLE_FIELDS:
+            if cur.get(f, "") != old.get(f, ""):
+                fields[f] = (old.get(f, ""), cur.get(f, ""))
+        if fields:
+            changes[tid] = fields
+    return changes
+
+
+def _ah_week_removed_ids(csv_path: Path, baseline_path: Path) -> list[str]:
+    csv_ids = {r["id"] for r in _read_csv_rows(csv_path)}
+    base_ids = {r["id"] for r in _read_csv_rows(baseline_path)}
+    return sorted(base_ids - csv_ids)
+
+
+def _ah_week_added_ids(csv_path: Path, baseline_path: Path) -> list[str]:
+    csv_ids = {r["id"] for r in _read_csv_rows(csv_path)}
+    base_ids = {r["id"] for r in _read_csv_rows(baseline_path)}
+    return sorted(csv_ids - base_ids)
+
+
+# =============================================================================
 # Typer app + callback
 # =============================================================================
 
@@ -825,6 +1088,7 @@ def _parse_since(value: str | None) -> date | None:
 
 
 SinceOption = Annotated[date | None, typer.Option(help="Filter by Sort Date >= YYYY-MM-DD", parser=_parse_since)]
+UntilOption = Annotated[date | None, typer.Option(help="End of window YYYY-MM-DD", parser=_parse_since)]
 ReportSinceOption = Annotated[date | None, typer.Option(help="Filter by Due Date >= YYYY-MM-DD", parser=_parse_since)]
 
 
@@ -1303,6 +1567,233 @@ def report(
 
     overall_avg = total_ah / total_tickets if total_tickets else 0
     print(f"\nSummary: {total_tickets} tickets, {total_ah:.0f} AH total, {overall_avg:.1f} avg")
+
+
+@app.command("ah-week")
+def ah_week(
+    diff: Annotated[bool, typer.Option(help="Show changes vs the baseline snapshot")] = False,
+    report: Annotated[bool, typer.Option(help="Print AH totals from the CSV")] = False,
+    apply: Annotated[bool, typer.Option(help="Push the diff to Notion and refresh the baseline")] = False,
+    out: Annotated[str | None, typer.Option(help="CSV path (default: ah-week-<year>-W<week>.csv)")] = None,
+    assignee: Annotated[str | None, typer.Option(help="Assignee name (default: default_creator_alias)")] = None,
+    since: SinceOption = None,
+    until: UntilOption = None,
+) -> None:
+    """Weekly ticket/AH reconciliation via a local CSV.
+
+    Default: pull the week's tickets into a CSV plus a hidden .baseline
+    snapshot. --diff shows edits vs baseline, --report prints AH totals,
+    --apply pushes status/priority/AH changes to Notion.
+    """
+    config = get_config()
+    start, end = _ah_week_range(since, until)
+    iso = start.isocalendar()
+    csv_path = Path(out) if out else Path(f"ah-week-{iso[0]}-W{iso[1]:02d}.csv")
+    baseline_path = _ah_baseline_path(csv_path)
+
+    if diff:
+        for p in (csv_path, baseline_path):
+            if not p.exists():
+                print(f"Error: {p} not found. Run ah-week (pull) first.", file=sys.stderr)
+                raise typer.Exit(1)
+        for tid in _ah_week_added_ids(csv_path, baseline_path):
+            print(f"added {tid}")
+        for tid in _ah_week_removed_ids(csv_path, baseline_path):
+            print(f"removed {tid} (not pushed; remove rows only in the CSV)")
+        changes = _ah_week_changes(csv_path, baseline_path)
+        for tid, fields in changes.items():
+            for field, (old, new) in fields.items():
+                print(f"{tid} {field}: {old or '(blank)'} -> {new or '(blank)'}")
+        if not changes and not _ah_week_added_ids(csv_path, baseline_path) and not _ah_week_removed_ids(csv_path, baseline_path):
+            print("No changes vs baseline.")
+        return
+
+    if report:
+        if not csv_path.exists():
+            print(f"Error: {csv_path} not found. Run ah-week (pull) first.", file=sys.stderr)
+            raise typer.Exit(1)
+        rows = _read_csv_rows(csv_path)
+        ah: dict[str, float] = {}
+        for r in rows:
+            if not r.get("ah"):
+                continue
+            try:
+                ah[r["id"]] = float(r["ah"])
+            except ValueError:
+                print(f"Warning: skipping non-numeric AH '{r['ah']}' for {r['id']}", file=sys.stderr)
+        total = sum(ah.values())
+        # Report the CSV's own date window when it has dates, so historical/custom
+        # files are labelled correctly instead of the current week.
+        csv_dates = sorted(r["sort_date"][:10] for r in rows if r.get("sort_date"))
+        if csv_dates:
+            start, end = date.fromisoformat(csv_dates[0]), date.fromisoformat(csv_dates[-1])
+        days = (end - start).days + 1
+        weekdays = sum(1 for i in range(days) if (start + timedelta(days=i)).weekday() < 5)
+        by_project: dict[str, float] = {}
+        by_status: dict[str, float] = {}
+        for r in rows:
+            if r["id"] not in ah:
+                continue
+            prefix = r["id"].rsplit("-", 1)[0]
+            by_project[prefix] = by_project.get(prefix, 0.0) + ah[r["id"]]
+            by_status[r.get("status") or "(no status)"] = by_status.get(r.get("status") or "(no status)", 0.0) + ah[r["id"]]
+        print(f"AH Report {start} - {end} ({days} days)\n")
+        print(f"Total AH: {total:.1f} across {len(ah)} of {len(rows)} ticket(s)")
+        print(f"Avg per day: {total / days:.2f} (all days), {total / weekdays:.2f} ({weekdays} weekdays)")
+        print("\nBy project:")
+        for key in sorted(by_project):
+            print(f"  {key}: {by_project[key]:.1f}")
+        print("\nBy status:")
+        for key in sorted(by_status):
+            print(f"  {key}: {by_status[key]:.1f}")
+        print("\nTickets with AH:")
+        for r in rows:
+            if r["id"] in ah:
+                print(f"  {r['id']:<10} {r.get('status') or '(no status)':<12} {ah[r['id']]:>5.1f}")
+        return
+
+    # Pull (default) and apply both need the files.
+    if apply:
+        for p in (csv_path, baseline_path):
+            if not p.exists():
+                print(f"Error: {p} not found. Run ah-week (pull) first.", file=sys.stderr)
+                raise typer.Exit(1)
+        changes = _ah_week_changes(csv_path, baseline_path)
+        if not changes:
+            print("No changes vs baseline. Nothing to apply.")
+            return
+        base_rows = {r["id"]: r for r in _read_csv_rows(baseline_path)}
+        csv_rows = {r["id"]: r for r in _read_csv_rows(csv_path)}
+        failed = 0
+        local_mr = 0
+        local_only = 0
+        print(f"Applying to Notion ({len(changes)} ticket(s))...")
+        for tid, fields in changes.items():
+            project = base_rows.get(tid, {}).get("project", "")
+            properties: dict[str, Any] = {}
+            if "status" in fields:
+                new_status = fields["status"][1]
+                if new_status:
+                    properties["Status"] = new_status
+            if "priority" in fields and fields["priority"][1]:
+                try:
+                    properties["Priority"] = {"select": {"name": Priority(fields["priority"][1]).value}}
+                except ValueError:
+                    print(f"FAIL {tid}: priority '{fields['priority'][1]}' is not Low/Medium/High/Critical")
+                    failed += 1
+                    continue
+            if "ah" in fields and fields["ah"][1]:
+                try:
+                    properties["AH"] = {"number": float(fields["ah"][1])}
+                except ValueError:
+                    print(f"FAIL {tid}: ah '{fields['ah'][1]}' is not a number")
+                    failed += 1
+                    continue
+            if "mr" in fields:
+                local_mr += 1
+            if not properties:
+                local_only += 1
+                continue
+            # Status needs the project's option type + name mapping applied below.
+            try:
+                resolved = _resolve_page(tid, config, project or None)
+            except SystemExit:
+                # A UUID-style row id (ticket without unique_id) can 404 on a direct
+                # fetch; count it as FAIL instead of killing the whole apply.
+                print(f"FAIL {tid}: not found")
+                failed += 1
+                continue
+            if resolved is None:
+                print(f"FAIL {tid}: not found")
+                failed += 1
+                continue
+            if "Status" in properties:
+                proj = config.projects.get(project)
+                if proj is None:
+                    print(f"FAIL {tid}: unknown project for status update")
+                    failed += 1
+                    continue
+                properties["Status"] = {proj.ticket_status_type: {"name": _ticket_status_name(proj, properties["Status"])}}
+            _patch(f"/pages/{resolved['id']}", {"properties": properties})
+            print(f"OK   {tid}")
+        total = len(changes)
+        applied = total - failed - local_only
+        print(f"\nApplied {applied}, local-only {local_only}, failed {failed} of {total} ticket(s).")
+        if local_mr:
+            print(f"Local-only (not in Notion API): {local_mr} MR change(s) — kept in CSV/baseline only.")
+        if failed:
+            raise typer.Exit(1)
+        refreshed = [{**csv_rows[tid], "project": base_rows.get(tid, {}).get("project", "")} for tid in sorted(csv_rows)]
+        _write_csv(baseline_path, refreshed, AH_WEEK_CSV_COLUMNS + ["project"])
+        return
+
+    # Pull: fetch all tickets for the assignee across all projects, filter dates client-side.
+    assignee_name = assignee or config.default_creator_alias
+    if not assignee_name:
+        print("Error: missing default_creator_alias in config; pass --assignee", file=sys.stderr)
+        raise typer.Exit(1)
+    user_id = resolve_user_id(config, assignee_name)
+    if not user_id:
+        available = ", ".join(sorted(config.users.keys()))
+        print(f"Error: unknown assignee '{assignee_name}'. Available: {available}", file=sys.stderr)
+        raise typer.Exit(1)
+
+    body: dict[str, Any] = {
+        "page_size": 100,
+        "filter": {"property": "Assignee", "people": {"contains": user_id}},
+        "sorts": [{"property": "Sort Date", "direction": "descending"}],
+    }
+    start_str, end_str = start.isoformat(), end.isoformat()
+
+    # MR column: scan configured GitLab repos, fall back to Notion MR property.
+    gitlab_token = os.environ.get("GITLAB_TOKEN", "")
+    repos: list[str] = []
+    scan_skipped = False
+    if gitlab_token:
+        repos = _gitlab_repos()
+        if not repos:
+            scan_skipped = True
+            print(f"Warning: no GitLab repos found in {GITLAB_REPOS_PATH}; using Notion MR property only", file=sys.stderr)
+    else:
+        scan_skipped = True
+        print("Warning: GITLAB_TOKEN not set; skipping GitLab MR scan, using Notion MR property only", file=sys.stderr)
+
+    # Notion projects and GitLab repos are independent chains; fetch them all
+    # concurrently (pages within a chain stay sequential for cursor pagination).
+    work: list[tuple[str, Any]] = []
+    for name, proj in config.projects.items():
+        work.append((f"Notion: {name}", lambda n=name, p=proj: _ah_week_fetch_project(n, p, body, start_str, end_str)))
+    for repo in repos:
+        work.append((f"GitLab: {repo}", lambda r=repo: _ah_week_fetch_repo_mrs(r, gitlab_token)))
+
+    interactive = sys.stderr.isatty()
+    pulled: list[dict[str, str]] = []
+    all_mrs: list[dict[str, Any]] = []
+    with _ah_week_progress(interactive) as progress:
+        task = progress.add_task("Fetching Notion + GitLab", total=len(work)) if interactive else None
+        if not interactive:
+            print(f"Fetching {len(config.projects)} Notion project(s) + {len(repos)} GitLab repo(s)...")
+        with ThreadPoolExecutor(max_workers=min(12, max(4, len(work)))) as pool:
+            futures = {pool.submit(fn): label for label, fn in work}
+            for future in as_completed(futures):
+                label = futures[future]
+                name, payload = future.result()
+                if label.startswith("Notion:"):
+                    pulled.extend(payload)
+                else:
+                    all_mrs.extend(payload)
+                if task is not None:
+                    progress.update(task, advance=1, description=f"{label} done")
+    if not scan_skipped:
+        mr_index = _build_mr_index(all_mrs)
+        for row in pulled:
+            row["mr"] = mr_index.get(row["id"]) or row["mr"]
+
+    csv_rows, base_rows = _ah_week_merge(pulled, csv_path, baseline_path, scan_skipped=scan_skipped)
+    _write_csv(csv_path, csv_rows, AH_WEEK_CSV_COLUMNS)
+    _write_csv(baseline_path, base_rows, AH_WEEK_CSV_COLUMNS + ["project"])
+    print(f"Pulled {len(pulled)} ticket(s) for {start} - {end} into {csv_path}.")
+    print(f"Baseline: {baseline_path}")
 
 
 @app.command("get-ticket")

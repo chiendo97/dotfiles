@@ -215,6 +215,29 @@ uv run /home/cle/.claude/skills/notion/notion_cli.py report \
 
 **Output:** Table showing ticket count, total AH, and average AH per Due Date period, sorted newest first, with a summary line.
 
+### AH week reconciliation
+
+```bash
+uv run /home/cle/.claude/skills/notion/notion_cli.py ah-week                 # pull
+uv run /home/cle/.claude/skills/notion/notion_cli.py ah-week --diff          # show edits vs baseline
+uv run /home/cle/.claude/skills/notion/notion_cli.py ah-week --report        # AH totals from CSV
+uv run /home/cle/.claude/skills/notion/notion_cli.py ah-week --apply         # push to Notion
+```
+
+Weekly ticket/AH reconciliation through a local CSV. The default (no flags) pulls the current Mon–Sun week's tickets for `default_creator_alias` (or `--assignee`) across all configured projects, filters by Sort Date client-side, and writes `ah-week-<year>-W<week>.csv` (override with `--out`) with columns `id,name,status,priority,ah,mr,sort_date,notion_url`, plus a hidden `<csv>.baseline` snapshot.
+
+**MR column**: when `GITLAB_TOKEN` is set, scans every repo listed in `/home/cle/.claude/skills/gitlab/repos.yaml` (all MR states, ticket ids matched in MR titles; merged > opened, most recent wins). Falls back to the Notion Gitlab MR property; prints a warning when scanning is skipped.
+
+**Workflow**: pull → edit the CSV (status, priority, ah, mr) → `--diff` to review → `--apply` to push. `--apply` pushes only Notion-updatable changed fields (status, priority, ah) with the correct project per ticket; changed `mr` values are listed as local-only (the Notion API has no MR update from this CLI). On full success the baseline is refreshed; on any FAIL the baseline is left untouched and the exit code is non-zero. Re-pulling keeps user-edited cells and only refreshes unedited fields.
+
+**Options:**
+- `--diff`: compare the CSV against its `.baseline` on status/priority/ah/mr; reports added/removed rows
+- `--report`: total AH, avg per day (7-day and 5-day), per-project and per-status totals, per-ticket table
+- `--apply`: push the diff to Notion, then refresh the baseline
+- `--out`: CSV path (default: `ah-week-<ISO year>-W<ISO week>.csv` in the cwd)
+- `--assignee`: assignee name (default: `default_creator_alias`)
+- `--since` / `--until`: override the week window with explicit YYYY-MM-DD dates
+
 ### List epics
 
 ```bash
