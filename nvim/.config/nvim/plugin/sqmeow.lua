@@ -10,6 +10,15 @@ if not require("sqmeow.install").resolve() then
 	require("sqmeow").install()
 end
 
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	pattern = "sqmeow://drawer,sqmeow://result",
+	callback = function(args)
+		if vim.api.nvim_win_get_buf(0) == args.buf then
+			vim.wo.winhighlight = "Normal:SqmeowNormal,NormalNC:SqmeowNormal,CursorLine:SqmeowCursorLine,WinBar:SqmeowWinbar,WinBarNC:SqmeowWinbar"
+		end
+	end,
+})
+
 -- Toggle the sqmeow UI (drawer + open windows).
 -- Everything else (connect, scratchpad, grid nav) uses the plugin's
 -- built-in keymaps inside the drawer — see `?` there or the cheatsheet.
