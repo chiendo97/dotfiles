@@ -98,6 +98,10 @@
       "rev": "52cd40dbcfca61d3fea37485b3b6424898fedabe",
       "src": "https://github.com/jrop/morph.nvim"
     },
+    "nui.nvim": {
+      "rev": "10fc361835c856ba4233ef5ea135b919bf3dce97",
+      "src": "https://github.com/MunifTanjim/nui.nvim"
+    },
     "nvim": {
       "rev": "6f8ca3d0f228fbd61e5aeeb5c68343c410720873",
       "src": "https://github.com/ember-theme/nvim"
@@ -138,6 +142,10 @@
     "snacks.nvim": {
       "rev": "882c996cf28183f4d63640de0b4c02ec886d01f2",
       "src": "https://github.com/folke/snacks.nvim"
+    },
+    "sqmeow.nvim": {
+      "rev": "7787aec9f207f4f8913b53af3de1e7b03d0751d4",
+      "src": "https://github.com/2giosangmitom/sqmeow.nvim"
     },
     "squix.nvim": {
       "rev": "6d9b3559dfa1cb65a11ebb6f8e00e3b1b564893a",

@@ -28,6 +28,22 @@ require("ember").setup({
         -- Embedded SQL in Rust sqlx query strings
         hl["@sqlx.query"] = { bg = theme.ui.base2 }
         hl["@sqlx.query.rust"] = { bg = theme.ui.base2 }
+
+        -- sqmeow.nvim: the result grid colors only numbers/NULLs/headers by default,
+        -- so a text-heavy table looks flat. Add a header band, a brighter text body,
+        -- and colored type icons to match the README look.
+        hl.SqmeowHeader = { fg = theme.ui.base8, bg = theme.ui.base3, bold = true }
+        hl.SqmeowText = { fg = theme.ui.fg }
+        hl.SqmeowNumber = { fg = theme.syn.number }
+        hl.SqmeowNull = { fg = theme.ui.base6, italic = true }
+        hl.SqmeowExpression = { fg = theme.syn.gold }
+        hl.SqmeowIconTypeText = { fg = theme.syn.sage }
+        hl.SqmeowIconTypeNumber = { fg = theme.syn.steel }
+        hl.SqmeowIconTypeBoolean = { fg = theme.syn.coral }
+        hl.SqmeowIconTypeTemporal = { fg = theme.syn.orange }
+        hl.SqmeowIconTypeJson = { fg = theme.syn.gold }
+        hl.SqmeowIconTypeUuid = { fg = theme.syn.mauve }
+        hl.SqmeowIconTypeBinary = { fg = theme.syn.rose }
     end,
 })
 
