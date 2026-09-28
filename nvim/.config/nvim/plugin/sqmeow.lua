@@ -19,6 +19,11 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 	end,
 })
 
+-- One-shot connect: `:SqmeowC sqlite:~/data/app.db`
+vim.api.nvim_create_user_command("SqmeowC", function(args)
+	require("sqmeow.api").connect(args.args)
+end, { nargs = 1, desc = "Db: connect by URL" })
+
 -- Toggle the sqmeow UI (drawer + open windows).
 -- Everything else (connect, scratchpad, grid nav) uses the plugin's
 -- built-in keymaps inside the drawer — see `?` there or the cheatsheet.
