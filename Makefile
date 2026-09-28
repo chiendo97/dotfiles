@@ -1,5 +1,5 @@
-STOW_PACKAGES := agents alacritty git herdr hermes home-manager nvim opencode pi tmux usql zellij
-PACKAGES := $(STOW_PACKAGES) codex
+STOW_PACKAGES := agents alacritty git hermes home-manager nvim opencode pi tmux usql zellij
+PACKAGES := $(STOW_PACKAGES) codex herdr
 
 .PHONY: all stow unstow restow codex-clean pve-build pve-upload pve-image $(PACKAGES)
 
@@ -8,6 +8,7 @@ all: stow
 stow:
 	stow -v -t ~ $(STOW_PACKAGES)
 	$(MAKE) codex
+	$(MAKE) herdr
 
 unstow:
 	stow -D -v -t ~ $(STOW_PACKAGES)
@@ -16,6 +17,7 @@ unstow:
 restow:
 	stow -R -v -t ~ $(STOW_PACKAGES)
 	$(MAKE) codex
+	$(MAKE) herdr
 
 # Individual package targets
 $(STOW_PACKAGES):
@@ -26,6 +28,11 @@ codex:
 
 codex-clean:
 	stow -D -v -t ~ codex || true
+
+# ~/.config/herdr is a live dir (sockets, logs); sync the config file instead of stowing.
+herdr:
+	cp -f herdr/.config/herdr/config.toml ~/.config/herdr/config.toml
+	herdr server reload-config 2>/dev/null || true
 
 # --- Proxmox image build/upload ---
 # Override on the command line, e.g.:
