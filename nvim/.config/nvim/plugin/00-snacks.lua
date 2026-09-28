@@ -90,8 +90,11 @@ end, { desc = "Spell suggest" })
 
 vim.keymap.set("n", "<leader>i", function()
     require("snacks.picker").command_history({
+        transform = function(item)
+            return item.text:match("^%u") and item or false
+        end,
         sort = function(a, b)
             return a.idx < b.idx
         end,
     })
-end, { desc = "Command history" })
+end, { desc = "User command history" })
