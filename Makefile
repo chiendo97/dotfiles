@@ -1,33 +1,24 @@
 STOW_PACKAGES := agents alacritty git hermes home-manager nvim opencode pi tmux usql zellij
-PACKAGES := $(STOW_PACKAGES) codex herdr
+PACKAGES := $(STOW_PACKAGES) herdr
 
-.PHONY: all stow unstow restow codex-clean pve-build pve-upload pve-image $(PACKAGES)
+.PHONY: all stow unstow restow pve-build pve-upload pve-image $(PACKAGES)
 
 all: stow
 
 stow:
 	stow -v -t ~ $(STOW_PACKAGES)
-	$(MAKE) codex
 	$(MAKE) herdr
 
 unstow:
 	stow -D -v -t ~ $(STOW_PACKAGES)
-	$(MAKE) codex-clean
 
 restow:
 	stow -R -v -t ~ $(STOW_PACKAGES)
-	$(MAKE) codex
 	$(MAKE) herdr
 
 # Individual package targets
 $(STOW_PACKAGES):
 	stow -v -t ~ $@
-
-codex:
-	stow -R -v -t ~ codex
-
-codex-clean:
-	stow -D -v -t ~ codex || true
 
 # ~/.config/herdr is a live dir (sockets, logs); sync config + plugins instead of stowing.
 herdr:

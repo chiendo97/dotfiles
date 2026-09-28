@@ -66,6 +66,10 @@
       "rev": "3322ffb55deba02d47503309130b4a0164f79483",
       "src": "https://github.com/r4ppz/lspeek.nvim"
     },
+    "luna.nvim": {
+      "rev": "61bae0d6d90b080f8129377aeed623319338bfb1",
+      "src": "https://github.com/WTFox/luna.nvim"
+    },
     "markdown-plus.nvim": {
       "rev": "f76cef58805c18d5fee7808ff5539da2490fee5c",
       "src": "https://github.com/yousefhadder/markdown-plus.nvim"

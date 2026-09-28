@@ -31,13 +31,6 @@ claude/.claude/shell-snapshots/
 claude/.claude/tasks/
 claude/.claude/telemetry/
 
-# Local Codex runtime state
-codex/.codex/*
-!codex/.codex/config.toml
-!codex/.codex/skills/
-!codex/.codex/skills/excalidraw-skill/
-!codex/.codex/skills/excalidraw-skill/**
-
 # Local Pi runtime state
 pi/.pi/agent/auth.json
 pi/.pi/agent/models-store.json

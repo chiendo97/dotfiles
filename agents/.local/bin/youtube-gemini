@@ -1,0 +1,2 @@
+#!/bin/sh
+exec uv run "${AGENTS_SKILLS_DIR:-$HOME/.agents/skills}/youtube-gemini/scripts/youtube_gemini.py" "$@"

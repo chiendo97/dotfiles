@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.87.1",
-  "defaultProvider": "zariel",
-  "defaultModel": "vllm/vllm-model",
-  "defaultThinkingLevel": "medium",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6-luna",
+  "defaultThinkingLevel": "max",
   "modelThinkingLevels": {
     "zariel/vllm/vllm-model": "low"
   },
@@ -16,10 +16,9 @@
   ],
   "enabledModels": [
     "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-5.6-luna",
-    "openai-codex/gpt-5.6-terra",
-    "zariel/vllm/vllm-model",
-    "openai-codex/gpt-6-sol"
+    "openai-codex/gpt-6-sol",
+    "openai-codex/gpt-6-luna",
+    "anthropic/claude-opus-5-5"
   ],
   "hideThinkingBlock": false,
   "commandPalette": {

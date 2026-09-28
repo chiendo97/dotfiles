@@ -11,7 +11,6 @@ dotfiles/
 ├── alacritty/       # Terminal emulator (Gruvbox theme)
 ├── zellij/          # Terminal multiplexer alternative
 ├── claude/          # Claude Code settings, hooks, rules, and skills
-├── codex/           # Codex local skills bridge
 ├── pi/              # Pi config (models, settings, keybindings, AGENTS.md)
 ├── agents/          # Shared agent skills for runtimes using ~/.agents/skills
 └── Makefile         # Stow commands
@@ -101,7 +100,6 @@ make stow      # Symlink all packages
 make unstow    # Remove all symlinks
 make restow    # Re-symlink all (after changes)
 make nvim      # Stow individual package
-make codex     # Stow tracked Codex config and local skills
 make agents    # Stow shared agent skills
 make pi        # Stow Pi config
 ```
@@ -114,32 +112,16 @@ Tracked files: `AGENTS.md`, `settings.json`, `keybindings.json`, `models.json`.
 Runtime state (`auth.json`, `models-store.json`, `sessions/`, `tmp/`, `npm/`)
 is gitignored and kept local.
 
-### Codex
-
-`make codex` only stows the tracked Codex files. It links
-`codex/.codex/config.toml` to `~/.codex/config.toml` and any tracked local skills
-under `codex/.codex/skills` to `~/.codex/skills`.
-
-- `~/.codex/config.toml` -> `codex/.codex/config.toml`
-- `~/.codex/skills/reddit-cli/SKILL.md` -> `codex/.codex/skills/reddit-cli/SKILL.md`
-
-Codex plugins and external skills are managed outside this dotfiles repo. This
-avoids tracking marketplace cache state or cloning third-party plugin sources
-from repository scripts.
-
 ### Shared Agent Skills
 
-`agents/.agents/skills` mirrors the repository-maintained Codex skills for
-runtimes that discover skills under `~/.agents/skills`. Run `make agents` to
-stow them without replacing the existing third-party skills in that directory.
+`agents/.agents/skills` stores skills shared across agent runtimes. Run
+`make agents` to stow them under `~/.agents/skills` without replacing existing
+third-party skills.
 
-- `~/.agents/skills/excalidraw-skill`
-- `~/.agents/skills/reddit-cli`
-- `~/.agents/skills/youtube-gemini`
-
-The Codex package remains available for Codex-specific discovery. The agent
-copies use `AGENTS_SKILLS_DIR` when set and otherwise default to
-`~/.agents/skills`.
+Migrated skills include `excalidraw-skill`, `reddit-cli`, and `youtube-gemini`.
+The Reddit and YouTube scripts use `AGENTS_SKILLS_DIR` when set and otherwise
+fall back to `~/.agents/skills`. The YouTube helper is installed at
+`~/.local/bin/youtube-gemini`.
 
 ### Neovim
 

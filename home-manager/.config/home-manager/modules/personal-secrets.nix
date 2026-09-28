@@ -147,6 +147,9 @@
     source ~/.secrets/api-keys 2>/dev/null
     unset GITHUB_TOKEN
     unset ANTHROPIC_API_KEY
+    unset DEEPSEEK_API_KEY
+    unset MISTRAL_API_KEY
+    unset OPENROUTER_API_KEY
   '';
 
   # home.activation.dockerContextUnraidCle = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
