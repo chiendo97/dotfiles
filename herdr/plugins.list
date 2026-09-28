@@ -3,5 +3,4 @@
 # Lines starting with # and blank lines are ignored.
 # To update a pin: run `herdr plugin install owner/repo` (moves pin to latest),
 # then copy the new commit sha into the --ref below.
-thanhdat77/herdr-navigator --ref 313b753b1f98f802b7d861430a13cb95a86e8dd3
 speardragon/herdr-plugin-manager --ref e4fef2693728a36cbb389af033a389cad2257869
