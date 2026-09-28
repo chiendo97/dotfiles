@@ -29,9 +29,10 @@ codex:
 codex-clean:
 	stow -D -v -t ~ codex || true
 
-# ~/.config/herdr is a live dir (sockets, logs); sync the config file instead of stowing.
+# ~/.config/herdr is a live dir (sockets, logs); sync config + plugins instead of stowing.
 herdr:
 	cp -f herdr/.config/herdr/config.toml ~/.config/herdr/config.toml
+	sh herdr/sync-plugins.sh herdr/plugins.list
 	herdr server reload-config 2>/dev/null || true
 
 # --- Proxmox image build/upload ---
