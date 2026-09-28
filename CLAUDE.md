@@ -23,6 +23,7 @@ alacritty/.config/alacritty/  →  ~/.config/alacritty
 | `home-manager/` | Nix flakes + Home Manager for declarative system config | Yes |
 | `alacritty/` | Terminal emulator (Gruvbox theme, Liga SFMono font) | No |
 | `zellij/` | Terminal multiplexer alternative (KDL config) | No |
+| `tmux/` | Tmux (vim-tmux navigation, Gruvbox, TPM plugins) | No |
 | `agents/` | Shared local skills for agent runtimes | No |
 | `pi/` | Pi agent config (settings, models, keybindings, AGENTS.md) | No |
 
@@ -31,7 +32,6 @@ alacritty/.config/alacritty/  →  ~/.config/alacritty
 | File | Purpose |
 |------|---------|
 | `.zshrc` | Zsh shell (Pure prompt, zoxide, fzf, lazy nvm) |
-| `.tmux.conf` | Tmux (vim-tmux navigation, Gruvbox, TPM plugins) |
 | `.gitconfig` | Git (delta for diffs, custom aliases, LFS) |
 | `.editorconfig` | Editor indentation standards |
 
