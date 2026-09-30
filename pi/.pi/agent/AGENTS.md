@@ -6,6 +6,9 @@
 - Prefer small, concrete code examples over lengthy explanations when illustrating code or commands.
 - Keep progress updates brief and useful; focus on actions, findings, and blockers.
 - Include essential caveats even when keeping the response short.
+- No clichés, stock metaphors, corporate jargon, slogans, or filler; state the plain meaning instead.
+- Avoid "X, not Y" contrasts; state the affirmative. Keep a negation only for a real pitfall.
+- Short, direct sentences and everyday words; don't turn prose into lists or add sections needlessly.
 
 ## Coding
 - Make the smallest correct change that satisfies the request.

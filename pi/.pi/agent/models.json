@@ -20,7 +20,7 @@
           "compat": {
             "supportsReasoningEffort": true
           },
-          "input": ["text"],
+          "input": ["text", "image"],
           "contextWindow": 128000,
           "maxTokens": 16384
         }

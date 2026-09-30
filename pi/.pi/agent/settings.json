@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.87.1",
+  "lastChangelogVersion": "0.99.1",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6-luna",
   "defaultThinkingLevel": "max",
@@ -12,7 +12,8 @@
     "npm:@narumitw/pi-btw@0.58.1",
     "npm:pi-subagents@0.69.0",
     "npm:pi-gpt-search@1.1.0",
-    "npm:pi-open-tui"
+    "npm:pi-open-tui",
+    "npm:speak-like-you-eat"
   ],
   "enabledModels": [
     "openai-codex/gpt-6-astra",
@@ -20,7 +21,7 @@
     "openai-codex/gpt-6-luna",
     "anthropic/claude-opus-5-5"
   ],
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "commandPalette": {
     "shortcut": "ctrl+o"
   }
