@@ -12,7 +12,7 @@
   "tui.editor.deleteToLineStart": [],
   "tui.editor.deleteCharForward": "delete",
   "app.exit": "ctrl+c",
-  "app.model.select": "ctrl+shift+m",
+  "app.model.select": ["ctrl+shift+m", "alt+m"],
   "app.models.save": "f10",
   "app.thinking.save": "f10",
   "app.models.toggleProvider": "f9",

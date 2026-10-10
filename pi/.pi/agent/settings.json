@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.99.1"
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6-luna",
-  "defaultThinkingLevel": "max",
+  "lastChangelogVersion": "1.1.0",
+  "defaultProvider": "zariel",
+  "defaultModel": "vllm/vllm-model",
+  "defaultThinkingLevel": "medium",
   "modelThinkingLevels": {
     "zariel/vllm/vllm-model": "low"
   },
@@ -10,16 +10,16 @@
   "tuiMode": "fullscreen",
   "packages": [
     "npm:@narumitw/pi-btw@0.58.1",
-    "npm:pi-subagents@0.69.0",
+    "npm:pi-subagents@0.76.1",
     "npm:pi-gpt-search@1.1.0",
     "npm:pi-open-tui",
     "npm:speak-like-you-eat"
   ],
   "enabledModels": [
     "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-6-sol",
     "openai-codex/gpt-6-luna",
-    "anthropic/claude-opus-5-5"
+    "zariel/vllm/vllm-model",
+    "openai-codex/gpt-6.1-sol"
   ],
   "hideThinkingBlock": true,
   "commandPalette": {
