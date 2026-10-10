@@ -56,7 +56,7 @@
           };
 
           # Derive the home directory path based on the OS
-          homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}";
+          homeDirectory = if pkgs.stdenv.hostPlatform.isDarwin then "/Users/${username}" else "/home/${username}";
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;

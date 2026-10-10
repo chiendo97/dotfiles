@@ -64,8 +64,8 @@
       };
     })) ] ++
     # Platform-specific packages
-    (lib.optionals pkgs.stdenv.isLinux (import ./packages/linux.nix { inherit pkgs; })) ++
-    (lib.optionals pkgs.stdenv.isDarwin (import ./packages/darwin.nix { inherit pkgs; }));
+    (lib.optionals pkgs.stdenv.hostPlatform.isLinux (import ./packages/linux.nix { inherit pkgs; })) ++
+    (lib.optionals pkgs.stdenv.hostPlatform.isDarwin (import ./packages/darwin.nix { inherit pkgs; }));
 
   # ============================================================================
   # Config files
@@ -81,7 +81,7 @@
   # ============================================================================
   # Systemd user services (Linux only)
   # ============================================================================
-  systemd.user.sockets.podman = lib.mkIf pkgs.stdenv.isLinux {
+  systemd.user.sockets.podman = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     Unit.Description = "Podman API Socket";
     Socket = {
       ListenStream = "%t/podman/podman.sock";
@@ -92,7 +92,7 @@
     Install.WantedBy = [ "sockets.target" ];
   };
 
-  systemd.user.services.podman = lib.mkIf pkgs.stdenv.isLinux {
+  systemd.user.services.podman = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     Unit.Description = "Podman API Service";
     Service = {
       Type = "exec";
@@ -233,7 +233,7 @@
       DISCORD_GUILD_ID = "1181560951141584926";
     };
 
-    profileExtra = lib.optionalString pkgs.stdenv.isDarwin ''
+    profileExtra = lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
       # OrbStack command-line tools and integration
       source ~/.orbstack/shell/init.zsh 2>/dev/null || :
     '';
@@ -282,7 +282,7 @@
     autosuggestion.enable = true;
   };
 
-  home.file."./.zprofile" = lib.mkIf pkgs.stdenv.isDarwin {
+  home.file."./.zprofile" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     force = true;
     target = ".zprofile";
   };
@@ -296,7 +296,7 @@
   # ============================================================================
   # Launchd Agents (macOS scheduled tasks)
   # ============================================================================
-  launchd.agents.podman-machine = lib.mkIf pkgs.stdenv.isDarwin {
+  launchd.agents.podman-machine = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     enable = true;
     config = {
       Label = "com.podman.machine";
@@ -321,10 +321,10 @@
     EDITOR = "nvim";
     LC_CTYPE = "en_US.UTF-8";
     ZK_NOTEBOOK_DIR = "/srv/selfhost/zk";
-  } // lib.optionalAttrs pkgs.stdenv.isLinux {
+  } // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
     SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
     DOCKER_HOST = "unix:///run/user/1000/podman/podman.sock";
-  } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+  } // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
     DOCKER_HOST = "unix:///var/folders/s6/svtg9t310t167pdfqqcj4gvw0000gn/T/podman/podman-machine-default-api.sock";
   };
 

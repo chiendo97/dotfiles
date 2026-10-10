@@ -11,6 +11,7 @@ with pkgs; [
   yq-go
   ripgrep
   stow
+  tmux
   tree
   unzip
   uv
