@@ -2,7 +2,7 @@
   "providers": {
     "zariel": {
       "name": "Zariel Bifrost",
-      "baseUrl": "http://100.64.0.98:8080/v1",
+      "baseUrl": "http://10.32.20.30:8080/v1",
       "api": "openai-completions",
       "apiKey": "$OPENAI_API_KEY",
       "models": [

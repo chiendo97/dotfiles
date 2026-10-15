@@ -23,16 +23,16 @@ Override with `--config path/to/notion.yaml`.
 ### Config structure
 
 ```yaml
-default_project: genbooks
+default_project: data-platform
 default_creator_alias: cle
 projects:
-  genbooks:
+  data-platform:
     project_id: "..."
     database_id: "..."          # tickets database
     tickets_data_source_id: "..." # tickets data source for page creation
     sprints_data_source_id: "..." # sprints database/data source
     epics_database_id: "..."    # epics database
-    prop_epic: "Related Genbook | Epics"
+    prop_epic: "Epic"
     prop_epic_id: "..."         # required for data-source-backed create payloads
     prop_sprint: "Sprint"       # ticket relation property
     prop_sprint_id: "..."       # required for data-source-backed create payloads
@@ -55,7 +55,6 @@ users:
 
 - Use `--project data-platform` for Data Platform work, including every Entity Registry ticket.
 - Use an epic from `Data Platform | Epics` whose `Service` is `Entity Registry` for Entity Registry tickets.
-- Continue using `--project genbook-global` for Genbook Global tickets.
 - Always pass `--project` explicitly when creating a ticket so topic-based routing is unambiguous.
 
 ### Create a ticket
@@ -111,7 +110,7 @@ uv run /home/cle/.agents/skills/notion/notion_cli.py update \
   --priority High \
   --assignee huy \
   --epic "Sprint Planning v2" \
-  --project genbooks
+  --project data-platform
 ```
 
 **Options:**
@@ -150,7 +149,7 @@ uv run /home/cle/.agents/skills/notion/notion_cli.py search \
   --query "auth" \
   --since 2026-03-01 \
   --limit 20 \
-  --project genbooks
+  --project data-platform
 ```
 
 **Options:**
@@ -186,7 +185,7 @@ uv run /home/cle/.agents/skills/notion/notion_cli.py stale \
   --assignee cle \
   --since 2026-03-01 \
   --limit 20 \
-  --project genbooks
+  --project data-platform
 ```
 
 **Options:**
@@ -204,7 +203,7 @@ uv run /home/cle/.agents/skills/notion/notion_cli.py report \
   --period weekly \
   --assignee cle \
   --since 2026-03-01 \
-  --project genbooks
+  --project data-platform
 ```
 
 **Options:**
@@ -243,7 +242,7 @@ Weekly ticket/AH reconciliation through a local CSV. The default (no flags) pull
 ```bash
 uv run /home/cle/.agents/skills/notion/notion_cli.py epics \
   --status "In progress" \
-  --project genbooks
+  --project data-platform
 ```
 
 **Options:**

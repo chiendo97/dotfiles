@@ -32,12 +32,12 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
---  See `:help vim.highlight.on_yank()`
+--  See `:help vim.hl.hl_op()`
 vim.api.nvim_create_autocmd("TextYankPost", {
     group = my_augroup,
     desc = "Highlight when yanking (copying) text",
     callback = function()
-        vim.highlight.on_yank()
+        vim.hl.hl_op({ higroup = "Visual", timeout = 300 })
     end,
 })
 
