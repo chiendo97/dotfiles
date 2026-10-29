@@ -1122,7 +1122,8 @@ def get_config() -> Config:
 @app.command()
 def create(
     title: Annotated[str, typer.Option(help="Ticket title")],
-    epic: Annotated[str, typer.Option(help="Epic name to link")],
+    epic: Annotated[str | None, typer.Option(help="Epic name to link (required unless --management)")] = None,
+    management: Annotated[bool, typer.Option(help="Management ticket; epic is optional")] = False,
     description: Annotated[str, typer.Option(help="Ticket description (markdown)")] = "",
     priority: Annotated[Priority, typer.Option(help="Ticket priority")] = Priority.MEDIUM,
     status: Annotated[Status | None, typer.Option(help="Ticket status")] = None,
@@ -1141,15 +1142,20 @@ def create(
         available = ", ".join(sorted(config.users.keys()))
         print(f"Error: unknown assignee '{assignee_name}'. Available: {available}", file=sys.stderr)
         raise typer.Exit(1)
-    epic_name = epic.strip()
-    epics_db = proj.epics_database_id
-    if not epics_db:
-        print("Error: selected project has no epics_database_id configured", file=sys.stderr)
+    epic_name = epic.strip() if epic else ""
+    if not epic_name and not management:
+        print("Error: pass --epic for an existing epic, or --management for a management ticket", file=sys.stderr)
         raise typer.Exit(1)
-    epic_id = _find_epic_id(epics_db, epic_name)
-    if not epic_id:
-        print(f"Error: epic '{epic_name}' not found; run the epics command and pass an existing epic", file=sys.stderr)
-        raise typer.Exit(1)
+    epic_id = None
+    if epic_name:
+        epics_db = proj.epics_database_id
+        if not epics_db:
+            print("Error: selected project has no epics_database_id configured", file=sys.stderr)
+            raise typer.Exit(1)
+        epic_id = _find_epic_id(epics_db, epic_name)
+        if not epic_id:
+            print(f"Error: epic '{epic_name}' not found; run the epics command and pass an existing epic", file=sys.stderr)
+            raise typer.Exit(1)
     sprint_id = _find_current_sprint_id(proj)
     title_key, assignee_key, sprint_key, epic_key, priority_key, status_key = _create_property_keys(proj)
 
@@ -1157,8 +1163,10 @@ def create(
         title_key: {"title": [{"text": {"content": title}}]},
         assignee_key: {"people": [{"id": user_id}]},
         sprint_key: {"relation": [{"id": sprint_id}]},
-        epic_key: {"relation": [{"id": epic_id}]},
     }
+
+    if epic_id:
+        properties[epic_key] = {"relation": [{"id": epic_id}]}
 
     properties[priority_key] = {"select": {"name": priority.value}}
 

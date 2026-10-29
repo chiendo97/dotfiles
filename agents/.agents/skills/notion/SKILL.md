@@ -63,9 +63,10 @@ users:
 
 - Always assign the ticket to the creator. The CLI uses `default_creator_alias` from config when `--assignee` is omitted; pass an explicit `--assignee` when the creator differs.
 - Always set the ticket's `Sprint` relation to the current active sprint for the selected project. The CLI resolves it from the project's configured sprint source using today's local date and `prop_sprint_date`.
-- Always set the ticket's Epic relation by passing `--epic` with an existing epic name for the selected project.
+- Management tickets (planning, coordination, delivery reports, and other manager work) may omit an epic: pass `--management` and omit `--epic`. Keep the creator assignment and current active sprint.
+- For other tickets, set the Epic relation with `--epic` and an existing epic name for the selected project.
 - For data-source-backed projects, configure all `prop_*_id` values used by create payloads.
-- If the creator, current active sprint, configured epic source, named epic, or required create property IDs cannot be resolved, stop and report the missing mapping/source instead of creating an incomplete ticket.
+- If the creator, current active sprint, required epic source or named epic, or required create property IDs cannot be resolved, stop and report the missing mapping/source instead of creating an incomplete ticket.
 
 ```bash
 uv run /home/cle/.agents/skills/notion/notion_cli.py create \
@@ -83,7 +84,8 @@ uv run /home/cle/.agents/skills/notion/notion_cli.py create \
 - `--priority`: Low | Medium | High | Critical (default: Medium)
 - `--status`: Not started | In progress | Done | Backlog | Closed
 - `--assignee`: User name from config. Optional only when `default_creator_alias` is configured; use the creator alias.
-- `--epic` (required): Existing epic name for the selected project. The CLI fails before ticket creation if it is omitted, the project has no epic database, or the name cannot be found.
+- `--epic`: Existing epic name for the selected project; required unless `--management` is passed. A supplied epic must resolve in the selected project.
+- `--management`: Management ticket; allows creation without an epic.
 - `--project`: Project key from config
 
 **Description convention:** When creating tickets, format the `--description` with this structure:
@@ -273,6 +275,6 @@ URL: https://www.notion.so/...
 - The integration cannot delete or archive pages (`delete_content` / `archive_content` not granted) — close tickets by setting Status to `Closed` instead; hard deletion must be done in the Notion UI
 - Missing `NOTION_TOKEN`: exits with error message
 - Unknown assignee: shows available user names from config
-- Missing or unknown epic on create: exits before creating a ticket
+- Missing epic on non-management create, or unknown supplied epic: exits before creating a ticket
 - API errors: prints HTTP status code and error body
 - Missing config: exits with error listing checked paths
