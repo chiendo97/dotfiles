@@ -1,28 +1,21 @@
 {
-  "lastChangelogVersion": "1.2.0",
-  "defaultProvider": "zariel",
-  "defaultModel": "vllm/vllm-model",
-  "defaultThinkingLevel": "medium",
-  "modelThinkingLevels": {
-    "zariel/vllm/vllm-model": "low"
-  },
+  "lastChangelogVersion": "1.4.0",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6.1-sol",
+  "defaultThinkingLevel": "low",
   "theme": "dark",
   "tuiMode": "fullscreen",
   "packages": [
     "npm:@narumitw/pi-btw@0.58.1",
     "npm:pi-subagents@0.76.1",
     "npm:pi-gpt-search@1.1.0",
-    "npm:pi-open-tui",
-    "npm:speak-like-you-eat"
+    "npm:pi-open-tui"
   ],
   "enabledModels": [
-    "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-6-luna",
-    "zariel/vllm/vllm-model",
     "openai-codex/gpt-6.1-sol"
   ],
-  "hideThinkingBlock": true,
-  "commandPalette": {
-    "shortcut": "ctrl+o"
+  "hideThinkingBlock": false,
+  "warnings": {
+    "anthropicExtraUsage": false
   }
 }

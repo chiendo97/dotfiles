@@ -14,6 +14,11 @@
 - Preserve facts and my language, including intentional language mixes.
 - Use light formatting. Add bullets or headings only when they help scanning.
 - End on the last useful detail. Skip recaps, unsolicited offers, and closing questions.
+- For completed work, report what changed, checks run, and remaining risks or decisions. Omit empty categories.
+- For procedures, use STE-inspired wording: direct commands, one action per step, and conditions before actions. Aim for at most 20 words per sentence.
+- Show only the code or command needed to explain the point.
+- Describe the current behavior and intent. Keep change history in commit messages.
+- When I say “simplify,” restate the answer in plain technical English with one concrete example. Preserve essential caveats.
 
 ## Coding
 
