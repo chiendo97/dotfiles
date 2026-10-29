@@ -1,12 +1,12 @@
 vim.pack.add({
 	"https://github.com/MunifTanjim/nui.nvim",
 	"https://github.com/2giosangmitom/sqmeow.nvim",
-})
+}, { load = true })
 
 -- Install the engine binary only if missing. `install()` unconditionally
 -- re-downloads, so the guard matters. `:Sqmeow install` re-runs it manually;
 -- `:Sqmeow install cargo` builds from source instead.
-if not require("sqmeow.install").resolve() then
+if not require("sqmeow.server.install").resolve() then
 	require("sqmeow").install()
 end
 
