@@ -29,6 +29,11 @@
 - Describe the current behavior and intent. Keep change history in commit messages.
 - When I say “simplify,” restate the answer in plain technical English with one concrete example. Preserve essential caveats.
 
+## Search tools
+
+- Use `rg` (ripgrep) instead of `grep` for searching file contents.
+- Use `fd` instead of `find` for locating files by name.
+
 ## Coding
 
 - Make the smallest correct change that satisfies the request.

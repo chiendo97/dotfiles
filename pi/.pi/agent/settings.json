@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "1.4.0",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6.1-sol",
+  "defaultProvider": "zariel",
+  "defaultModel": "vllm/vllm-model",
   "defaultThinkingLevel": "low",
   "theme": "dark",
   "tuiMode": "fullscreen",
@@ -12,7 +12,9 @@
     "npm:pi-open-tui"
   ],
   "enabledModels": [
-    "openai-codex/gpt-6.1-sol"
+    "openai-codex/gpt-6.1-sol",
+    "zariel/vllm/vllm-model",
+    "openai-codex/gpt-6.1-terra"
   ],
   "hideThinkingBlock": false,
   "warnings": {
