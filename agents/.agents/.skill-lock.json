@@ -1,0 +1,104 @@
+{
+  "version": 3,
+  "skills": {
+    "full-output-enforcement": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/Leonxlnx/taste-skill.git",
+      "skillPath": "skills/output-skill/SKILL.md",
+      "skillFolderHash": "3dd6ad49b667d15182acddc9d3e4f7763ae33c9c",
+      "installedAt": "2026-07-17T15:46:22.057Z",
+      "updatedAt": "2026-07-17T15:46:22.057Z"
+    },
+    "apple-design": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/emilkowalski/skills.git",
+      "skillPath": "skills/apple-design/SKILL.md",
+      "skillFolderHash": "cd509ae729c86487d352e17a26651217a4c25711",
+      "installedAt": "2026-09-21T13:56:55.584Z",
+      "updatedAt": "2026-09-21T13:56:55.584Z"
+    },
+    "grill-with-docs": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/grill-with-docs/SKILL.md",
+      "skillFolderHash": "eedaf2562c83155115e9c649fa3ecaac2e10e81d",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-10-28T09:07:16.443Z",
+      "updatedAt": "2026-10-28T09:07:16.443Z"
+    },
+    "adaptive-communication": {
+      "source": "bencium/bencium-marketplace",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/bencium/bencium-marketplace.git",
+      "skillPath": "adaptive-communication/skills/adaptive-communication/SKILL.md",
+      "skillFolderHash": "3aa8173ba751fb14c9d5ceb565398a302a60adfd",
+      "installedAt": "2026-10-28T09:07:17.321Z",
+      "updatedAt": "2026-10-28T09:07:17.321Z"
+    },
+    "recording-decisions": {
+      "source": "riekelt/technical-writer",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/riekelt/technical-writer.git",
+      "skillPath": "plugins/technical-writer/skills/recording-decisions/SKILL.md",
+      "skillFolderHash": "ba35d28d541a5fb223e449e245b1c1dba176242e",
+      "installedAt": "2026-10-28T09:07:22.492Z",
+      "updatedAt": "2026-10-28T09:07:22.492Z"
+    },
+    "technical-writing": {
+      "source": "riekelt/technical-writer",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/riekelt/technical-writer.git",
+      "skillPath": "plugins/technical-writer/skills/technical-writing/SKILL.md",
+      "skillFolderHash": "bf6d4b1b54135c052483d1d259b35b2c06154e65",
+      "installedAt": "2026-10-28T09:07:22.493Z",
+      "updatedAt": "2026-10-28T09:07:22.493Z"
+    },
+    "writing-design-docs": {
+      "source": "riekelt/technical-writer",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/riekelt/technical-writer.git",
+      "skillPath": "plugins/technical-writer/skills/writing-design-docs/SKILL.md",
+      "skillFolderHash": "174bd0149a235f903489568849c2ec502db4fbe7",
+      "installedAt": "2026-10-28T09:07:22.493Z",
+      "updatedAt": "2026-10-28T09:07:22.493Z"
+    },
+    "design-doc-mermaid": {
+      "source": "spillwavesolutions/design-doc-mermaid",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/spillwavesolutions/design-doc-mermaid.git",
+      "skillPath": "SKILL.md",
+      "skillFolderHash": "c36d83503d2ba9c1e51638dc2d8a34758a377dea",
+      "installedAt": "2026-10-28T09:07:22.668Z",
+      "updatedAt": "2026-10-28T09:07:22.668Z"
+    },
+    "i-have-adhd": {
+      "source": "ayghri/i-have-adhd",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/ayghri/i-have-adhd.git",
+      "skillPath": "skills/i-have-adhd/SKILL.md",
+      "skillFolderHash": "759f1e56d0d2fdd3819d2a53b81e72767c08d914",
+      "installedAt": "2026-10-28T09:07:35.071Z",
+      "updatedAt": "2026-10-28T09:07:35.071Z"
+    }
+  },
+  "dismissed": {
+    "findSkillsPrompt": true
+  },
+  "lastSelectedAgents": [
+    "amp",
+    "cline",
+    "codex",
+    "cursor",
+    "droid",
+    "gemini-cli",
+    "github-copilot",
+    "kilo",
+    "kimi-code-cli",
+    "opencode",
+    "warp",
+    "zed"
+  ]
+}
