@@ -41,3 +41,13 @@
 - Follow existing patterns and reuse existing utilities before adding abstractions or dependencies.
 - Favor straightforward, readable code over clever or compressed code.
 - Run relevant checks when practical. Briefly report what changed, what was tested, and anything unverified.
+
+### Data Flow
+
+- Work backward from consumers: choose data shapes that make rendering, responses, or other final actions simple.
+- Make stage dependencies explicit through inputs and outputs, not hidden call order or shared mutable state.
+- Keep business rules in producers; give consumers prepared data instead of repeating derivations and checks.
+- Prefer plain data at stage boundaries so intermediate results are easy to inspect, serialize, and test.
+- Use rule tables when they clarify policy; make priority and compatibility explicit rather than implicit in code order.
+- Test transformations with explicit inputs and expected outputs.
+- Treat pipelines as a mental model, not mandatory chaining. Use loops when clearer; avoid needless stages and allocations.
