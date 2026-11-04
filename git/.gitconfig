@@ -90,3 +90,7 @@
 [credential "https://gist.github.com"]
 	helper =
 	helper = !gh auth git-credential
+[credential "http://100.124.138.35:3000"]
+	useHttpPath = true
+	helper = 
+	helper = !GITEA_CLI_CONFIG_DIR='/Users/chiendo97/Library/Application Support/gitea-cli' /Users/chiendo97/.local/bin/gt auth git-credential --host http://100.124.138.35:3000

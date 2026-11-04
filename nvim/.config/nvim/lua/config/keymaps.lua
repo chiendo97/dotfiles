@@ -76,9 +76,9 @@ vim.keymap.set("x", "j", "gj", { noremap = true, silent = true, desc = "Down wit
 vim.keymap.set("x", "k", "gk", { noremap = true, silent = true, desc = "Up with line wraps" })
 
 -- Copy to system's clipboard
-vim.keymap.set("x", "y", '"*y', { noremap = true, desc = "Yank to clipboard" })
+vim.keymap.set("x", "y", '"+y', { noremap = true, desc = "Yank to clipboard" })
 vim.keymap.set("x", "p", '"+p', { noremap = true, desc = "Paste from last Yank" })
-vim.keymap.set("n", "yy", '"*yy', { noremap = false, desc = "Yank line to clipboard" })
+vim.keymap.set("n", "yy", '"+yy', { noremap = false, desc = "Yank line to clipboard" })
 
 -- Copy current relative path
 vim.keymap.set("n", "<leader>yp", function()
