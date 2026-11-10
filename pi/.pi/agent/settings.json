@@ -3,7 +3,7 @@
   "defaultProvider": "zariel",
   "defaultModel": "vllm/vllm-model",
   "defaultThinkingLevel": "low",
-  "theme": "gruvbox-light-medium",
+  "theme": "gruvbox-light-medium/gruvbox-dark-medium",
   "tuiMode": "fullscreen",
   "packages": [
     "npm:@narumitw/pi-btw@0.58.1",
