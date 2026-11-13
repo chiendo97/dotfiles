@@ -300,6 +300,7 @@
     enable = true;
     config = {
       Label = "com.podman.machine";
+      AbandonProcessGroup = true;
       ProgramArguments = [
         "/bin/sh"
         "-c"

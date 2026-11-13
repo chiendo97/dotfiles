@@ -8,6 +8,9 @@
     # Main package repository — tracking the rolling unstable channel
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # Podman updates are independent of the main package set.
+    podman-nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+
     # Declarative user-environment manager (dotfiles, packages, services)
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -36,7 +39,7 @@
   # --- Flake Outputs ---
   # Destructure all inputs so they can be referenced below.
   outputs =
-    { nixpkgs, home-manager, neovim-nightly-overlay, agenix, nixos-generators, ... }:
+    { nixpkgs, podman-nixpkgs, home-manager, neovim-nightly-overlay, agenix, nixos-generators, ... }:
     let
       # Helper function to build a Home Manager configuration.
       # Arguments:
@@ -52,6 +55,9 @@
             config.allowUnfree = true;
             overlays = [
               neovim-nightly-overlay.overlays.default
+              (final: prev: nixpkgs.lib.optionalAttrs prev.stdenv.hostPlatform.isDarwin {
+                podman = podman-nixpkgs.legacyPackages.${system}.podman;
+              })
             ];
           };
 
