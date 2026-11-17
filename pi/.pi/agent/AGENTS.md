@@ -42,8 +42,18 @@
 - Favor straightforward, readable code over clever or compressed code.
 - Run relevant checks when practical. Briefly report what changed, what was tested, and anything unverified.
 
+### Use Case Design
+
+- Keep each use case easy to follow from input to result.
+- Reuse data shapes across layers unless a boundary needs different validation, ownership, or lifecycle.
+- Add helpers and classes when they express a useful rule or remove meaningful repetition. Avoid pass-through wrappers.
+- Prefer direct function calls and focused operations over generic command dispatch, large mutation functions, and runtime type-based routing.
+- Set up dependencies at entry points. Commit related writes together. Use background jobs only for deferred work.
+- Judge simplicity across models, conversions, validation, persistence, cleanup, and tests, not just line or class counts.
+
 ### Data Flow
 
+- Prefer pure functions and immutable data structures. Isolate database, network, and other side effects.
 - Work backward from consumers: choose data shapes that make rendering, responses, or other final actions simple.
 - Make stage dependencies explicit through inputs and outputs, not hidden call order or shared mutable state.
 - Keep business rules in producers; give consumers prepared data instead of repeating derivations and checks.
