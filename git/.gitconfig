@@ -6,8 +6,7 @@
 
 [delta]
     navigate = true  # use n and N to move between diff sections
-    light = true
-    syntax-theme = gruvbox-light
+    detect-dark-light = auto
 
 [user]
     name = chiendo97
